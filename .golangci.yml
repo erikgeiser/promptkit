@@ -1,0 +1,14 @@
+linters:
+  enable-all: true
+  disable:
+    - maligned
+    - goerr113
+    - exhaustivestruct
+    - exhaustive
+    - gomnd
+linters-settings:
+  govet:
+    check-shadowing: true
+  funlen:
+    lines: 65
+    statements: 50
