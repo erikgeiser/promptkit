@@ -58,6 +58,20 @@ type Prompt struct {
 	tmpl             *template.Template
 }
 
+func (sp *Prompt) Run() (*Choice, error) {
+	p := tea.NewProgram(sp)
+	if err := p.Start(); err != nil {
+		return nil, err
+	}
+
+	choice, err := sp.Choice()
+	if err != nil {
+		return nil, err
+	}
+
+	return choice, err
+}
+
 func (sp *Prompt) Init() tea.Cmd {
 	sp.reindexChoices()
 
@@ -95,7 +109,7 @@ func (sp *Prompt) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (sp *Prompt) Choice() (interface{}, error) {
+func (sp *Prompt) Choice() (*Choice, error) {
 	if sp.Err != nil {
 		return nil, sp.Err
 	}
@@ -108,7 +122,7 @@ func (sp *Prompt) Choice() (interface{}, error) {
 		return nil, fmt.Errorf("choice index out of bounds")
 	}
 
-	return sp.currentChoices[sp.currentIdx].Value, nil
+	return sp.currentChoices[sp.currentIdx], nil
 }
 
 func (sp *Prompt) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -198,11 +212,7 @@ func (sp *Prompt) View() string {
 		return "Template Error: " + err.Error()
 	}
 
-	w := wrap.NewWriter(sp.width)
-	w.PreserveSpace = true
-	_, _ = w.Write([]byte(wordwrap.String(viewBuffer.String(), sp.width)))
-
-	return w.String()
+	return wrap.String(wordwrap.String(viewBuffer.String(), sp.width), sp.width)
 }
 
 func (sp Prompt) filteredAndPagedChoices() ([]*Choice, int) {

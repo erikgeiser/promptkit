@@ -6,6 +6,7 @@ linters:
     - exhaustivestruct
     - exhaustive
     - gomnd
+    - wrapcheck
 linters-settings:
   govet:
     check-shadowing: true

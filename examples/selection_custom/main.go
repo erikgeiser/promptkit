@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/erikgeiser/promptkit/selection"
 )
 
@@ -60,17 +59,11 @@ func main() {
 		PageSize: 3,
 	}
 
-	p := tea.NewProgram(sp)
-	if err := p.Start(); err != nil {
-		fmt.Printf("Error: %v\n", err)
-		os.Exit(1)
-	}
-
-	choice, err := sp.Choice()
+	choice, err := sp.Run()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Your choice: %v\n", choice)
+	fmt.Printf("Your choice: %v\n", choice.Value)
 }
