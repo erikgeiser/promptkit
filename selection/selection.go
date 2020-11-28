@@ -188,7 +188,7 @@ func (sp *Prompt) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return sp, nil
 		}
 	case tea.WindowSizeMsg:
-		sp.width = msg.Width - 1
+		sp.width = msg.Width
 	case error:
 		sp.Err = msg
 
