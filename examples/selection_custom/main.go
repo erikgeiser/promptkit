@@ -39,7 +39,7 @@ type Article struct {
 }
 
 func main() {
-	choices := []*Article{
+	choices := []Article{
 		{ID: "123", Name: "Article A"},
 		{ID: "234", Name: "Article B"},
 		{ID: "345", Name: "Article C"},
@@ -52,7 +52,7 @@ func main() {
 		Choices:  selection.SliceChoices(choices),
 		Template: customTemplate,
 		Filter: func(filter string, choice *selection.Choice) bool {
-			article, _ := choice.Value.(*Article)
+			article, _ := choice.Value.(Article)
 
 			return strings.Contains(article.ID, filter)
 		},

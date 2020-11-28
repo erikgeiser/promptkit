@@ -5,6 +5,10 @@ import (
 	"reflect"
 )
 
+// Choice represents a single choice. This type used as an input
+// for the select prompt, for filtering and as a result value.
+// The index is populated by the prompt itself and is exported
+// to be accessed when filtering.
 type Choice struct {
 	Index  int
 	String string
@@ -32,6 +36,7 @@ func NewChoice(item interface{}) *Choice {
 	return choice
 }
 
+// StringChoices converts a string slice to a slice of choices.
 func StringChoices(choiceStrings []string) []*Choice {
 	choices := make([]*Choice, 0, len(choiceStrings))
 
@@ -42,6 +47,7 @@ func StringChoices(choiceStrings []string) []*Choice {
 	return choices
 }
 
+// StringerChoices converts a slice of Stringers to a slice of choices.
 func StringerChoices(choiceStrings []fmt.Stringer) []*Choice {
 	choices := make([]*Choice, 0, len(choiceStrings))
 
@@ -52,6 +58,8 @@ func StringerChoices(choiceStrings []fmt.Stringer) []*Choice {
 	return choices
 }
 
+// SliceChoices converts a slice of anything to a slice of choices.
+// SliceChoices panics if the input is not a slice.
 func SliceChoices(sliceChoices interface{}) []*Choice {
 	switch reflect.TypeOf(sliceChoices).Kind() {
 	case reflect.Slice:
@@ -60,21 +68,14 @@ func SliceChoices(sliceChoices interface{}) []*Choice {
 		choices := make([]*Choice, 0, slice.Len())
 
 		for i := 0; i < slice.Len(); i++ {
-			choices = append(choices, NewChoice(slice.Index(i).Interface()))
+			value := slice.Index(i).Interface()
+			choice := NewChoice(value)
+
+			choices = append(choices, choice)
 		}
 
 		return choices
 	default:
 		panic("SliceChoices argument is not a slice")
 	}
-}
-
-func InterfaceChoices(choiceInterfaces []interface{}) []*Choice {
-	choices := make([]*Choice, 0, len(choiceInterfaces))
-
-	for _, c := range choiceInterfaces {
-		choices = append(choices, NewChoice(c))
-	}
-
-	return choices
 }

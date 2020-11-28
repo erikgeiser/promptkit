@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	// DefaultSelectTemplate defines the appearance of the selection prompt.
 	DefaultSelectTemplate = `
 {{- if .Label -}}
   {{ Bold .Label }}
@@ -36,9 +37,14 @@ const (
     {{- print "  " $choice.String "\n"}}
   {{- end }}
 {{- end}}`
+
+	// DefaultFilterPlaceholder is printed instead of the
+	// filter text when no filter text was entered yet.
 	DefaultFilterPlaceholder = "Type to filter choices"
 )
 
+// Prompt is a configurable selection prompt with optional filtering
+// and pagination.
 type Prompt struct {
 	Choices           []*Choice
 	Label             string
@@ -46,6 +52,7 @@ type Prompt struct {
 	FilterPlaceholder string
 	Template          string
 	PageSize          int
+	KeyMap            *KeyMap
 
 	Err error
 
@@ -58,6 +65,10 @@ type Prompt struct {
 	tmpl             *template.Template
 }
 
+// ensure that the Model interface is implemented.
+var _ tea.Model = &Prompt{}
+
+// Run executes the prompt in standalone mode.
 func (sp *Prompt) Run() (*Choice, error) {
 	p := tea.NewProgram(sp)
 	if err := p.Start(); err != nil {
@@ -72,6 +83,7 @@ func (sp *Prompt) Run() (*Choice, error) {
 	return choice, err
 }
 
+// Init initializes the selection prompt model.
 func (sp *Prompt) Init() tea.Cmd {
 	sp.reindexChoices()
 
@@ -81,6 +93,10 @@ func (sp *Prompt) Init() tea.Cmd {
 
 	if sp.Template == "" {
 		sp.Template = DefaultSelectTemplate
+	}
+
+	if sp.KeyMap == nil {
+		sp.KeyMap = NewDefaultKeyMap()
 	}
 
 	sp.tmpl = template.New("")
@@ -109,6 +125,8 @@ func (sp *Prompt) Init() tea.Cmd {
 	return textinput.Blink
 }
 
+// Choice returns the current choice or the final choice after the
+// prompt has concluded.
 func (sp *Prompt) Choice() (*Choice, error) {
 	if sp.Err != nil {
 		return nil, sp.Err
@@ -125,6 +143,7 @@ func (sp *Prompt) Choice() (*Choice, error) {
 	return sp.currentChoices[sp.currentIdx], nil
 }
 
+// Update updates the model based on the received message.
 func (sp *Prompt) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if sp.Err != nil {
 		return sp, tea.Quit
@@ -134,34 +153,36 @@ func (sp *Prompt) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.Type {
-		case tea.KeyCtrlC:
+		key := msg.String()
+
+		switch {
+		case keyMatches(key, sp.KeyMap.Abort):
 			sp.Err = fmt.Errorf("selection was aborted")
 
 			return sp, tea.Quit
-		case tea.KeyEsc:
+		case keyMatches(key, sp.KeyMap.ClearFilter):
 			sp.filterInput.SetValue("")
 
 			return sp, nil
-		case tea.KeyEnter:
+		case keyMatches(key, sp.KeyMap.Select):
 			if len(sp.currentChoices) == 0 {
 				return sp, nil
 			}
 
 			return sp, tea.Quit
-		case tea.KeyDown:
+		case keyMatches(key, sp.KeyMap.Down):
 			sp.cursorDown()
 
 			return sp, nil
-		case tea.KeyUp:
+		case keyMatches(key, sp.KeyMap.Up):
 			sp.cursorUp()
 
 			return sp, nil
-		case tea.KeyPgDown, tea.KeyRight:
+		case keyMatches(key, sp.KeyMap.ScrollDown):
 			sp.scrollDown()
 
 			return sp, nil
-		case tea.KeyPgUp, tea.KeyLeft:
+		case keyMatches(key, sp.KeyMap.ScrollUp):
 			sp.scrollUp()
 
 			return sp, nil
@@ -191,6 +212,7 @@ func (sp *Prompt) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return sp, cmd
 }
 
+// View renders the selection prompt.
 func (sp *Prompt) View() string {
 	viewBuffer := &bytes.Buffer{}
 
