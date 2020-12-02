@@ -47,16 +47,15 @@ func main() {
 		{ID: "567", Name: "Article E"},
 	}
 
-	sp := &selection.Prompt{
-		Label:    "Choose an article!",
-		Choices:  selection.SliceChoices(choices),
-		Template: customTemplate,
-		Filter: func(filter string, choice *selection.Choice) bool {
-			article, _ := choice.Value.(Article)
+	sp := selection.NewModel(selection.Choices(choices))
+	sp.Label = "Choose an article!"
+	sp.Template = customTemplate
+	sp.FilterPlaceholder = "asdasddsdas"
+	sp.PageSize = 3
+	sp.Filter = func(filter string, choice *selection.Choice) bool {
+		article, _ := choice.Value.(Article)
 
-			return strings.Contains(article.ID, filter)
-		},
-		PageSize: 3,
+		return strings.Contains(article.ID, filter)
 	}
 
 	choice, err := sp.Run()

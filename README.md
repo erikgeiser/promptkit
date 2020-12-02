@@ -1,5 +1,7 @@
 # Promptkit
 
+**WARNING:** This library will be continued as part of https://github.com/charmbracelet/bubbles as soon as it is merged (see https://github.com/charmbracelet/bubbles/pull/33).
+
 # Selection
 
 Selection with filter and pagination support:

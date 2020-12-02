@@ -13,8 +13,26 @@ import (
 )
 
 const (
-	// DefaultSelectTemplate defines the appearance of the selection prompt.
-	DefaultSelectTemplate = `
+	// DefaultTemplate defines the appearance of the selection and
+	// can be copied as a starting point for a custom template. The
+	// following variables and functions are available:
+	//
+	//  * Label string: The configured label (see Model)
+	//  * Filter bool: Whether or not filtering is enabled
+	//  * FilterInput string: The view of the filter input model
+	//  * Choices []*Choice: The choices on the current page
+	//  * NChoices int: The number of choices on the current page,
+	//  * SelectedIndex int: The index that is currently selected
+	//  * PageSize int: The configured page size (see Model)
+	//  * IsPaged bool: Whether pagination is currently active
+	//  * AllChoices []*Choice: All configured choices (see Model)
+	//  * NAllChoices int: The number of configured choices
+	//  * IsScrollDownHintPosition(idx int) bool: Returns whether
+	//    the scroll down hint shoud be displayed at the given index
+	//  * IsScrollUpHintPosition(idx int) bool: Returns whether the
+	//    scroll up hint shoud be displayed at the given index)
+	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv)
+	DefaultTemplate = `
 {{- if .Label -}}
   {{ Bold .Label }}
 {{ end -}}
@@ -43,39 +61,85 @@ const (
 	DefaultFilterPlaceholder = "Type to filter choices"
 )
 
-// Prompt is a configurable selection prompt with optional filtering
+// Model is a configurable selection prompt with optional filtering
 // and pagination.
-type Prompt struct {
-	Choices           []*Choice
-	Label             string
-	Filter            func(filterText string, choice *Choice) bool
-	FilterPlaceholder string
-	Template          string
-	PageSize          int
-	KeyMap            *KeyMap
+type Model struct {
+	// Choices represent all selectable choices of the selection.
+	// Slices of arbitrary types can be converted to a slice of
+	// choices using the helpers StringChoices, StringerChoices
+	// and SliceChoices.
+	Choices []*Choice
 
+	// Label holds the the prompt text or question that is printed
+	// above the choices in the default template (if not empty).
+	Label string
+
+	// Filter is a function that decides whether a given choice
+	// should be displayed based on the text entered by the user
+	// into the filter input field. If Filter is nil, filtering
+	// will be disabled.
+	Filter func(filterText string, choice *Choice) bool
+
+	// FilterPlaceholder holds the text that is displayed in the
+	// filter input field when no text was entered by the user yet.
+	// If empty, the DefaultFilterPlaceholder is used. If Filter
+	// is nil, filtering is disabled and FilterPlaceholder does
+	// nothing.
+	FilterPlaceholder string
+
+	// Template holds the display template. A custom template can
+	// be used to completely customize the appearance of the
+	// selection prompt. If empty, DefaultTemplate is used.
+	Template string
+
+	// PageSize is the number of choices that are displayed at
+	// once. If PageSize is smaller than the number of choices,
+	// pagination is enabled. If PageSize is 0, pagenation is
+	// always disabled.
+	PageSize int
+
+	// KeyMap determines with which keys the selection prompt is
+	// controlled. By default, DefaultKeyMap is used.
+	KeyMap KeyMap
+
+	// Err holds errors that may occur during the execution of
+	// the selection prompt.
 	Err error
 
-	filterInput      textinput.Model
-	currentChoices   []*Choice
+	filterInput textinput.Model
+	// currently displayed choices, after filtering and pagination
+	currentChoices []*Choice
+	// number of available choices after filtering
 	availableChoices int
-	currentIdx       int
-	scrollOffset     int
-	width            int
-	tmpl             *template.Template
+	// index of current selection in currentChoices slice
+	currentIdx   int
+	scrollOffset int
+	width        int
+	tmpl         *template.Template
 }
 
 // ensure that the Model interface is implemented.
-var _ tea.Model = &Prompt{}
+var _ tea.Model = &Model{}
 
-// Run executes the prompt in standalone mode.
-func (sp *Prompt) Run() (*Choice, error) {
-	p := tea.NewProgram(sp)
+// NewModel returns a new selection prompt model for the
+// provided choices.
+func NewModel(choices []*Choice) Model {
+	return Model{
+		Choices:           choices,
+		Template:          DefaultTemplate,
+		FilterPlaceholder: DefaultFilterPlaceholder,
+		KeyMap:            DefaultKeyMap,
+	}
+}
+
+// Run executes the selection prompt in standalone mode.
+func (m *Model) Run() (*Choice, error) {
+	p := tea.NewProgram(m)
 	if err := p.Start(); err != nil {
 		return nil, err
 	}
 
-	choice, err := sp.Choice()
+	choice, err := m.Choice()
 	if err != nil {
 		return nil, err
 	}
@@ -84,69 +148,73 @@ func (sp *Prompt) Run() (*Choice, error) {
 }
 
 // Init initializes the selection prompt model.
-func (sp *Prompt) Init() tea.Cmd {
-	sp.reindexChoices()
+func (m *Model) Init() tea.Cmd {
+	if len(m.Choices) == 0 {
+		m.Err = fmt.Errorf("no choices provided")
 
-	if sp.FilterPlaceholder == "" {
-		sp.FilterPlaceholder = DefaultFilterPlaceholder
-	}
-
-	if sp.Template == "" {
-		sp.Template = DefaultSelectTemplate
-	}
-
-	if sp.KeyMap == nil {
-		sp.KeyMap = NewDefaultKeyMap()
-	}
-
-	sp.tmpl = template.New("")
-	sp.tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
-	sp.tmpl.Funcs(template.FuncMap{
-		"IsScrollDownHintPosition": func(idx int) bool {
-			return sp.canScrollDown() && (idx == len(sp.currentChoices)-1)
-		},
-		"IsScrollUpHintPosition": func(idx int) bool {
-			return sp.canScrollUp() && idx == 0 && sp.scrollOffset > 0
-		},
-	})
-
-	sp.tmpl, sp.Err = sp.tmpl.Parse(sp.Template)
-	if sp.Err != nil {
 		return tea.Quit
 	}
 
-	sp.filterInput = textinput.NewModel()
-	sp.filterInput.Placeholder = sp.FilterPlaceholder
-	sp.filterInput.Prompt = ""
-	sp.filterInput.Focus()
-	sp.width = 70
-	sp.currentChoices, sp.availableChoices = sp.filteredAndPagedChoices()
+	if !validateKeyMap(m.KeyMap) {
+		m.Err = fmt.Errorf("insufficient key map")
+
+		return tea.Quit
+	}
+
+	m.reindexChoices()
+
+	if m.Template == "" {
+		m.Template = DefaultTemplate
+	}
+
+	m.tmpl = template.New("")
+	m.tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
+	m.tmpl.Funcs(template.FuncMap{
+		"IsScrollDownHintPosition": func(idx int) bool {
+			return m.canScrollDown() && (idx == len(m.currentChoices)-1)
+		},
+		"IsScrollUpHintPosition": func(idx int) bool {
+			return m.canScrollUp() && idx == 0 && m.scrollOffset > 0
+		},
+	})
+
+	m.tmpl, m.Err = m.tmpl.Parse(m.Template)
+	if m.Err != nil {
+		return tea.Quit
+	}
+
+	m.filterInput = textinput.NewModel()
+	m.filterInput.Placeholder = m.FilterPlaceholder
+	m.filterInput.Prompt = ""
+	m.filterInput.Focus()
+	m.width = 80
+	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
 	return textinput.Blink
 }
 
-// Choice returns the current choice or the final choice after the
-// prompt has concluded.
-func (sp *Prompt) Choice() (*Choice, error) {
-	if sp.Err != nil {
-		return nil, sp.Err
+// Choice returns the choice that is currently selected or the final
+// choice after the prompt has concluded.
+func (m *Model) Choice() (*Choice, error) {
+	if m.Err != nil {
+		return nil, m.Err
 	}
 
-	if len(sp.currentChoices) == 0 {
+	if len(m.currentChoices) == 0 {
 		return nil, fmt.Errorf("no choices")
 	}
 
-	if sp.currentIdx < 0 || sp.currentIdx >= len(sp.currentChoices) {
+	if m.currentIdx < 0 || m.currentIdx >= len(m.currentChoices) {
 		return nil, fmt.Errorf("choice index out of bounds")
 	}
 
-	return sp.currentChoices[sp.currentIdx], nil
+	return m.currentChoices[m.currentIdx], nil
 }
 
 // Update updates the model based on the received message.
-func (sp *Prompt) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if sp.Err != nil {
-		return sp, tea.Quit
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	if m.Err != nil {
+		return m, tea.Quit
 	}
 
 	var cmd tea.Cmd
@@ -156,104 +224,110 @@ func (sp *Prompt) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		key := msg.String()
 
 		switch {
-		case keyMatches(key, sp.KeyMap.Abort):
-			sp.Err = fmt.Errorf("selection was aborted")
+		case keyMatches(key, m.KeyMap.Abort):
+			m.Err = fmt.Errorf("selection was aborted")
 
-			return sp, tea.Quit
-		case keyMatches(key, sp.KeyMap.ClearFilter):
-			sp.filterInput.SetValue("")
+			return m, tea.Quit
+		case keyMatches(key, m.KeyMap.ClearFilter):
+			m.filterInput.Reset()
+			m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
-			return sp, nil
-		case keyMatches(key, sp.KeyMap.Select):
-			if len(sp.currentChoices) == 0 {
-				return sp, nil
+			return m, nil
+		case keyMatches(key, m.KeyMap.Select):
+			if len(m.currentChoices) == 0 {
+				return m, nil
 			}
 
-			return sp, tea.Quit
-		case keyMatches(key, sp.KeyMap.Down):
-			sp.cursorDown()
+			return m, tea.Quit
+		case keyMatches(key, m.KeyMap.Down):
+			m.cursorDown()
 
-			return sp, nil
-		case keyMatches(key, sp.KeyMap.Up):
-			sp.cursorUp()
+			return m, nil
+		case keyMatches(key, m.KeyMap.Up):
+			m.cursorUp()
 
-			return sp, nil
-		case keyMatches(key, sp.KeyMap.ScrollDown):
-			sp.scrollDown()
+			return m, nil
+		case keyMatches(key, m.KeyMap.ScrollDown):
+			m.scrollDown()
 
-			return sp, nil
-		case keyMatches(key, sp.KeyMap.ScrollUp):
-			sp.scrollUp()
+			return m, nil
+		case keyMatches(key, m.KeyMap.ScrollUp):
+			m.scrollUp()
 
-			return sp, nil
+			return m, nil
 		}
 	case tea.WindowSizeMsg:
-		sp.width = msg.Width
+		m.width = msg.Width
 	case error:
-		sp.Err = msg
+		m.Err = msg
 
-		return sp, tea.Quit
+		return m, tea.Quit
 	}
 
-	if sp.Filter == nil {
-		return sp, cmd
+	if m.Filter == nil {
+		return m, cmd
 	}
 
-	previousFilter := sp.filterInput.Value()
+	previousFilter := m.filterInput.Value()
 
-	sp.filterInput, cmd = sp.filterInput.Update(msg)
+	m.filterInput, cmd = m.filterInput.Update(msg)
 
-	if sp.filterInput.Value() != previousFilter {
-		sp.currentIdx = 0
-		sp.scrollOffset = 0
-		sp.currentChoices, sp.availableChoices = sp.filteredAndPagedChoices()
+	if m.filterInput.Value() != previousFilter {
+		m.currentIdx = 0
+		m.scrollOffset = 0
+		m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 	}
 
-	return sp, cmd
+	return m, cmd
 }
 
 // View renders the selection prompt.
-func (sp *Prompt) View() string {
+func (m *Model) View() string {
+	// avoid panics if Quit is sent during Init
+	if m.tmpl == nil {
+		return ""
+	}
+
 	viewBuffer := &bytes.Buffer{}
 
-	err := sp.tmpl.Execute(viewBuffer, map[string]interface{}{
-		"Label":         sp.Label,
-		"Filter":        sp.Filter != nil,
-		"FilterInput":   sp.filterInput.View(),
-		"Choices":       sp.currentChoices,
-		"NChoices":      len(sp.currentChoices),
-		"SelectedIndex": sp.currentIdx,
-		"PageSize":      sp.PageSize,
-		"IsPaged":       sp.PageSize > 0 && len(sp.currentChoices) > sp.PageSize,
-		"AllChoices":    sp.Choices,
-		"NAllChoices":   len(sp.Choices),
+	err := m.tmpl.Execute(viewBuffer, map[string]interface{}{
+		"Label":         m.Label,
+		"Filter":        m.Filter != nil,
+		"FilterInput":   m.filterInput.View(),
+		"Choices":       m.currentChoices,
+		"NChoices":      len(m.currentChoices),
+		"SelectedIndex": m.currentIdx,
+		"PageSize":      m.PageSize,
+		"IsPaged":       m.PageSize > 0 && len(m.currentChoices) > m.PageSize,
+		"AllChoices":    m.Choices,
+		"NAllChoices":   len(m.Choices),
 	})
 	if err != nil {
-		sp.Err = err
+		m.Err = err
 
 		return "Template Error: " + err.Error()
 	}
 
-	return wrap.String(wordwrap.String(viewBuffer.String(), sp.width), sp.width)
+	return wrap.String(wordwrap.String(viewBuffer.String(), m.width), m.width)
 }
 
-func (sp Prompt) filteredAndPagedChoices() ([]*Choice, int) {
+func (m Model) filteredAndPagedChoices() ([]*Choice, int) {
 	choices := []*Choice{}
 
 	var available, ignored int
 
-	for _, choice := range sp.Choices {
-		if sp.Filter != nil && !sp.Filter(sp.filterInput.Value(), choice) {
+	for _, choice := range m.Choices {
+		if m.Filter != nil && !m.Filter(m.filterInput.Value(), choice) {
 			continue
 		}
 
 		available++
 
-		if sp.PageSize > 0 && len(choices) >= sp.PageSize {
+		if m.PageSize > 0 && len(choices) >= m.PageSize {
 			break
 		}
 
-		if (sp.PageSize > 0) && (ignored < sp.scrollOffset) {
+		if (m.PageSize > 0) && (ignored < m.scrollOffset) {
 			ignored++
 
 			continue
@@ -265,60 +339,60 @@ func (sp Prompt) filteredAndPagedChoices() ([]*Choice, int) {
 	return choices, available
 }
 
-func (sp *Prompt) canScrollDown() bool {
-	if sp.PageSize <= 0 || sp.availableChoices <= sp.PageSize {
+func (m *Model) canScrollDown() bool {
+	if m.PageSize <= 0 || m.availableChoices <= m.PageSize {
 		return false
 	}
 
-	if sp.scrollOffset+sp.PageSize >= len(sp.Choices) {
+	if m.scrollOffset+m.PageSize >= len(m.Choices) {
 		return false
 	}
 
 	return true
 }
 
-func (sp *Prompt) canScrollUp() bool {
-	return sp.scrollOffset > 0
+func (m *Model) canScrollUp() bool {
+	return m.scrollOffset > 0
 }
 
-func (sp *Prompt) cursorDown() {
-	if sp.currentIdx == len(sp.currentChoices)-1 && sp.canScrollDown() {
-		sp.scrollDown()
+func (m *Model) cursorDown() {
+	if m.currentIdx == len(m.currentChoices)-1 && m.canScrollDown() {
+		m.scrollDown()
 	}
 
-	sp.currentIdx = min(len(sp.currentChoices)-1, sp.currentIdx+1)
+	m.currentIdx = min(len(m.currentChoices)-1, m.currentIdx+1)
 }
 
-func (sp *Prompt) cursorUp() {
-	if sp.currentIdx == 0 && sp.canScrollUp() {
-		sp.scrollUp()
+func (m *Model) cursorUp() {
+	if m.currentIdx == 0 && m.canScrollUp() {
+		m.scrollUp()
 	}
 
-	sp.currentIdx = max(0, sp.currentIdx-1)
+	m.currentIdx = max(0, m.currentIdx-1)
 }
 
-func (sp *Prompt) scrollDown() {
-	if sp.PageSize <= 0 || sp.scrollOffset+sp.PageSize >= sp.availableChoices {
+func (m *Model) scrollDown() {
+	if m.PageSize <= 0 || m.scrollOffset+m.PageSize >= m.availableChoices {
 		return
 	}
 
-	sp.currentIdx = max(0, sp.currentIdx-1)
-	sp.scrollOffset++
-	sp.currentChoices, sp.availableChoices = sp.filteredAndPagedChoices()
+	m.currentIdx = max(0, m.currentIdx-1)
+	m.scrollOffset++
+	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
 
-func (sp *Prompt) scrollUp() {
-	if sp.PageSize <= 0 || sp.scrollOffset <= 0 {
+func (m *Model) scrollUp() {
+	if m.PageSize <= 0 || m.scrollOffset <= 0 {
 		return
 	}
 
-	sp.currentIdx = min(len(sp.currentChoices)-1, sp.currentIdx+1)
-	sp.scrollOffset--
-	sp.currentChoices, sp.availableChoices = sp.filteredAndPagedChoices()
+	m.currentIdx = min(len(m.currentChoices)-1, m.currentIdx+1)
+	m.scrollOffset--
+	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
 
-func (sp *Prompt) reindexChoices() {
-	for i, choice := range sp.Choices {
+func (m *Model) reindexChoices() {
+	for i, choice := range m.Choices {
 		choice.Index = i
 	}
 }
