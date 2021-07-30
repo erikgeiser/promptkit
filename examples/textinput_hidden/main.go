@@ -8,13 +8,13 @@ import (
 )
 
 func main() {
-	sp := textinput.New()
-	sp.Prompt = "Choose a password:"
-	sp.Placeholder = "minimum 10 characters"
-	sp.Validate = func(s string) bool { return len(s) >= 10 } // nolint:gomnd
-	sp.Hidden = true
+	input := textinput.New()
+	input.Prompt = "Choose a password:"
+	input.Placeholder = "minimum 10 characters"
+	input.Validate = func(s string) bool { return len(s) >= 10 } // nolint:gomnd
+	input.Hidden = true
 
-	name, err := sp.RunPrompt()
+	name, err := input.RunPrompt()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 

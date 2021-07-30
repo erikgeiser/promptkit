@@ -8,12 +8,12 @@ import (
 )
 
 func main() {
-	sp := textinput.New()
-	sp.Prompt = "What is your name?"
-	sp.InitialValue = os.Getenv("USER")
-	sp.Placeholder = "Your name cannot be empty"
+	input := textinput.New()
+	input.Prompt = "What is your name?"
+	input.InitialValue = os.Getenv("USER")
+	input.Placeholder = "Your name cannot be empty"
 
-	name, err := sp.RunPrompt()
+	name, err := input.RunPrompt()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 

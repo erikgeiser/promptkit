@@ -15,13 +15,13 @@ func main() {
 	{{- else }} 🖥️{{- end -}}
 	`
 
-	sp := textinput.New()
-	sp.Prompt = "Enter an IP address:"
-	sp.Placeholder = "e.g. 127.0.0.1"
-	sp.Validate = func(input string) bool { return net.ParseIP(input) != nil }
-	sp.Template = customTemplate
+	input := textinput.New()
+	input.Prompt = "Enter an IP address:"
+	input.Placeholder = "e.g. 127.0.0.1"
+	input.Validate = func(input string) bool { return net.ParseIP(input) != nil }
+	input.Template = customTemplate
 
-	ip, err := sp.RunPrompt()
+	ip, err := input.RunPrompt()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 
