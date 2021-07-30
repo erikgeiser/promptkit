@@ -8,12 +8,14 @@ import (
 	"github.com/erikgeiser/promptkit/selection"
 )
 
-// nolint:lll
-const customTemplate = `
-{{- if .Label -}}
-  {{ Bold .Label }}
+func main() {
+	// nolint:lll
+	const (
+		customTemplate = `
+{{- if .Prompt -}}
+  {{ Bold .Prompt }}
 {{ end -}}
-{{ if .Filter }}
+{{ if .IsFiltered }}
   {{- print "Filter by ID: " .FilterInput }}
 {{ end }}
 
@@ -29,40 +31,48 @@ const customTemplate = `
   {{- if eq $.SelectedIndex $i }}
    {{- Foreground "32" (print (Bold (print "[x] " $choice.Value.Name)) (Faint (print " (" $choice.Value.ID ") " "\n"))) }}
   {{- else }}
-    {{- print "[ ] " $choice.Value.Name " (" $choice.Value.ID ") " "\n"}}
+    {{- print "[ ] " $choice.Value.Name (Faint (print " (" $choice.Value.ID ") ")) "\n"}}
   {{- end }}
 {{- end}}`
+		customConfirmationTempalte = `
+		{{- Bold (print .Prompt " " (Foreground "32"  (name .FinalChoice)) "\n") -}}
+		`
+	)
 
-type Article struct {
-	ID   string
-	Name string
-}
+	type article struct {
+		ID   string
+		Name string
+	}
 
-func main() {
-	choices := []Article{
+	choices := []article{
 		{ID: "123", Name: "Article A"},
-		{ID: "234", Name: "Article B"},
+		{ID: "321", Name: "Article B"},
 		{ID: "345", Name: "Article C"},
 		{ID: "456", Name: "Article D"},
-		{ID: "567", Name: "Article E"},
+		{ID: "444", Name: "Article E"},
 	}
 
-	sp := selection.NewModel(selection.Choices(choices))
-	sp.Label = "Choose an article!"
-	sp.Template = customTemplate
-	sp.FilterPlaceholder = "asdasddsdas"
+	sp := selection.New(selection.Choices(choices))
+	sp.Prompt = "Choose an article!"
+	sp.FilterPlaceholder = "Type to filter"
 	sp.PageSize = 3
 	sp.Filter = func(filter string, choice *selection.Choice) bool {
-		article, _ := choice.Value.(Article)
+		chosenArticle, _ := choice.Value.(article)
 
-		return strings.Contains(article.ID, filter)
+		return strings.HasPrefix(chosenArticle.ID, filter)
+	}
+	sp.Template = customTemplate
+	sp.ConfirmationTemplate = customConfirmationTempalte
+	sp.ExtendedTemplateScope = map[string]interface{}{
+		"name": func(c *selection.Choice) string { return c.Value.(article).Name },
 	}
 
-	choice, err := sp.Run()
+	choice, err := sp.RunPrompt()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Your choice: %v\n", choice.Value)
+	// do something with the final choice
+	_ = choice
 }

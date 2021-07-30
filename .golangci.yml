@@ -1,15 +1,23 @@
 linters:
   enable-all: true
   disable:
+    - golint
+    - interfacer
+    - scopelint
     - maligned
+    - rowserrcheck
+    - funlen
+    - depguard
     - goerr113
     - exhaustivestruct
-    - exhaustive
-    - gomnd
+    - testpackage
+    - gochecknoglobals
     - wrapcheck
+    - forbidigo
+    - ifshort
+    - cyclop
 linters-settings:
-  govet:
-    check-shadowing: true
-  funlen:
-    lines: 65
-    statements: 50
+  exhaustive:
+    default-signifies-exhaustive: true
+issues:
+  exclude-use-default: false

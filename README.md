@@ -1,6 +1,8 @@
 # Promptkit
 
-**WARNING:** This library will be continued as part of https://github.com/charmbracelet/bubbles as soon as it is merged (see https://github.com/charmbracelet/bubbles/pull/33).
+Promptkit is a collection of common command line prompts for interactive
+programs. Each prompts comes with sensible defaults, re-mappable key bindings
+and many opportunities for heavy customization.
 
 # Selection
 
@@ -8,6 +10,21 @@ Selection with filter and pagination support:
 
 [![asciicast](https://asciinema.org/a/4ZK5HZ2uJm8NtC0rs8rnqxUwS.svg)](https://asciinema.org/a/4ZK5HZ2uJm8NtC0rs8rnqxUwS)
 
-Works also with custom types which for example enables filtering only on custom fields:
+The selection prompt is highly customizable and also works well with custom
+types which for example enables filtering only on custom fields:
 
-[![asciicast](https://asciinema.org/a/HZ7BOXUgOsFx7u5p1eId9I33b.svg)](https://asciinema.org/a/HZ7BOXUgOsFx7u5p1eId9I33b)
+[![asciicast](https://asciinema.org/a/T9SG8WwP683dZxRdh1cAD6Deu.svg)](https://asciinema.org/a/T9SG8WwP683dZxRdh1cAD6Deu)
+
+# Text Input
+
+A text input that supports editable default values:
+
+[![asciicast](https://asciinema.org/a/tJCUnnKxoXivvSf0gSkZfAjdn.svg)](https://asciinema.org/a/tJCUnnKxoXivvSf0gSkZfAjdn)
+
+Custom validation is also supported:
+
+[![asciicast](https://asciinema.org/a/LNsZi7yrk7SvrcYCLROnUk7Of.svg)](https://asciinema.org/a/LNsZi7yrk7SvrcYCLROnUk7Of)
+
+The text input can also be used in hidden mode for password prompts:
+
+[![asciicast](https://asciinema.org/a/HcqfFKCIPSBClYYjqJdDqJ35z.svg)](https://asciinema.org/a/HcqfFKCIPSBClYYjqJdDqJ35z)

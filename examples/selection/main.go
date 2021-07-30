@@ -3,24 +3,22 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/erikgeiser/promptkit/selection"
 )
 
 func main() {
-	sp := selection.NewModel(selection.Choices([]string{"Horse", "Car", "Plane", "Bike"}))
-	sp.Label = "What do you pick?"
-	sp.Filter = func(filter string, choice *selection.Choice) bool {
-		return strings.Contains(strings.ToLower(choice.String), strings.ToLower(filter))
-	}
+	sp := selection.New(selection.Choices([]string{"Horse", "Car", "Plane", "Bike"}))
+	sp.Prompt = "What do you pick?"
 	sp.PageSize = 3
 
-	choice, err := sp.Run()
+	choice, err := sp.RunPrompt()
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
+
 		os.Exit(1)
 	}
 
-	fmt.Printf("Your choice: %v\n", choice.Value)
+	// do something with the final choice
+	_ = choice
 }

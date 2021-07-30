@@ -12,95 +12,9 @@ import (
 	"github.com/muesli/termenv"
 )
 
-const (
-	// DefaultTemplate defines the appearance of the selection and
-	// can be copied as a starting point for a custom template. The
-	// following variables and functions are available:
-	//
-	//  * Label string: The configured label (see Model)
-	//  * Filter bool: Whether or not filtering is enabled
-	//  * FilterInput string: The view of the filter input model
-	//  * Choices []*Choice: The choices on the current page
-	//  * NChoices int: The number of choices on the current page,
-	//  * SelectedIndex int: The index that is currently selected
-	//  * PageSize int: The configured page size (see Model)
-	//  * IsPaged bool: Whether pagination is currently active
-	//  * AllChoices []*Choice: All configured choices (see Model)
-	//  * NAllChoices int: The number of configured choices
-	//  * IsScrollDownHintPosition(idx int) bool: Returns whether
-	//    the scroll down hint shoud be displayed at the given index
-	//  * IsScrollUpHintPosition(idx int) bool: Returns whether the
-	//    scroll up hint shoud be displayed at the given index)
-	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv)
-	DefaultTemplate = `
-{{- if .Label -}}
-  {{ Bold .Label }}
-{{ end -}}
-{{ if .Filter }}
-  {{- print "Filter: " .FilterInput }}
-{{ end }}
-
-{{- range  $i, $choice := .Choices }}
-  {{- if IsScrollUpHintPosition $i }}
-    {{- "⇡ " -}}
-  {{- else if IsScrollDownHintPosition $i -}}
-    {{- "⇣ " -}} 
-  {{- else -}}
-    {{- "  " -}}
-  {{- end -}} 
-
-  {{- if eq $.SelectedIndex $i }}
-   {{- Foreground "32" (Bold (print "▸ " $choice.String "\n")) }}
-  {{- else }}
-    {{- print "  " $choice.String "\n"}}
-  {{- end }}
-{{- end}}`
-
-	// DefaultFilterPlaceholder is printed instead of the
-	// filter text when no filter text was entered yet.
-	DefaultFilterPlaceholder = "Type to filter choices"
-)
-
-// Model is a configurable selection prompt with optional filtering
-// and pagination.
+// Model implements the bubbletea.Model for a selection prompt.
 type Model struct {
-	// Choices represent all selectable choices of the selection.
-	// Slices of arbitrary types can be converted to a slice of
-	// choices using the helpers StringChoices, StringerChoices
-	// and SliceChoices.
-	Choices []*Choice
-
-	// Label holds the the prompt text or question that is printed
-	// above the choices in the default template (if not empty).
-	Label string
-
-	// Filter is a function that decides whether a given choice
-	// should be displayed based on the text entered by the user
-	// into the filter input field. If Filter is nil, filtering
-	// will be disabled.
-	Filter func(filterText string, choice *Choice) bool
-
-	// FilterPlaceholder holds the text that is displayed in the
-	// filter input field when no text was entered by the user yet.
-	// If empty, the DefaultFilterPlaceholder is used. If Filter
-	// is nil, filtering is disabled and FilterPlaceholder does
-	// nothing.
-	FilterPlaceholder string
-
-	// Template holds the display template. A custom template can
-	// be used to completely customize the appearance of the
-	// selection prompt. If empty, DefaultTemplate is used.
-	Template string
-
-	// PageSize is the number of choices that are displayed at
-	// once. If PageSize is smaller than the number of choices,
-	// pagination is enabled. If PageSize is 0, pagenation is
-	// always disabled.
-	PageSize int
-
-	// KeyMap determines with which keys the selection prompt is
-	// controlled. By default, DefaultKeyMap is used.
-	KeyMap KeyMap
+	*Selection
 
 	// Err holds errors that may occur during the execution of
 	// the selection prompt.
@@ -116,6 +30,8 @@ type Model struct {
 	scrollOffset int
 	width        int
 	tmpl         *template.Template
+
+	quitting bool
 }
 
 // ensure that the Model interface is implemented.
@@ -123,53 +39,36 @@ var _ tea.Model = &Model{}
 
 // NewModel returns a new selection prompt model for the
 // provided choices.
-func NewModel(choices []*Choice) Model {
-	return Model{
-		Choices:           choices,
-		Template:          DefaultTemplate,
-		FilterPlaceholder: DefaultFilterPlaceholder,
-		KeyMap:            DefaultKeyMap,
-	}
-}
-
-// Run executes the selection prompt in standalone mode.
-func (m *Model) Run() (*Choice, error) {
-	p := tea.NewProgram(m)
-	if err := p.Start(); err != nil {
-		return nil, err
-	}
-
-	choice, err := m.Choice()
-	if err != nil {
-		return nil, err
-	}
-
-	return choice, err
+func NewModel(selection *Selection) *Model {
+	return &Model{Selection: selection}
 }
 
 // Init initializes the selection prompt model.
 func (m *Model) Init() tea.Cmd {
-	if len(m.Choices) == 0 {
-		m.Err = fmt.Errorf("no choices provided")
-
-		return tea.Quit
-	}
-
-	if !validateKeyMap(m.KeyMap) {
-		m.Err = fmt.Errorf("insufficient key map")
-
-		return tea.Quit
-	}
-
 	m.reindexChoices()
 
-	if m.Template == "" {
-		m.Template = DefaultTemplate
+	m.Err = m.validate()
+	if m.Err != nil {
+		return tea.Quit
 	}
 
-	m.tmpl = template.New("")
-	m.tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
-	m.tmpl.Funcs(template.FuncMap{
+	m.tmpl, m.Err = m.initTemplate()
+	if m.Err != nil {
+		return tea.Quit
+	}
+
+	m.filterInput = m.initFilterInput()
+
+	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
+
+	return textinput.Blink
+}
+
+func (m *Model) initTemplate() (*template.Template, error) {
+	tmpl := template.New("")
+	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
+	tmpl.Funcs(m.ExtendedTemplateScope)
+	tmpl.Funcs(template.FuncMap{
 		"IsScrollDownHintPosition": func(idx int) bool {
 			return m.canScrollDown() && (idx == len(m.currentChoices)-1)
 		},
@@ -178,19 +77,21 @@ func (m *Model) Init() tea.Cmd {
 		},
 	})
 
-	m.tmpl, m.Err = m.tmpl.Parse(m.Template)
-	if m.Err != nil {
-		return tea.Quit
-	}
+	return tmpl.Parse(m.Template)
+}
 
-	m.filterInput = textinput.NewModel()
-	m.filterInput.Placeholder = m.FilterPlaceholder
-	m.filterInput.Prompt = ""
-	m.filterInput.Focus()
-	m.width = 80
-	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
+func (m *Model) initFilterInput() textinput.Model {
+	filterInput := textinput.NewModel()
+	filterInput.Prompt = ""
+	filterInput.TextStyle = m.FilterInputTextStyle
+	filterInput.BackgroundStyle = m.FilterInputBackgroundStyle
+	filterInput.PlaceholderStyle = m.FilterInputPlaceholderStyle
+	filterInput.CursorStyle = m.FilterInputCursorStyle
+	filterInput.Placeholder = m.FilterPlaceholder
+	filterInput.Width = 80
+	filterInput.Focus()
 
-	return textinput.Blink
+	return filterInput
 }
 
 // Choice returns the choice that is currently selected or the final
@@ -221,37 +122,37 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		key := msg.String()
-
 		switch {
-		case keyMatches(key, m.KeyMap.Abort):
+		case keyMatches(msg, m.KeyMap.Abort):
 			m.Err = fmt.Errorf("selection was aborted")
 
 			return m, tea.Quit
-		case keyMatches(key, m.KeyMap.ClearFilter):
+		case keyMatches(msg, m.KeyMap.ClearFilter):
 			m.filterInput.Reset()
 			m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
 			return m, nil
-		case keyMatches(key, m.KeyMap.Select):
+		case keyMatches(msg, m.KeyMap.Select):
 			if len(m.currentChoices) == 0 {
 				return m, nil
 			}
 
+			m.quitting = true
+
 			return m, tea.Quit
-		case keyMatches(key, m.KeyMap.Down):
+		case keyMatches(msg, m.KeyMap.Down):
 			m.cursorDown()
 
 			return m, nil
-		case keyMatches(key, m.KeyMap.Up):
+		case keyMatches(msg, m.KeyMap.Up):
 			m.cursorUp()
 
 			return m, nil
-		case keyMatches(key, m.KeyMap.ScrollDown):
+		case keyMatches(msg, m.KeyMap.ScrollDown):
 			m.scrollDown()
 
 			return m, nil
-		case keyMatches(key, m.KeyMap.ScrollUp):
+		case keyMatches(msg, m.KeyMap.ScrollUp):
 			m.scrollUp()
 
 			return m, nil
@@ -283,16 +184,22 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View renders the selection prompt.
 func (m *Model) View() string {
+	if m.quitting {
+		return ""
+	}
+
 	// avoid panics if Quit is sent during Init
 	if m.tmpl == nil {
+		m.Err = fmt.Errorf("rendering view without loaded template")
+
 		return ""
 	}
 
 	viewBuffer := &bytes.Buffer{}
 
 	err := m.tmpl.Execute(viewBuffer, map[string]interface{}{
-		"Label":         m.Label,
-		"Filter":        m.Filter != nil,
+		"Prompt":        m.Prompt,
+		"IsFiltered":    m.Filter != nil,
 		"FilterInput":   m.filterInput.View(),
 		"Choices":       m.currentChoices,
 		"NChoices":      len(m.currentChoices),
@@ -307,6 +214,8 @@ func (m *Model) View() string {
 
 		return "Template Error: " + err.Error()
 	}
+
+	termenv.Reset()
 
 	return wrap.String(wordwrap.String(viewBuffer.String(), m.width), m.width)
 }
