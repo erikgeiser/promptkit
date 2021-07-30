@@ -1,6 +1,13 @@
-# Promptkit
-
-[![Go Reference](https://pkg.go.dev/badge/github.com/erikgeiser/promptkit.svg)](https://pkg.go.dev/github.com/erikgeiser/promptkit)
+<p align="center">
+  <h1 align="center"><b>promptkit</b></h1>
+  <p align="center"><i>Interactive command line prompts with style!</i></p>
+  <p align="center">
+    <a href="https://github.com/erikgeiser/promptkit/releases/latest"><img alt="Release" src="https://img.shields.io/github/release/erikgeiser/promptkit.svg?style=for-the-badge"></a>
+    <a href="https://pkg.go.dev/github.com/erikgeiser/promptkit"><img alt="Go Doc" src="https://img.shields.io/badge/godoc-reference-blue.svg?style=for-the-badge"></a>
+    <a href="/LICENSE.md"><img alt="Software License" src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=for-the-badge"></a>
+    <a href="https://goreportcard.com/report/github.com/erikgeiser/promptkit"><img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/erikgeiser/promptkit?style=for-the-badge"></a>
+  </p>
+</p>
 
 Promptkit is a collection of common command line prompts for interactive
 programs. Each prompts comes with sensible defaults, re-mappable key bindings
