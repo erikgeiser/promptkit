@@ -40,3 +40,7 @@ The text input can also be used in hidden mode for password prompts:
 [![asciicast](https://asciinema.org/a/HcqfFKCIPSBClYYjqJdDqJ35z.svg)](https://asciinema.org/a/HcqfFKCIPSBClYYjqJdDqJ35z)
 
 https://github.com/erikgeiser/promptkit/blob/f29e12dd8eb290771e9652a0eda6cac0e3895976/examples/textinput_hidden/main.go#L11-L17
+
+## Confirmation Prompt
+
+A confirmation prompt for binary questions is coming soon.
