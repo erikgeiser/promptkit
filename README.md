@@ -1,10 +1,12 @@
 # Promptkit
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/erikgeiser/promptkit.svg)](https://pkg.go.dev/github.com/erikgeiser/promptkit)
+
 Promptkit is a collection of common command line prompts for interactive
 programs. Each prompts comes with sensible defaults, re-mappable key bindings
 and many opportunities for heavy customization.
 
-# Selection
+## Selection
 
 Selection with filter and pagination support:
 
@@ -19,7 +21,7 @@ types which for example enables filtering only on custom fields:
 
 https://github.com/erikgeiser/promptkit/blob/ea17c82a1ba5299a2eb2b00bc1b1b5baf4e52a5e/examples/selection_custom/main.go#L55-L70
 
-# Text Input
+## Text Input
 
 A text input that supports editable default values:
 
