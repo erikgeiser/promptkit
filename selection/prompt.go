@@ -165,7 +165,7 @@ func New(choices []*Choice) *Selection {
 }
 
 // RunPrompt executes the selection prompt.
-func (s *Selection) RunPrompt() (*Choice, error) {
+func (s *Selection) RunPrompt(opts ...tea.ProgramOption) (*Choice, error) {
 	var (
 		tmpl *template.Template
 		err  error
@@ -185,7 +185,7 @@ func (s *Selection) RunPrompt() (*Choice, error) {
 
 	m := NewModel(s)
 
-	p := tea.NewProgram(m)
+	p := tea.NewProgram(m, opts...)
 	if err := p.Start(); err != nil {
 		return nil, err
 	}

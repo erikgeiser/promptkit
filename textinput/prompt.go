@@ -155,7 +155,7 @@ func (t *TextInput) initConfirmationTemplate() (*template.Template, error) {
 }
 
 // RunPrompt executes the text input prompt.
-func (t *TextInput) RunPrompt() (string, error) {
+func (t *TextInput) RunPrompt(opts ...tea.ProgramOption) (string, error) {
 	tmpl, err := t.initConfirmationTemplate()
 	if err != nil {
 		return "", fmt.Errorf("initializing confirmation template: %w", err)
@@ -163,7 +163,7 @@ func (t *TextInput) RunPrompt() (string, error) {
 
 	m := NewModel(t)
 
-	p := tea.NewProgram(m)
+	p := tea.NewProgram(m, opts...)
 	if err := p.Start(); err != nil {
 		return "", err
 	}
