@@ -62,6 +62,8 @@ func (m *Model) Init() tea.Cmd {
 
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
+	termenv.Reset()
+
 	return textinput.Blink
 }
 
@@ -186,6 +188,8 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View renders the selection prompt.
 func (m *Model) View() string {
+	defer termenv.Reset()
+
 	if m.quitting {
 		return ""
 	}
@@ -216,8 +220,6 @@ func (m *Model) View() string {
 
 		return "Template Error: " + err.Error()
 	}
-
-	termenv.Reset()
 
 	return wrap.String(wordwrap.String(viewBuffer.String(), m.width), m.width)
 }
