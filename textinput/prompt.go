@@ -13,6 +13,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/termenv"
 )
 
@@ -80,14 +81,15 @@ type TextInput struct {
 	// the DefaultTemplate is used. The following variables and functions are
 	// available:
 	//
-	//  * Prompt string: The configured prompt
-	//  * InitialValue string: The configured initial value of the input
-	//  * Placeholder string: The configured placeholder of the input
-	//  * Input string: The actual input field
+	//  * Prompt string: The configured prompt.
+	//  * InitialValue string: The configured initial value of the input.
+	//  * Placeholder string: The configured placeholder of the input.
+	//  * Input string: The actual input field.
 	//  * Valid bool: Whether or not the current value is valid according
-	//    to the configured Validate function
-	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv)
-	//  * The functions specified in ExtendedTemplateScope
+	//    to the configured Validate function.
+	//  * promptkit.UtilFuncMap: Handy helper functions.
+	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
+	//  * The functions specified in ExtendedTemplateScope.
 	Template string
 
 	// ConfirmationTemplate is rendered as soon as a input has been confirmed.
@@ -96,15 +98,16 @@ type TextInput struct {
 	// method and NOT when the text input is used as a model. The following
 	// variables and functions are available:
 	//
-	//  * FinalChoice: The choice that was selected by the user
-	//  * Prompt string: The configured prompt
-	//  * InitialValue string: The configured initial value of the input
-	//  * Placeholder string: The configured placeholder of the input
+	//  * FinalChoice: The choice that was selected by the user.
+	//  * Prompt string: The configured prompt.
+	//  * InitialValue string: The configured initial value of the input.
+	//  * Placeholder string: The configured placeholder of the input.
 	//  * Mask(string) string: A function that replaces all characters of
 	//    a string with the character specified in HideMask if Hidden is
-	//    true and returns the input string if Hidden is false
-	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv)
-	//  * The functions specified in ExtendedTemplateScope
+	//    true and returns the input string if Hidden is false.
+	//  * promptkit.UtilFuncMap: Handy helper functions.
+	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
+	//  * The functions specified in ExtendedTemplateScope.
 	ConfirmationTemplate string
 
 	// ExtendedTemplateScope can be used to add additional functions to the
@@ -144,6 +147,7 @@ func (t *TextInput) initConfirmationTemplate() (*template.Template, error) {
 
 	tmpl := template.New("confirmed")
 	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
+	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(t.ExtendedTemplateScope)
 	tmpl.Funcs(template.FuncMap{"Mask": t.mask})
 

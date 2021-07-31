@@ -13,6 +13,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/termenv"
 )
 
@@ -87,22 +88,23 @@ type Selection struct {
 	// the DefaultTemplate is used. The following variables and functions are
 	// available:
 	//
-	//  * Prompt string: The configured prompt
-	//  * IsFiltered bool: Whether or not filtering is enabled
-	//  * FilterInput string: The view of the filter input model
-	//  * Choices []*Choice: The choices on the current page
-	//  * NChoices int: The number of choices on the current page,
-	//  * SelectedIndex int: The index that is currently selected
-	//  * PageSize int: The configured page size
-	//  * IsPaged bool: Whether pagination is currently active
-	//  * AllChoices []*Choice: All configured choices
-	//  * NAllChoices int: The number of configured choices
+	//  * Prompt string: The configured prompt.
+	//  * IsFiltered bool: Whether or not filtering is enabled.
+	//  * FilterInput string: The view of the filter input model.
+	//  * Choices []*Choice: The choices on the current page.
+	//  * NChoices int: The number of choices on the current page.
+	//  * SelectedIndex int: The index that is currently selected.
+	//  * PageSize int: The configured page size.
+	//  * IsPaged bool: Whether pagination is currently active.
+	//  * AllChoices []*Choice: All configured choices.
+	//  * NAllChoices int: The number of configured choices.
 	//  * IsScrollDownHintPosition(idx int) bool: Returns whether
-	//    the scroll down hint shoud be displayed at the given index
+	//    the scroll down hint shoud be displayed at the given index.
 	//  * IsScrollUpHintPosition(idx int) bool: Returns whether the
-	//    scroll up hint shoud be displayed at the given index)
-	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv)
-	//  * The functions specified in ExtendedTemplateScope
+	//    scroll up hint shoud be displayed at the given index).
+	//  * promptkit.UtilFuncMap: Handy helper functions.
+	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
+	//  * The functions specified in ExtendedTemplateScope.
 	Template string
 
 	// ConfirmationTemplate is rendered as soon as a choice has been selected.
@@ -111,12 +113,13 @@ type Selection struct {
 	// Run() method and NOT when the selection prompt is used as a model. The
 	// following variables and functions are available:
 	//
-	//  * FinalChoice: The choice that was selected by the user
-	//  * Prompt string: The configured prompt
-	//  * AllChoices []*Choice: All configured choices
-	//  * NAllChoices int: The number of configured choices
-	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv)
-	//  * The functions specified in ExtendedTemplateScope
+	//  * FinalChoice: The choice that was selected by the user.
+	//  * Prompt string: The configured prompt.
+	//  * AllChoices []*Choice: All configured choices.
+	//  * NAllChoices int: The number of configured choices.
+	//  * promptkit.UtilFuncMap: Handy helper functions.
+	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
+	//  * The functions specified in ExtendedTemplateScope.
 	ConfirmationTemplate string
 
 	// ExtendedTemplateScope can be used to add additional functions to the
@@ -172,6 +175,7 @@ func (s *Selection) RunPrompt() (*Choice, error) {
 		tmpl = template.New("confirmed")
 		tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
 		tmpl.Funcs(s.ExtendedTemplateScope)
+		tmpl.Funcs(promptkit.UtilFuncMap())
 
 		tmpl, err = tmpl.Parse(s.ConfirmationTemplate)
 		if err != nil {

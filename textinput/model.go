@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/reflow/wordwrap"
 	"github.com/muesli/reflow/wrap"
 	"github.com/muesli/termenv"
@@ -56,6 +57,7 @@ func (m *Model) Init() tea.Cmd {
 func (m *Model) initTemplate() (*template.Template, error) {
 	tmpl := template.New("")
 	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
+	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(m.ExtendedTemplateScope)
 	tmpl.Funcs(template.FuncMap{"Mask": m.mask})
 
@@ -97,10 +99,13 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case keyMatches(msg, m.KeyMap.Submit):
 			if m.Validate == nil || m.Validate(m.input.Value()) {
+				m.quitting = true
+
 				return m, tea.Quit
 			}
 		case keyMatches(msg, m.KeyMap.Abort):
 			m.Err = fmt.Errorf("prompt aborted")
+			m.quitting = true
 
 			return m, tea.Quit
 		case keyMatches(msg, m.KeyMap.Reset):
