@@ -47,7 +47,7 @@ A text input that supports editable default values: [Code](https://github.com/er
 Custom validation is also supported: [Code](https://github.com/erikgeiser/promptkit/blob/f29e12dd8eb290771e9652a0eda6cac0e3895976/examples/textinput_custom/main.go#L28-L36)
 
 <p align="center">
-  <a href="https://asciinema.org/a/DobgVEJWgxQr6MnyX48gzHOR1" target="_blank"><img src="https://asciinema.org/a/DobgVEJWgxQr6MnyX48gzHOR1.svg" /></a>
+  <a href="https://asciinema.org/a/FF14DYA8WtEtRjdPkcllAJk9p" target="_blank"><img src="https://asciinema.org/a/FF14DYA8WtEtRjdPkcllAJk9p.svg" /></a>
 </p>
 
 ---
