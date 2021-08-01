@@ -147,6 +147,7 @@ func New(prompt string) *TextInput {
 		InputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
 		Validate:              func(s string) bool { return len(s) > 0 },
 		HideMask:              DefaultMask,
+		ExtendedTemplateScope: template.FuncMap{},
 		Output:                os.Stdout,
 		Input:                 os.Stdin,
 	}

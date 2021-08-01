@@ -128,13 +128,14 @@ type Confirmation struct {
 // New creates a new text input.
 func New(prompt string) *Confirmation {
 	return &Confirmation{
-		Prompt:               prompt,
-		Template:             DefaultTemplate,
-		ConfirmationTemplate: DefaultConfirmationTemplate,
-		KeyMap:               NewDefaultKeyMap(),
-		DefaultValue:         Undecided,
-		Output:               os.Stdout,
-		Input:                os.Stdin,
+		Prompt:                prompt,
+		Template:              DefaultTemplate,
+		ConfirmationTemplate:  DefaultConfirmationTemplate,
+		KeyMap:                NewDefaultKeyMap(),
+		DefaultValue:          Undecided,
+		ExtendedTemplateScope: template.FuncMap{},
+		Output:                os.Stdout,
+		Input:                 os.Stdin,
 	}
 }
 

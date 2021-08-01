@@ -169,6 +169,7 @@ func New(prompt string, choices []*Choice) *Selection {
 		FilterInputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
 		KeyMap:                      NewDefaultKeyMap(),
 		FilterPlaceholder:           DefaultFilterPlaceholder,
+		ExtendedTemplateScope:       template.FuncMap{},
 		Output:                      os.Stdout,
 		Input:                       os.Stdin,
 	}
