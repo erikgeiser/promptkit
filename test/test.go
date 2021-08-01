@@ -2,6 +2,7 @@
 package test
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -49,7 +50,7 @@ func AssertGoldenView(tb testing.TB, m tea.Model, expectedViewFile string, updat
 	view := m.View()
 	goldenFilePath := filepath.Join("testdata", expectedViewFile)
 
-	if update {
+	if _, err := os.Stat(goldenFilePath); errors.Is(err, os.ErrNotExist) || update {
 		err := os.WriteFile(goldenFilePath, []byte(view), 0o664) // nolint:gosec,gomnd
 		if err != nil {
 			tb.Fatalf("updating golden view: %v", err)
@@ -66,8 +67,8 @@ func AssertGoldenView(tb testing.TB, m tea.Model, expectedViewFile string, updat
 	expectedView := string(goldenViewFileContent)
 
 	if view != expectedView {
-		tb.Errorf("view mismatch:\nExpected:\n%s\nGot:\n%s",
-			Indent(expectedView), Indent(view))
+		tb.Errorf("view mismatch in %s:\nExpected:\n%s\nGot:\n%s",
+			expectedViewFile, Indent(expectedView), Indent(view))
 	}
 }
 
