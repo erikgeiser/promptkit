@@ -1,4 +1,4 @@
-package textinput
+package textinput_test
 
 import (
 	"errors"
@@ -9,6 +9,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/erikgeiser/promptkit"
 	"github.com/erikgeiser/promptkit/test"
+	"github.com/erikgeiser/promptkit/textinput"
 )
 
 var update = flag.Bool("update", false, "update the golden files")
@@ -16,7 +17,7 @@ var update = flag.Bool("update", false, "update the golden files")
 func TestEnterText(t *testing.T) {
 	t.Parallel()
 
-	m := NewModel(New("foo:"))
+	m := textinput.NewModel(textinput.New("foo:"))
 	m.Placeholder = "placeholder"
 
 	input := "bar"
@@ -42,7 +43,7 @@ func TestEnterText(t *testing.T) {
 func TestHidden(t *testing.T) {
 	t.Parallel()
 
-	m := NewModel(New("password?"))
+	m := textinput.NewModel(textinput.New("password?"))
 	m.Hidden = true
 	m.HideMask = 'X'
 
@@ -74,7 +75,7 @@ func TestPlaceholder(t *testing.T) {
 
 	placeholder := "enter some text"
 
-	m := NewModel(New("Text:"))
+	m := textinput.NewModel(textinput.New("Text:"))
 	m.Placeholder = placeholder
 
 	test.Run(t, m)
@@ -99,7 +100,7 @@ func TestInitialValue(t *testing.T) {
 
 	initialValue := "some text"
 
-	m := NewModel(New("question?"))
+	m := textinput.NewModel(textinput.New("question?"))
 	m.InitialValue = initialValue
 	m.Placeholder = "placeholder"
 
@@ -126,7 +127,7 @@ func TestModifiedInitialValue(t *testing.T) {
 	initialValue := "some test"
 	modifiedInitialValue := "some text"
 
-	m := NewModel(New("Text:"))
+	m := textinput.NewModel(textinput.New("Text:"))
 	m.InitialValue = initialValue
 
 	test.Run(t, m, tea.KeyLeft, tea.KeyBackspace, test.KeyMsg('x'))
@@ -162,7 +163,7 @@ func TestTemplate(t *testing.T) {
 
 	separator := "|"
 
-	m := NewModel(New("password?"))
+	m := textinput.NewModel(textinput.New("password?"))
 	m.Template = `{{ print .Prompt Separator .Input}}`
 	m.ExtendedTemplateScope["Separator"] = func() string { return separator }
 
@@ -179,7 +180,7 @@ func TestTemplate(t *testing.T) {
 func TestQuit(t *testing.T) {
 	t.Parallel()
 
-	m := NewModel(New("Question?"))
+	m := textinput.NewModel(textinput.New("Question?"))
 	m.Validate = nil
 
 	test.Run(t, m, tea.KeyEnter)
@@ -194,7 +195,7 @@ func TestQuit(t *testing.T) {
 func TestAbort(t *testing.T) {
 	t.Parallel()
 
-	m := NewModel(New("Question?"))
+	m := textinput.NewModel(textinput.New("Question?"))
 	m.Validate = nil
 
 	test.Run(t, m, tea.KeyCtrlC)
@@ -208,7 +209,7 @@ func TestAbort(t *testing.T) {
 	}
 }
 
-func getValue(tb testing.TB, m *Model) string {
+func getValue(tb testing.TB, m *textinput.Model) string {
 	tb.Helper()
 
 	v, err := m.Value()
@@ -219,7 +220,7 @@ func getValue(tb testing.TB, m *Model) string {
 	return v
 }
 
-func assertNoError(tb testing.TB, m *Model) {
+func assertNoError(tb testing.TB, m *textinput.Model) {
 	tb.Helper()
 
 	if m.Err != nil {
