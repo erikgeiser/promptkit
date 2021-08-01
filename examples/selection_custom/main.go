@@ -52,8 +52,7 @@ func main() {
 		{ID: "444", Name: "Article E"},
 	}
 
-	sp := selection.New(selection.Choices(choices))
-	sp.Prompt = "Choose an article!"
+	sp := selection.New("Choose an article!", selection.Choices(choices))
 	sp.FilterPlaceholder = "Type to filter"
 	sp.PageSize = 3
 	sp.Filter = func(filter string, choice *selection.Choice) bool {

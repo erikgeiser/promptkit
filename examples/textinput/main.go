@@ -8,8 +8,7 @@ import (
 )
 
 func main() {
-	input := textinput.New()
-	input.Prompt = "What is your name?"
+	input := textinput.New("What is your name?")
 	input.InitialValue = os.Getenv("USER")
 	input.Placeholder = "Your name cannot be empty"
 

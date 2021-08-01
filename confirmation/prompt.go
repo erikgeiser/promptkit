@@ -126,8 +126,9 @@ type Confirmation struct {
 }
 
 // New creates a new text input.
-func New() *Confirmation {
+func New(prompt string) *Confirmation {
 	return &Confirmation{
+		Prompt:               prompt,
 		Template:             DefaultTemplate,
 		ConfirmationTemplate: DefaultConfirmationTemplate,
 		KeyMap:               NewDefaultKeyMap(),

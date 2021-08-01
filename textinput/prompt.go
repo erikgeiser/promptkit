@@ -138,8 +138,9 @@ type TextInput struct {
 }
 
 // New creates a new text input.
-func New() *TextInput {
+func New(prompt string) *TextInput {
 	return &TextInput{
+		Prompt:                prompt,
 		Template:              DefaultTemplate,
 		ConfirmationTemplate:  DefaultConfirmationTemplate,
 		KeyMap:                NewDefaultKeyMap(),

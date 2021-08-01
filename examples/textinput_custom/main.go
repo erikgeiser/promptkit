@@ -25,8 +25,7 @@ func main() {
 	{{- Bold (print "🖥️  Connecting to " (Foreground "32" .FinalValue) "\n") -}}
 	`
 
-	input := textinput.New()
-	input.Prompt = "Enter an IP address"
+	input := textinput.New("Enter an IP address")
 	input.Placeholder = "127.0.0.1"
 	input.Validate = func(input string) bool { return net.ParseIP(input) != nil }
 	input.Template = customTemplate

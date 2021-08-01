@@ -150,9 +150,10 @@ type Selection struct {
 }
 
 // New creates a new selection prompt.
-func New(choices []*Choice) *Selection {
+func New(prompt string, choices []*Choice) *Selection {
 	return &Selection{
 		Choices:                     choices,
+		Prompt:                      prompt,
 		Template:                    DefaultTemplate,
 		ConfirmationTemplate:        DefaultConfirmationTemplate,
 		Filter:                      FilterContainsCaseInsensitive,

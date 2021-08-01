@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	sp := selection.New(selection.Choices([]string{"Horse", "Car", "Plane", "Bike"}))
-	sp.Prompt = "What do you pick?"
+	sp := selection.New("What do you pick?",
+		selection.Choices([]string{"Horse", "Car", "Plane", "Bike"}))
 	sp.PageSize = 3
 
 	choice, err := sp.RunPrompt()
