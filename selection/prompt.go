@@ -27,7 +27,7 @@ const (
   {{ Bold .Prompt }}
 {{ end -}}
 {{ if .IsFiltered }}
-  {{- print "Filter: " .FilterInput }}
+  {{- print .FilterPrompt " " .FilterInput }}
 {{ end }}
 
 {{- range  $i, $choice := .Choices }}
@@ -52,6 +52,10 @@ const (
 	{{- print .Prompt " " (Foreground "32"  .FinalChoice.String) "\n" -}}
 	`
 
+	// DefaultFilterPrompt is the default prompt for the filter input when
+	// filtering is enabled.
+	DefaultFilterPrompt = "Filter:"
+
 	// DefaultFilterPlaceholder is printed by default when no filter text was
 	// entered yet.
 	DefaultFilterPlaceholder = "Type to filter choices"
@@ -64,9 +68,12 @@ type Selection struct {
 	// selection.Choices.
 	Choices []*Choice
 
-	// Prompt holds the the prompt text or question that is printed above the
-	// choices in the default template (if not empty).
+	// Prompt holds the the prompt text or question that is to be answered by
+	// one of the choices.
 	Prompt string
+
+	// FilterPrompt is the prompt for the filter if filtering is enabled.
+	FilterPrompt string
 
 	// Filter is a function that decides whether a given choice should be
 	// displayed based on the text entered by the user into the filter input
@@ -92,6 +99,7 @@ type Selection struct {
 	//
 	//  * Prompt string: The configured prompt.
 	//  * IsFiltered bool: Whether or not filtering is enabled.
+	//  * FilterPrompt string: The configured filter prompt.
 	//  * FilterInput string: The view of the filter input model.
 	//  * Choices []*Choice: The choices on the current page.
 	//  * NChoices int: The number of choices on the current page.
@@ -154,6 +162,7 @@ func New(prompt string, choices []*Choice) *Selection {
 	return &Selection{
 		Choices:                     choices,
 		Prompt:                      prompt,
+		FilterPrompt:                DefaultFilterPrompt,
 		Template:                    DefaultTemplate,
 		ConfirmationTemplate:        DefaultConfirmationTemplate,
 		Filter:                      FilterContainsCaseInsensitive,

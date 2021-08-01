@@ -16,7 +16,7 @@ func main() {
   {{ Bold .Prompt }}
 {{ end -}}
 {{ if .IsFiltered }}
-  {{- print "Filter by ID: " .FilterInput }}
+  {{- print .FilterPrompt " " .FilterInput }}
 {{ end }}
 
 {{- range  $i, $choice := .Choices }}
@@ -53,6 +53,7 @@ func main() {
 	}
 
 	sp := selection.New("Choose an article!", selection.Choices(choices))
+	sp.FilterPrompt = "Filter by ID:"
 	sp.FilterPlaceholder = "Type to filter"
 	sp.PageSize = 3
 	sp.Filter = func(filter string, choice *selection.Choice) bool {

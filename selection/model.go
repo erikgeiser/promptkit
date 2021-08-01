@@ -208,6 +208,7 @@ func (m *Model) View() string {
 	err := m.tmpl.Execute(viewBuffer, map[string]interface{}{
 		"Prompt":        m.Prompt,
 		"IsFiltered":    m.Filter != nil,
+		"FilterPrompt":  m.FilterPrompt,
 		"FilterInput":   m.filterInput.View(),
 		"Choices":       m.currentChoices,
 		"NChoices":      len(m.currentChoices),
