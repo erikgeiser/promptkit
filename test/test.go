@@ -1,0 +1,98 @@
+// Package test contains helper functions for prompt tests.
+package test
+
+import (
+	"os"
+	"path/filepath"
+	"regexp"
+	"testing"
+
+	tea "github.com/charmbracelet/bubbletea"
+)
+
+// MsgsFromText generates KeyMsg events from a given text.
+func MsgsFromText(text string) []tea.Msg {
+	msgs := make([]tea.Msg, 0, len(text))
+
+	for _, c := range text {
+		msgs = append(msgs, KeyMsg(c))
+	}
+
+	return msgs
+}
+
+// KeyMsg returns the KeyMsg that corresponds to the given rune.
+func KeyMsg(r rune) tea.Msg {
+	return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{r}}
+}
+
+// Run initializes the model and applies all events.
+func Run(tb testing.TB, model tea.Model, events ...tea.Msg) {
+	tb.Helper()
+
+	model.Update(model.Init())
+
+	for _, event := range events {
+		switch e := event.(type) {
+		case tea.KeyType:
+			model.Update(tea.KeyMsg{Type: e})
+		default:
+			model.Update(event)
+		}
+	}
+}
+
+// AssertGoldenView compares the view to an exected view in an updatable golden file.
+func AssertGoldenView(tb testing.TB, m tea.Model, expectedViewFile string, update bool) {
+	tb.Helper()
+
+	view := m.View()
+	goldenFilePath := filepath.Join("testdata", expectedViewFile)
+
+	if update {
+		err := os.WriteFile(goldenFilePath, []byte(view), 0o664) // nolint:gosec,gomnd
+		if err != nil {
+			tb.Fatalf("updating golden view: %v", err)
+		}
+
+		return
+	}
+
+	goldenViewFileContent, err := os.ReadFile(goldenFilePath)
+	if err != nil {
+		tb.Fatalf("reading golden view: %v", err)
+	}
+
+	expectedView := string(goldenViewFileContent)
+
+	if view != expectedView {
+		tb.Errorf("view mismatch:\nExpected:\n%s\nGot:\n%s",
+			Indent(expectedView), Indent(view))
+	}
+}
+
+// Indent is intended to indent views for easier comparison in test error logs.
+func Indent(text string) string {
+	res := make([]byte, 0, len(text))
+
+	newLine := true
+
+	for _, c := range text {
+		if newLine && c != '\n' {
+			res = append(res, []byte("    ")...)
+		}
+
+		res = append(res, byte(c))
+		newLine = c == '\n'
+	}
+
+	return string(res)
+}
+
+var ansiRE = regexp.MustCompile("[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*" +
+	"(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))")
+
+// StripANSI removes all ANSI sequences from a string.
+func StripANSI(str string) string {
+	return ansiRE.ReplaceAllString(str, "")
+}
