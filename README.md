@@ -17,7 +17,7 @@ and many opportunities for heavy customization.
 
 ## Selection
 
-Selection with filter and pagination support: [Code](https://github.com/erikgeiser/promptkit/blob/ea17c82a1ba5299a2eb2b00bc1b1b5baf4e52a5e/examples/selection/main.go#L11-L150)
+Selection with filter and pagination support: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/selection/main.go)
 
 <p align="center">
   <a href="https://asciinema.org/a/8co2qSgAIxRZBJzvX5iZXwUqF" target="_blank"><img src="https://asciinema.org/a/8co2qSgAIxRZBJzvX5iZXwUqF.svg" /></a>
@@ -26,7 +26,7 @@ Selection with filter and pagination support: [Code](https://github.com/erikgeis
 ---
 
 The selection prompt is highly customizable and also works well with custom
-types which for example enables filtering only on custom fields: [Code](https://github.com/erikgeiser/promptkit/blob/ea17c82a1ba5299a2eb2b00bc1b1b5baf4e52a5e/examples/selection_custom/main.go#L55-L70)
+types which for example enables filtering only on custom fields: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/selection_custom/main.go)
 
 <p align="center">
   <a href="https://asciinema.org/a/Uw7QjXK7nZ0eHmigqIzdDXk3C" target="_blank"><img src="https://asciinema.org/a/Uw7QjXK7nZ0eHmigqIzdDXk3C.svg" /></a>
@@ -36,7 +36,7 @@ types which for example enables filtering only on custom fields: [Code](https://
 
 ## Text Input
 
-A text input that supports editable default values: [Code](https://github.com/erikgeiser/promptkit/blob/f29e12dd8eb290771e9652a0eda6cac0e3895976/examples/textinput/main.go#L11-L16)
+A text input that supports editable default values: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/textinput/main.go)
 
 <p align="center">
   <a href="https://asciinema.org/a/xUudX97RAXNnHMkArASH4Ccgv" target="_blank"><img src="https://asciinema.org/a/xUudX97RAXNnHMkArASH4Ccgv.svg" /></a>
@@ -44,7 +44,7 @@ A text input that supports editable default values: [Code](https://github.com/er
 
 ---
 
-Custom validation is also supported: [Code](https://github.com/erikgeiser/promptkit/blob/f29e12dd8eb290771e9652a0eda6cac0e3895976/examples/textinput_custom/main.go#L28-L36)
+Custom validation is also supported: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/textinput_custom/main.go)
 
 <p align="center">
   <a href="https://asciinema.org/a/FF14DYA8WtEtRjdPkcllAJk9p" target="_blank"><img src="https://asciinema.org/a/FF14DYA8WtEtRjdPkcllAJk9p.svg" /></a>
@@ -52,7 +52,7 @@ Custom validation is also supported: [Code](https://github.com/erikgeiser/prompt
 
 ---
 
-The text input can also be used in hidden mode for password prompts: [Code](https://github.com/erikgeiser/promptkit/blob/f29e12dd8eb290771e9652a0eda6cac0e3895976/examples/textinput_hidden/main.go#L11-L17)
+The text input can also be used in hidden mode for password prompts: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/textinput_hidden/main.go)
 
 <p align="center">
   <a href="https://asciinema.org/a/k2KTLG49OWWQ3AofrGSzWVmkL" target="_blank"><img src="https://asciinema.org/a/k2KTLG49OWWQ3AofrGSzWVmkL.svg" /></a>
@@ -62,4 +62,17 @@ The text input can also be used in hidden mode for password prompts: [Code](http
 
 ## Confirmation Prompt
 
-A confirmation prompt for binary questions is coming soon.
+A confirmation prompt for binary questions: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/confirmation/main.go)
+
+<p align="center">
+  <a href="https://asciinema.org/a/dpQHPP22ceylJGbSthAekZwBB" target="_blank"><img src="https://asciinema.org/a/dpQHPP22ceylJGbSthAekZwBB.svg" /></a>
+</p>
+
+## Acknowledgements
+
+This library is built on top many great libraries, especially the following:
+
+- https://github.com/charmbracelet/bubbletea
+- https://github.com/charmbracelet/bubbles
+- https://github.com/muesli/termenv
+- https://github.com/muesli/reflow
