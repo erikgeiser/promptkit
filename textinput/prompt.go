@@ -6,7 +6,9 @@ as optional support for input validation and a customizable key map.
 package textinput
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"text/template"
@@ -22,15 +24,15 @@ const (
 	// be copied as a starting point for a custom template.
 	DefaultTemplate = `
 	{{- Bold .Prompt }} {{ .Input -}}
-	{{- if not .Valid }} {{ Foreground "1" "✘" }}
-	{{- else }} {{ Foreground "2" "✔" }}
+	{{- if not .Valid }} {{ Foreground "1" (Bold "✘") }}
+	{{- else }} {{ Foreground "2" (Bold "✔") }}
 	{{- end -}}
 	`
 
 	// DefaultConfirmationTemplate defines the default appearance with which the
 	// finale result of the prompt is presented.
 	DefaultConfirmationTemplate = `
-	{{- print (Bold (print .Prompt " " (Foreground "32"  (Mask .FinalValue)))) "\n" -}}
+	{{- print .Prompt " " (Foreground "32"  (Mask .FinalValue)) "\n" -}}
 	`
 
 	// DefaultMask specified the character with which the input is masked by
@@ -87,6 +89,7 @@ type TextInput struct {
 	//  * Input string: The actual input field.
 	//  * Valid bool: Whether or not the current value is valid according
 	//    to the configured Validate function.
+	//  * TerminalWidth int: The width of the terminal.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
 	//  * The functions specified in ExtendedTemplateScope.
@@ -102,6 +105,7 @@ type TextInput struct {
 	//  * Prompt string: The configured prompt.
 	//  * InitialValue string: The configured initial value of the input.
 	//  * Placeholder string: The configured placeholder of the input.
+	//  * TerminalWidth int: The width of the terminal.
 	//  * Mask(string) string: A function that replaces all characters of
 	//    a string with the character specified in HideMask if Hidden is
 	//    true and returns the input string if Hidden is false.
@@ -123,9 +127,14 @@ type TextInput struct {
 	InputPlaceholderStyle lipgloss.Style
 	InputCursorStyle      lipgloss.Style
 
-	// KeyMap determines with which keys the selection prompt is controlled. By
+	// KeyMap determines with which keys the text input is controlled. By
 	// default, DefaultKeyMap is used.
 	KeyMap *KeyMap
+
+	// Output is the output writer, by default os.Stdout is used.
+	Output io.Writer
+	// Input is the input reader, by default, os.Stdin is used.
+	Input io.Reader
 }
 
 // New creates a new text input.
@@ -137,7 +146,51 @@ func New() *TextInput {
 		InputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
 		Validate:              func(s string) bool { return len(s) > 0 },
 		HideMask:              DefaultMask,
+		Output:                os.Stdout,
+		Input:                 os.Stdin,
 	}
+}
+
+// RunPrompt executes the text input prompt.
+func (t *TextInput) RunPrompt() (string, error) {
+	tmpl, err := t.initConfirmationTemplate()
+	if err != nil {
+		return "", fmt.Errorf("initializing confirmation template: %w", err)
+	}
+
+	m := NewModel(t)
+
+	p := tea.NewProgram(m, tea.WithOutput(t.Output), tea.WithInput(t.Input))
+	if err := p.Start(); err != nil {
+		return "", fmt.Errorf("running prompt: %w", err)
+	}
+
+	value, err := m.Value()
+	if err != nil {
+		return "", fmt.Errorf("reading value: %w", err)
+	}
+
+	if t.ConfirmationTemplate == "" {
+		return value, nil
+	}
+
+	buffer := &bytes.Buffer{}
+
+	err = tmpl.Execute(buffer, map[string]interface{}{
+		"FinalValue":    value,
+		"Prompt":        m.Prompt,
+		"InitialValue":  m.InitialValue,
+		"Placeholder":   m.Placeholder,
+		"Hidden":        m.Hidden,
+		"TerminalWidth": m.width,
+	})
+	if err != nil {
+		return value, fmt.Errorf("execute confirmation template: %w", err)
+	}
+
+	_, err = fmt.Fprint(t.Output, promptkit.Wrap(buffer.String(), m.width))
+
+	return value, err
 }
 
 func (t *TextInput) initConfirmationTemplate() (*template.Template, error) {
@@ -152,38 +205,6 @@ func (t *TextInput) initConfirmationTemplate() (*template.Template, error) {
 	tmpl.Funcs(template.FuncMap{"Mask": t.mask})
 
 	return tmpl.Parse(t.ConfirmationTemplate)
-}
-
-// RunPrompt executes the text input prompt.
-func (t *TextInput) RunPrompt(opts ...tea.ProgramOption) (string, error) {
-	tmpl, err := t.initConfirmationTemplate()
-	if err != nil {
-		return "", fmt.Errorf("initializing confirmation template: %w", err)
-	}
-
-	m := NewModel(t)
-
-	p := tea.NewProgram(m, opts...)
-	if err := p.Start(); err != nil {
-		return "", err
-	}
-
-	value, err := m.Value()
-	if err != nil {
-		return "", err
-	}
-
-	if t.ConfirmationTemplate != "" {
-		err = tmpl.Execute(os.Stdout, map[string]interface{}{
-			"FinalValue":   value,
-			"Prompt":       m.Prompt,
-			"InitialValue": m.InitialValue,
-			"Placeholder":  m.Placeholder,
-			"Hidden":       m.Hidden,
-		})
-	}
-
-	return value, err
 }
 
 // mask replaces each character with HideMask if Hidden is true.

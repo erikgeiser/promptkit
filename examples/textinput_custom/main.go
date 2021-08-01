@@ -10,15 +10,15 @@ import (
 
 func main() {
 	const customTemplate = `
-	{{- "┏" }}━{{ Repeat "━" (Len .Prompt) }}━┯━{{ Repeat "━" (Max 16 (Len .Input)) }}{{ "━━━━┓\n" }}
+	{{- "┏" }}━{{ Repeat "━" (Len .Prompt) }}━┯━{{ Repeat "━" 13 }}{{ "━━━━┓\n" }}
 	{{- "┃" }} {{ Bold .Prompt }} │ {{ .Input -}}
 	{{- Repeat " " (Max 0 (Sub 16 (Len .Input))) }}
 	{{- if not .Valid -}}
-		{{- Foreground "1" " ✘  " }}
+		{{- Foreground "1" (Bold "✘") -}}
 	{{- else -}}
-		{{- " 🖥️  " -}}
+		{{- Foreground "2" (Bold "✔") -}}
 	{{- end -}}┃
-	{{- "\n┗" }}━{{ Repeat "━" (Len .Prompt) }}━┷━{{ Repeat "━" (Max 16 (Len .Input)) }}{{ "━━━━┛" -}}
+	{{- "\n┗" }}━{{ Repeat "━" (Len .Prompt) }}━┷━{{ Repeat "━" 13 }}{{ "━━━━┛" -}}
 	`
 
 	const customConfirmationTemplate = `

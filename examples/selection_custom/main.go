@@ -35,7 +35,7 @@ func main() {
   {{- end }}
 {{- end}}`
 		customConfirmationTempalte = `
-		{{- Bold (print .Prompt " " (Foreground "32"  (name .FinalChoice)) "\n") -}}
+		{{- print .Prompt " " (Foreground "32"  (name .FinalChoice)) "\n" -}}
 		`
 	)
 

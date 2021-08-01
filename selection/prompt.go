@@ -6,7 +6,9 @@ map as well as optional support for pagination, filtering.
 package selection
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"text/template"
@@ -47,7 +49,7 @@ const (
 	// DefaultConfirmationTemplate defines the default appearance with which the
 	// finale result of the selection is presented.
 	DefaultConfirmationTemplate = `
-	{{- Bold (print .Prompt " " (Foreground "32"  .FinalChoice.String) "\n") -}}
+	{{- print .Prompt " " (Foreground "32"  .FinalChoice.String) "\n" -}}
 	`
 
 	// DefaultFilterPlaceholder is printed by default when no filter text was
@@ -58,8 +60,8 @@ const (
 // Selection represents a configurable selection prompt.
 type Selection struct {
 	// Choices represent all selectable choices of the selection. Slices of
-	// arbitrary types can be converted to a slice of choices using the helpers
-	// StringChoices, StringerChoices and SliceChoices.
+	// arbitrary types can be converted to a slice of choices using the helper
+	// selection.Choices.
 	Choices []*Choice
 
 	// Prompt holds the the prompt text or question that is printed above the
@@ -98,6 +100,7 @@ type Selection struct {
 	//  * IsPaged bool: Whether pagination is currently active.
 	//  * AllChoices []*Choice: All configured choices.
 	//  * NAllChoices int: The number of configured choices.
+	//  * TerminalWidth int: The width of the terminal.
 	//  * IsScrollDownHintPosition(idx int) bool: Returns whether
 	//    the scroll down hint shoud be displayed at the given index.
 	//  * IsScrollUpHintPosition(idx int) bool: Returns whether the
@@ -117,6 +120,7 @@ type Selection struct {
 	//  * Prompt string: The configured prompt.
 	//  * AllChoices []*Choice: All configured choices.
 	//  * NAllChoices int: The number of configured choices.
+	//  * TerminalWidth int: The width of the terminal.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
 	//  * The functions specified in ExtendedTemplateScope.
@@ -138,73 +142,80 @@ type Selection struct {
 	// KeyMap determines with which keys the selection prompt is controlled. By
 	// default, DefaultKeyMap is used.
 	KeyMap *KeyMap
+
+	// Output is the output writer, by default os.Stdout is used.
+	Output io.Writer
+	// Input is the input reader, by default, os.Stdin is used.
+	Input io.Reader
 }
 
 // New creates a new selection prompt.
 func New(choices []*Choice) *Selection {
-	s := &Selection{
+	return &Selection{
 		Choices:                     choices,
+		Template:                    DefaultTemplate,
 		ConfirmationTemplate:        DefaultConfirmationTemplate,
 		Filter:                      FilterContainsCaseInsensitive,
 		FilterInputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
+		KeyMap:                      NewDefaultKeyMap(),
+		FilterPlaceholder:           DefaultFilterPlaceholder,
+		Output:                      os.Stdout,
+		Input:                       os.Stdin,
 	}
-
-	if s.Template == "" {
-		s.Template = DefaultTemplate
-	}
-
-	if s.KeyMap == nil {
-		s.KeyMap = NewDefaultKeyMap()
-	}
-
-	if s.FilterPlaceholder == "" {
-		s.FilterPlaceholder = DefaultFilterPlaceholder
-	}
-
-	return s
 }
 
 // RunPrompt executes the selection prompt.
-func (s *Selection) RunPrompt(opts ...tea.ProgramOption) (*Choice, error) {
-	var (
-		tmpl *template.Template
-		err  error
-	)
-
-	if s.ConfirmationTemplate != "" {
-		tmpl = template.New("confirmed")
-		tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
-		tmpl.Funcs(s.ExtendedTemplateScope)
-		tmpl.Funcs(promptkit.UtilFuncMap())
-
-		tmpl, err = tmpl.Parse(s.ConfirmationTemplate)
-		if err != nil {
-			return nil, fmt.Errorf("parsing confirmation template: %w", err)
-		}
+func (s *Selection) RunPrompt() (*Choice, error) {
+	tmpl, err := s.initConfirmationTemplate()
+	if err != nil {
+		return nil, fmt.Errorf("initializing confirmation template: %w", err)
 	}
 
 	m := NewModel(s)
 
-	p := tea.NewProgram(m, opts...)
+	p := tea.NewProgram(m, tea.WithOutput(s.Output), tea.WithInput(s.Input))
 	if err := p.Start(); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("running prompt: %w", err)
 	}
 
 	choice, err := m.Choice()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("reading choice: %w", err)
 	}
 
-	if s.ConfirmationTemplate != "" {
-		err = tmpl.Execute(os.Stdout, map[string]interface{}{
-			"FinalChoice": choice,
-			"Prompt":      m.Prompt,
-			"AllChoices":  m.Choices,
-			"NAllChoices": len(m.Choices),
-		})
+	if s.ConfirmationTemplate == "" {
+		return choice, nil
 	}
+
+	buffer := &bytes.Buffer{}
+
+	err = tmpl.Execute(buffer, map[string]interface{}{
+		"FinalChoice":   choice,
+		"Prompt":        m.Prompt,
+		"AllChoices":    m.Choices,
+		"NAllChoices":   len(m.Choices),
+		"TerminalWidth": m.width,
+	})
+	if err != nil {
+		return choice, fmt.Errorf("execute confirmation template: %w", err)
+	}
+
+	_, err = fmt.Fprint(s.Output, promptkit.Wrap(buffer.String(), m.width))
 
 	return choice, err
+}
+
+func (s *Selection) initConfirmationTemplate() (*template.Template, error) {
+	if s.ConfirmationTemplate == "" {
+		return nil, nil
+	}
+
+	tmpl := template.New("confirmed")
+	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
+	tmpl.Funcs(promptkit.UtilFuncMap())
+	tmpl.Funcs(s.ExtendedTemplateScope)
+
+	return tmpl.Parse(s.ConfirmationTemplate)
 }
 
 func (s *Selection) validate() error {

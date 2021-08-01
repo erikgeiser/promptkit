@@ -8,11 +8,17 @@ The actual prompt components can be found in the sub directories.
 package promptkit
 
 import (
+	"fmt"
 	"strings"
 	"text/template"
 
 	"github.com/muesli/reflow/ansi"
+	"github.com/muesli/reflow/wordwrap"
+	"github.com/muesli/reflow/wrap"
 )
+
+// ErrAborted is returned when the prompt was aborted.
+var ErrAborted = fmt.Errorf("prompt aborted")
 
 // UtilFuncMap returns a template.FuncMap with handy utility functions for
 // prompt templates.
@@ -47,4 +53,10 @@ func UtilFuncMap() template.FuncMap {
 		"Sub": func(a, b int) int { return a - b },
 		"Mul": func(a, b int) int { return a * b },
 	}
+}
+
+// Wrap performs a word wrap on the input and forces a wrap at width if a word
+// is larger that width.
+func Wrap(input string, width int) string {
+	return wrap.String(wordwrap.String(input, width), width)
 }

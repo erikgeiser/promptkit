@@ -122,20 +122,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	}
 
-	var cmd tea.Cmd
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
 		case keyMatches(msg, m.KeyMap.Abort):
-			m.Err = fmt.Errorf("selection was aborted")
+			m.Err = promptkit.ErrAborted
+			m.quitting = true
 
 			return m, tea.Quit
-		case keyMatches(msg, m.KeyMap.ClearFilter):
-			m.filterInput.Reset()
-			m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
-
-			return m, nil
 		case keyMatches(msg, m.KeyMap.Select):
 			if len(m.currentChoices) == 0 {
 				return m, nil
@@ -144,37 +138,45 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.quitting = true
 
 			return m, tea.Quit
+		case keyMatches(msg, m.KeyMap.ClearFilter):
+			m.filterInput.Reset()
+			m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 		case keyMatches(msg, m.KeyMap.Down):
 			m.cursorDown()
-
-			return m, nil
 		case keyMatches(msg, m.KeyMap.Up):
 			m.cursorUp()
-
-			return m, nil
 		case keyMatches(msg, m.KeyMap.ScrollDown):
 			m.scrollDown()
-
-			return m, nil
 		case keyMatches(msg, m.KeyMap.ScrollUp):
 			m.scrollUp()
-
-			return m, nil
+		default:
+			return m.updateFilter(msg)
 		}
+
+		return m, nil
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
+
+		return m, nil
 	case error:
 		m.Err = msg
 
 		return m, tea.Quit
 	}
 
+	var cmd tea.Cmd
+
+	return m, cmd
+}
+
+func (m *Model) updateFilter(msg tea.Msg) (*Model, tea.Cmd) {
 	if m.Filter == nil {
-		return m, cmd
+		return m, nil
 	}
 
 	previousFilter := m.filterInput.Value()
 
+	var cmd tea.Cmd
 	m.filterInput, cmd = m.filterInput.Update(msg)
 
 	if m.filterInput.Value() != previousFilter {
@@ -214,6 +216,7 @@ func (m *Model) View() string {
 		"IsPaged":       m.PageSize > 0 && len(m.currentChoices) > m.PageSize,
 		"AllChoices":    m.Choices,
 		"NAllChoices":   len(m.Choices),
+		"TerminalWidth": m.width,
 	})
 	if err != nil {
 		m.Err = err

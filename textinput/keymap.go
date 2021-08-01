@@ -1,8 +1,6 @@
 package textinput
 
 import (
-	"strings"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -60,7 +58,7 @@ type KeyMap struct {
 
 func keyMatches(key tea.KeyMsg, mapping []string) bool {
 	for _, m := range mapping {
-		if strings.EqualFold(m, key.String()) {
+		if m == key.String() {
 			return true
 		}
 	}
@@ -76,7 +74,15 @@ func keyMatchesUpstreamKeyMap(key tea.KeyMsg) bool {
 // least the bare minimum set of key bindings for the functional
 // prompt and false otherwise.
 func validateKeyMap(km *KeyMap) bool {
-	return len(km.Submit) > 0
+	if len(km.Submit) == 0 {
+		return false
+	}
+
+	if len(km.Abort) == 0 {
+		return false
+	}
+
+	return true
 }
 
 func allKeys(km *KeyMap) (keys []string) {

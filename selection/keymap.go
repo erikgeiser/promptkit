@@ -1,8 +1,6 @@
 package selection
 
 import (
-	"strings"
-
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -33,7 +31,7 @@ type KeyMap struct {
 
 func keyMatches(key tea.KeyMsg, mapping []string) bool {
 	for _, m := range mapping {
-		if strings.EqualFold(m, key.String()) {
+		if m == key.String() {
 			return true
 		}
 	}
@@ -54,6 +52,10 @@ func validateKeyMap(km *KeyMap) bool {
 	}
 
 	if len(km.Select) == 0 {
+		return false
+	}
+
+	if len(km.Abort) == 0 {
 		return false
 	}
 

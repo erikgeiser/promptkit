@@ -8,8 +8,6 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/erikgeiser/promptkit"
-	"github.com/muesli/reflow/wordwrap"
-	"github.com/muesli/reflow/wrap"
 	"github.com/muesli/termenv"
 )
 
@@ -106,7 +104,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 		case keyMatches(msg, m.KeyMap.Abort):
-			m.Err = fmt.Errorf("prompt aborted")
+			m.Err = promptkit.ErrAborted
 			m.quitting = true
 
 			return m, tea.Quit
@@ -172,11 +170,12 @@ func (m *Model) View() string {
 	}
 
 	err := m.tmpl.Execute(viewBuffer, map[string]interface{}{
-		"Prompt":       m.Prompt,
-		"InitialValue": m.InitialValue,
-		"Placeholder":  m.Placeholder,
-		"Input":        m.input.View(),
-		"Valid":        valid,
+		"Prompt":        m.Prompt,
+		"InitialValue":  m.InitialValue,
+		"Placeholder":   m.Placeholder,
+		"Input":         m.input.View(),
+		"Valid":         valid,
+		"TerminalWidth": m.width,
 	})
 	if err != nil {
 		m.Err = err
@@ -184,9 +183,7 @@ func (m *Model) View() string {
 		return "Template Error: " + err.Error()
 	}
 
-	termenv.Reset()
-
-	return wrap.String(wordwrap.String(viewBuffer.String(), m.width), m.width)
+	return promptkit.Wrap(viewBuffer.String(), m.width)
 }
 
 // Value returns the current value and error.
