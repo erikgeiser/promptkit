@@ -15,6 +15,14 @@ and many opportunities for heavy customization.
 
 ---
 
+**Warning:** This library is not stable yet. Currently, only one prompt can be
+run as subsequent prompts lose input events due to a bug in
+https://github.com/charmbracelet/bubbletea
+(https://github.com/charmbracelet/bubbletea/issues/24) but I'm working on it.
+I'll remove this note once this library becomes reliable.
+
+---
+
 ## Selection
 
 Selection with filter and pagination support: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/selection/main.go)
