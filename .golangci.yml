@@ -16,6 +16,7 @@ linters:
     - forbidigo
     - ifshort
     - cyclop
+    - gomoddirectives
 linters-settings:
   exhaustive:
     default-signifies-exhaustive: true

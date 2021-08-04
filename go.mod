@@ -1,6 +1,6 @@
 module github.com/erikgeiser/promptkit
 
-go 1.14
+go 1.16
 
 require (
 	github.com/atotto/clipboard v0.1.4 // indirect
