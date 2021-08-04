@@ -11,7 +11,8 @@ const TemplateArrow = `
 {{- end -}}
 `
 
-// ConfirmationTemplateArrow is the ConfirmationTempalte that matches TemplateArrow.
+// ConfirmationTemplateArrow is the ConfirmationTempalte that matches
+// TemplateArrow.
 const ConfirmationTemplateArrow = `
 {{- print .Prompt " " -}}
 {{- if .FinalValue -}}
