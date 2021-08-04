@@ -5,14 +5,10 @@ jobs:
     name: golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - name: "Install golangci-lint"
-        run: |
-          curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $HOME/bin latest
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: "Check out code"
-        uses: actions/checkout@v1
-
-      - name: "Run golangci-lint"
-        run: |
-          export PATH=$HOME/bin:$PATH
-          golangci-lint run
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
