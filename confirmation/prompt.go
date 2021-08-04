@@ -20,30 +20,25 @@ import (
 const (
 	// DefaultTemplate defines the default appearance of the text input and can
 	// be copied as a starting point for a custom template.
-	DefaultTemplate = `
-	{{- Bold .Prompt }}{{ " " -}}
-	{{ if .YesSelected -}} ◉ {{- else -}} ○ {{- end -}}
-	{{- print (Bold "Y") "es " -}}
-	{{ if .NoSelected -}} ◉ {{- else -}} ○ {{- end -}}
-	{{- print (Bold "N") "o" -}}
-	`
+	DefaultTemplate = TemplateArrow
 
 	// DefaultConfirmationTemplate defines the default appearance with which the
 	// finale result of the prompt is presented.
-	DefaultConfirmationTemplate = `
-	{{- print .Prompt " " -}}
-	{{- if .FinalValue -}}
-		{{- Foreground "32" "Yes" -}}
-	{{- else -}}
-		{{- Foreground "32" "No" -}}
-	{{- end -}}
-	{{- "\n" -}}
-	`
+	DefaultConfirmationTemplate = ConfirmationTemplateArrow
 )
 
 // Value is the value of the confirmation prompt which can be Undecided, Yes or
 // No.
 type Value *bool
+
+// NewValue creates a Value from a bool.
+func NewValue(v bool) Value {
+	if v {
+		return Yes
+	}
+
+	return No
+}
 
 var (
 	yes = true
