@@ -3,6 +3,7 @@ package test
 
 import (
 	"errors"
+	"flag"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -10,6 +11,8 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+var update = flag.Bool("update", false, "update the golden files")
 
 // MsgsFromText generates KeyMsg events from a given text.
 func MsgsFromText(text string) []tea.Msg {
@@ -44,13 +47,13 @@ func Run(tb testing.TB, model tea.Model, events ...tea.Msg) {
 }
 
 // AssertGoldenView compares the view to an exected view in an updatable golden file.
-func AssertGoldenView(tb testing.TB, m tea.Model, expectedViewFile string, update bool) {
+func AssertGoldenView(tb testing.TB, m tea.Model, expectedViewFile string) {
 	tb.Helper()
 
 	view := m.View()
 	goldenFilePath := filepath.Join("testdata", expectedViewFile)
 
-	if _, err := os.Stat(goldenFilePath); errors.Is(err, os.ErrNotExist) || update {
+	if _, err := os.Stat(goldenFilePath); errors.Is(err, os.ErrNotExist) || *update {
 		err := os.WriteFile(goldenFilePath, []byte(view), 0o664) // nolint:gosec,gomnd
 		if err != nil {
 			tb.Fatalf("updating golden view: %v", err)

@@ -1,16 +1,15 @@
 package selection_test
 
 import (
-	"flag"
+	"errors"
 	"strings"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/erikgeiser/promptkit"
 	"github.com/erikgeiser/promptkit/selection"
 	"github.com/erikgeiser/promptkit/test"
 )
-
-var update = flag.Bool("update", false, "update the golden files")
 
 func TestSelectSecond(t *testing.T) {
 	t.Parallel()
@@ -20,7 +19,7 @@ func TestSelectSecond(t *testing.T) {
 
 	test.Run(t, m, tea.KeyDown)
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "select_second.golden", *update)
+	test.AssertGoldenView(t, m, "select_second.golden")
 
 	choice := getChoice(t, m)
 	if choice.Value != "b" {
@@ -37,7 +36,7 @@ func TestPaginate(t *testing.T) {
 
 	test.Run(t, m)
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "paginate.golden", *update)
+	test.AssertGoldenView(t, m, "paginate.golden")
 
 	view := m.View()
 	strippedView := test.StripANSI(view)
@@ -59,7 +58,7 @@ func TestPaginatePush(t *testing.T) {
 
 	test.Run(t, m, tea.KeyDown, tea.KeyDown)
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "paginate_push.golden", *update)
+	test.AssertGoldenView(t, m, "paginate_push.golden")
 
 	view := m.View()
 	strippedView := test.StripANSI(view)
@@ -89,7 +88,7 @@ func TestPaginateScroll(t *testing.T) {
 
 	test.Run(t, m, tea.KeyRight)
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "paginate_scroll.golden", *update)
+	test.AssertGoldenView(t, m, "paginate_scroll.golden")
 
 	view := m.View()
 	strippedView := test.StripANSI(view)
@@ -121,11 +120,127 @@ func TestPaginateLast(t *testing.T) {
 		tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown,
 		tea.KeyRight, tea.KeyRight, tea.KeyRight, tea.KeyRight)
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "paginate_last.golden", *update)
+	test.AssertGoldenView(t, m, "paginate_last.golden")
 
 	choice := getChoice(t, m)
 	if choice.Value != "Second2" {
 		t.Errorf("unexpected selected element: %v", choice.Value)
+	}
+}
+
+func TestFilter(t *testing.T) {
+	t.Parallel()
+
+	m := selection.NewModel(selection.New("foo:",
+		selection.Choices([]string{
+			"AAA", "BBB", "CCC1", "CCC2", "DDD",
+		})))
+	m.PageSize = 2
+
+	inputs := append(test.MsgsFromText("CC"), tea.KeyDown)
+	test.Run(t, m, inputs...)
+	assertNoError(t, m)
+	test.AssertGoldenView(t, m, "filter.golden")
+
+	choice := getChoice(t, m)
+	if choice.Value != "CCC2" {
+		t.Errorf("unexpected selected element: %v", choice.Value)
+	}
+
+	view := m.View()
+	strippedView := test.StripANSI(view)
+
+	if !strings.Contains(strippedView, "CCC1") {
+		t.Errorf("filtered view does not contain first element that matches filter:\n%s",
+			view)
+	}
+
+	if !strings.Contains(strippedView, "CCC2") {
+		t.Errorf("filtered view does not contain first element that matches filter:\n%s",
+			view)
+	}
+
+	if strings.Contains(strippedView, "AAA") || strings.Contains(strippedView, "BBB") ||
+		strings.Contains(strippedView, "DDD") {
+		t.Errorf("filtered contains elements that do not match filter:\n%s", view)
+	}
+}
+
+func TestNoFilter(t *testing.T) {
+	t.Parallel()
+
+	m := selection.NewModel(selection.New("foo:",
+		selection.Choices([]string{
+			"AAA", "BBB", "CCC", "DDD",
+		})))
+	m.Filter = nil
+	m.PageSize = 2
+
+	inputs := append(test.MsgsFromText("CC"), tea.KeyDown)
+	test.Run(t, m, inputs...)
+	assertNoError(t, m)
+	test.AssertGoldenView(t, m, "no_filter.golden")
+
+	choice := getChoice(t, m)
+	if choice.Value != "BBB" {
+		t.Errorf("unexpected selected element: %v", choice.Value)
+	}
+
+	view := m.View()
+	strippedView := test.StripANSI(view)
+
+	if !strings.Contains(strippedView, "AAA") {
+		t.Errorf("filtered view does not contain first element that matches filter:\n%s",
+			view)
+	}
+
+	if !strings.Contains(strippedView, "BBB") {
+		t.Errorf("filtered view does not contain first element that matches filter:\n%s",
+			view)
+	}
+
+	if strings.Contains(strippedView, "CCC") || strings.Contains(strippedView, "DDD") {
+		t.Errorf("filtered contains elements that do not match filter:\n%s", view)
+	}
+}
+
+func TestAbort(t *testing.T) {
+	t.Parallel()
+
+	m := selection.NewModel(selection.New("foo:",
+		selection.Choices([]string{
+			"a", "b", "c",
+		})))
+
+	test.Run(t, m, tea.KeyCtrlC)
+
+	if m.Err == nil {
+		t.Fatalf("aborting did not produce an error")
+	}
+
+	if !errors.Is(m.Err, promptkit.ErrAborted) {
+		t.Fatalf("aborting produced %q instead of %q", m.Err, promptkit.ErrAborted)
+	}
+}
+
+func TestSubmit(t *testing.T) {
+	t.Parallel()
+
+	m := selection.NewModel(selection.New("foo:",
+		selection.Choices([]string{
+			"a", "b", "c",
+		})))
+
+	test.Run(t, m)
+	assertNoError(t, m)
+
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd == nil || cmd() != tea.Quit() {
+		t.Errorf("enter did not produce quit signal")
+	}
+
+	if m.View() != "" {
+		t.Errorf("view not empty after quitting")
 	}
 }
 

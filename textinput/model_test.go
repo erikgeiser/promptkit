@@ -2,7 +2,6 @@ package textinput_test
 
 import (
 	"errors"
-	"flag"
 	"strings"
 	"testing"
 
@@ -11,8 +10,6 @@ import (
 	"github.com/erikgeiser/promptkit/test"
 	"github.com/erikgeiser/promptkit/textinput"
 )
-
-var update = flag.Bool("update", false, "update the golden files")
 
 func TestEnterText(t *testing.T) {
 	t.Parallel()
@@ -24,7 +21,7 @@ func TestEnterText(t *testing.T) {
 
 	test.Run(t, m, test.MsgsFromText(input)...)
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "input.golden", *update)
+	test.AssertGoldenView(t, m, "input.golden")
 
 	value := getValue(t, m)
 	if value != input {
@@ -51,7 +48,7 @@ func TestHidden(t *testing.T) {
 
 	test.Run(t, m, test.MsgsFromText(input)...)
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "hidden.golden", *update)
+	test.AssertGoldenView(t, m, "hidden.golden")
 
 	view := m.View()
 	strippedView := test.StripANSI(view)
@@ -80,7 +77,7 @@ func TestPlaceholder(t *testing.T) {
 
 	test.Run(t, m)
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "placeholder.golden", *update)
+	test.AssertGoldenView(t, m, "placeholder.golden")
 
 	view := m.View()
 	strippedView := test.StripANSI(view)
@@ -106,7 +103,7 @@ func TestInitialValue(t *testing.T) {
 
 	test.Run(t, m)
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "initial_value.golden", *update)
+	test.AssertGoldenView(t, m, "initial_value.golden")
 
 	view := m.View()
 	strippedView := test.StripANSI(view)
@@ -132,7 +129,7 @@ func TestModifiedInitialValue(t *testing.T) {
 
 	test.Run(t, m, tea.KeyLeft, tea.KeyBackspace, test.KeyMsg('x'))
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "modified_initial_value.golden", *update)
+	test.AssertGoldenView(t, m, "modified_initial_value.golden")
 
 	view := m.View()
 	strippedView := test.StripANSI(view)
@@ -169,26 +166,11 @@ func TestTemplate(t *testing.T) {
 
 	test.Run(t, m, tea.KeyLeft, tea.KeyBackspace, test.KeyMsg('s'))
 	assertNoError(t, m)
-	test.AssertGoldenView(t, m, "template.golden", *update)
+	test.AssertGoldenView(t, m, "template.golden")
 
 	view := m.View()
 	if !strings.Contains(test.StripANSI(view), separator) {
 		t.Errorf("sparator was not rendered:\n%s", test.Indent(view))
-	}
-}
-
-func TestQuit(t *testing.T) {
-	t.Parallel()
-
-	m := textinput.NewModel(textinput.New("Question?"))
-	m.Validate = nil
-
-	test.Run(t, m, tea.KeyEnter)
-	assertNoError(t, m)
-
-	view := m.View()
-	if view != "" {
-		t.Fatalf("view is not empty after quitting:\n%s", test.Indent(view))
 	}
 }
 
@@ -206,6 +188,46 @@ func TestAbort(t *testing.T) {
 
 	if !errors.Is(m.Err, promptkit.ErrAborted) {
 		t.Fatalf("aborting produced %q instead of %q", m.Err, promptkit.ErrAborted)
+	}
+}
+
+func TestSubmit(t *testing.T) {
+	t.Parallel()
+
+	m := textinput.NewModel(textinput.New("foo:"))
+	m.Validate = nil
+
+	test.Run(t, m)
+	assertNoError(t, m)
+
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd == nil || cmd() != tea.Quit() {
+		t.Errorf("enter did not produce quit signal")
+	}
+
+	if m.View() != "" {
+		t.Errorf("view not empty after quitting")
+	}
+}
+
+func TestValidate(t *testing.T) {
+	t.Parallel()
+
+	m := textinput.NewModel(textinput.New("foo:"))
+
+	test.Run(t, m)
+	assertNoError(t, m)
+
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd != nil {
+		t.Errorf("enter on input that does not validate did not produce a no-op")
+	}
+
+	_, _ = m.Update(test.KeyMsg('x'))
+
+	_, cmd = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd == nil || cmd() != tea.Quit() {
+		t.Errorf("enter on input that validates did not produce quit signal")
 	}
 }
 
