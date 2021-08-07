@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	input := confirmation.New("Are you ready?")
+	input := confirmation.New("Are you ready?", confirmation.Undecided)
 
 	ready, err := input.RunPrompt()
 	if err != nil {

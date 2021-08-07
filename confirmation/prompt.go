@@ -120,14 +120,15 @@ type Confirmation struct {
 	Input io.Reader
 }
 
-// New creates a new text input.
-func New(prompt string) *Confirmation {
+// New creates a new text input. If the default value is nil it is equivalent to
+// Undecided.
+func New(prompt string, defaultValue Value) *Confirmation {
 	return &Confirmation{
 		Prompt:                prompt,
+		DefaultValue:          defaultValue,
 		Template:              DefaultTemplate,
 		ConfirmationTemplate:  DefaultConfirmationTemplate,
 		KeyMap:                NewDefaultKeyMap(),
-		DefaultValue:          Undecided,
 		ExtendedTemplateScope: template.FuncMap{},
 		Output:                os.Stdout,
 		Input:                 os.Stdin,

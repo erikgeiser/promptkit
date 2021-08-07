@@ -8,10 +8,10 @@ import (
 )
 
 func main() {
-	input := confirmation.New("Do you want to try out promptkit?")
+	input := confirmation.New("Do you want to try out promptkit?",
+		confirmation.NewValue(true))
 	input.Template = confirmation.TemplateYN
 	input.ConfirmationTemplate = confirmation.ConfirmationTemplateYN
-	input.DefaultValue = confirmation.Yes
 	input.KeyMap.SelectYes = append(input.KeyMap.SelectYes, "+")
 	input.KeyMap.SelectNo = append(input.KeyMap.SelectNo, "-")
 

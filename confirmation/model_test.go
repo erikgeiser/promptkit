@@ -13,8 +13,7 @@ import (
 func TestDefaultYes(t *testing.T) {
 	t.Parallel()
 
-	c := confirmation.New("ready?")
-	c.DefaultValue = confirmation.Yes
+	c := confirmation.New("ready?", confirmation.Yes)
 	m := confirmation.NewModel(c)
 
 	test.Run(t, m, tea.KeyEnter)
@@ -29,8 +28,7 @@ func TestDefaultYes(t *testing.T) {
 func TestDefaultNo(t *testing.T) {
 	t.Parallel()
 
-	c := confirmation.New("ready?")
-	c.DefaultValue = confirmation.No
+	c := confirmation.New("ready?", confirmation.No)
 	m := confirmation.NewModel(c)
 
 	test.Run(t, m, tea.KeyEnter)
@@ -45,8 +43,27 @@ func TestDefaultNo(t *testing.T) {
 func TestDefaultUndecided(t *testing.T) {
 	t.Parallel()
 
-	c := confirmation.New("ready?")
-	c.DefaultValue = confirmation.Undecided
+	c := confirmation.New("ready?", confirmation.Undecided)
+	m := confirmation.NewModel(c)
+
+	test.Run(t, m)
+	assertNoError(t, m)
+
+	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if cmd != nil {
+		t.Errorf("enter when undecided not produce a no-op but a %v", cmd)
+	}
+
+	v, err := m.Value()
+	if err == nil {
+		t.Errorf("getting value before deciding did not return an error but %v", v)
+	}
+}
+
+func TestDefaultNilIsUndecided(t *testing.T) {
+	t.Parallel()
+
+	c := confirmation.New("ready?", nil)
 	m := confirmation.NewModel(c)
 
 	test.Run(t, m)
@@ -66,7 +83,7 @@ func TestDefaultUndecided(t *testing.T) {
 func TestImmediatelyChooseYes(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?"))
+	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
 
 	test.Run(t, m)
 	assertNoError(t, m)
@@ -84,7 +101,7 @@ func TestImmediatelyChooseYes(t *testing.T) {
 func TestImmediatelyChooseNo(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?"))
+	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
 
 	test.Run(t, m)
 	assertNoError(t, m)
@@ -102,7 +119,7 @@ func TestImmediatelyChooseNo(t *testing.T) {
 func TestToggle(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?"))
+	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
 
 	test.Run(t, m)
 	assertNoError(t, m)
@@ -140,7 +157,7 @@ func TestToggle(t *testing.T) {
 func TestSelectYes(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?"))
+	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
 
 	test.Run(t, m, tea.KeyLeft)
 	assertNoError(t, m)
@@ -153,7 +170,7 @@ func TestSelectYes(t *testing.T) {
 func TestSelectNo(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?"))
+	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
 
 	test.Run(t, m, tea.KeyRight)
 	assertNoError(t, m)
@@ -166,7 +183,7 @@ func TestSelectNo(t *testing.T) {
 func TestAbort(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?"))
+	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
 
 	test.Run(t, m, tea.KeyCtrlC)
 
@@ -182,8 +199,7 @@ func TestAbort(t *testing.T) {
 func TestSubmit(t *testing.T) {
 	t.Parallel()
 
-	c := confirmation.New("ready?")
-	c.DefaultValue = confirmation.Yes
+	c := confirmation.New("ready?", confirmation.Yes)
 	m := confirmation.NewModel(c)
 
 	test.Run(t, m)
