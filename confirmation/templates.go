@@ -6,8 +6,10 @@ const TemplateArrow = `
 {{- Bold .Prompt -}}
 {{ if .YesSelected -}}
 	{{- print (Bold " ▸Yes ") " No" -}}
-{{- else -}}
+{{- else if .NoSelected -}}
 	{{- print "  Yes " (Bold "▸No") -}}
+{{- else -}}
+	{{- "  Yes  No" -}}
 {{- end -}}
 `
 
@@ -28,8 +30,10 @@ const TemplateYN = `
 {{- Bold .Prompt -}}
 {{ if .YesSelected -}}
 	{{- print " [" (Bold "Y") "/n]" -}}
+{{- else if .NoSelected-}}
+	{{- print " [y/" (Bold "N") "]" -}}
 {{- else -}}
-{{- print " [y/" (Bold "N") "]" -}}
+	{{- "[y/N]" -}}
 {{- end -}}
 `
 

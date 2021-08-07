@@ -6,7 +6,6 @@ map as well as optional support for pagination, filtering.
 package selection
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -15,8 +14,6 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/erikgeiser/promptkit"
-	"github.com/muesli/termenv"
 )
 
 const (
@@ -177,11 +174,6 @@ func New(prompt string, choices []*Choice) *Selection {
 
 // RunPrompt executes the selection prompt.
 func (s *Selection) RunPrompt() (*Choice, error) {
-	tmpl, err := s.initConfirmationTemplate()
-	if err != nil {
-		return nil, fmt.Errorf("initializing confirmation template: %w", err)
-	}
-
 	m := NewModel(s)
 
 	p := tea.NewProgram(m, tea.WithOutput(s.Output), tea.WithInput(s.Input))
@@ -194,39 +186,7 @@ func (s *Selection) RunPrompt() (*Choice, error) {
 		return nil, fmt.Errorf("reading choice: %w", err)
 	}
 
-	if s.ConfirmationTemplate == "" {
-		return choice, nil
-	}
-
-	buffer := &bytes.Buffer{}
-
-	err = tmpl.Execute(buffer, map[string]interface{}{
-		"FinalChoice":   choice,
-		"Prompt":        m.Prompt,
-		"AllChoices":    m.Choices,
-		"NAllChoices":   len(m.Choices),
-		"TerminalWidth": m.width,
-	})
-	if err != nil {
-		return choice, fmt.Errorf("execute confirmation template: %w", err)
-	}
-
-	_, err = fmt.Fprint(s.Output, promptkit.Wrap(buffer.String(), m.width))
-
 	return choice, err
-}
-
-func (s *Selection) initConfirmationTemplate() (*template.Template, error) {
-	if s.ConfirmationTemplate == "" {
-		return nil, nil
-	}
-
-	tmpl := template.New("confirmed")
-	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
-	tmpl.Funcs(promptkit.UtilFuncMap())
-	tmpl.Funcs(s.ExtendedTemplateScope)
-
-	return tmpl.Parse(s.ConfirmationTemplate)
 }
 
 func (s *Selection) validate() error {

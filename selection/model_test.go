@@ -25,6 +25,9 @@ func TestSelectSecond(t *testing.T) {
 	if choice.Value != "b" {
 		t.Errorf("unexpected choice: %v, expected b", choice.Value)
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "select_second_confirmed.golden")
 }
 
 func TestPaginate(t *testing.T) {
@@ -44,6 +47,9 @@ func TestPaginate(t *testing.T) {
 	if strings.Contains(strippedView, "Second1") {
 		t.Errorf("initial paginated view contains element of second page:\n%s", view)
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "paginate_confirmed.golden")
 }
 
 func TestPaginatePush(t *testing.T) {
@@ -74,6 +80,9 @@ func TestPaginatePush(t *testing.T) {
 	if strings.Contains(strippedView, "First1") {
 		t.Errorf("scolled view contains \"First1\" from first page")
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "paginate_push_confirmed.golden")
 }
 
 func TestPaginateScroll(t *testing.T) {
@@ -104,6 +113,9 @@ func TestPaginateScroll(t *testing.T) {
 	if strings.Contains(strippedView, "First1") {
 		t.Errorf("scolled view contains \"First1\" from first page")
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "paginate_scroll_confirmed.golden")
 }
 
 func TestPaginateLast(t *testing.T) {
@@ -126,6 +138,9 @@ func TestPaginateLast(t *testing.T) {
 	if choice.Value != "Second2" {
 		t.Errorf("unexpected selected element: %v", choice.Value)
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "paginate_last_confirmed.golden")
 }
 
 func TestFilter(t *testing.T) {
@@ -164,6 +179,9 @@ func TestFilter(t *testing.T) {
 		strings.Contains(strippedView, "DDD") {
 		t.Errorf("filtered contains elements that do not match filter:\n%s", view)
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "filter_confirmed.golden")
 }
 
 func TestNoFilter(t *testing.T) {
@@ -202,6 +220,9 @@ func TestNoFilter(t *testing.T) {
 	if strings.Contains(strippedView, "CCC") || strings.Contains(strippedView, "DDD") {
 		t.Errorf("filtered contains elements that do not match filter:\n%s", view)
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "no_filter_confirmed.golden")
 }
 
 func TestAbort(t *testing.T) {
@@ -221,6 +242,8 @@ func TestAbort(t *testing.T) {
 	if !errors.Is(m.Err, promptkit.ErrAborted) {
 		t.Fatalf("aborting produced %q instead of %q", m.Err, promptkit.ErrAborted)
 	}
+
+	test.AssertGoldenView(t, m, "abort.golden")
 }
 
 func TestSubmit(t *testing.T) {
@@ -234,14 +257,12 @@ func TestSubmit(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	cmd := test.Update(t, m, tea.KeyEnter)
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("enter did not produce quit signal")
 	}
 
-	if m.View() != "" {
-		t.Errorf("view not empty after quitting")
-	}
+	test.AssertGoldenView(t, m, "submit.golden")
 }
 
 func getChoice(tb testing.TB, m *selection.Model) *selection.Choice {

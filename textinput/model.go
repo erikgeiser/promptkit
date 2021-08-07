@@ -3,6 +3,7 @@ package textinput
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -19,7 +20,8 @@ type Model struct {
 
 	input textinput.Model
 
-	tmpl *template.Template
+	tmpl             *template.Template
+	confirmationTmpl *template.Template
 
 	quitting bool
 
@@ -47,6 +49,11 @@ func (m *Model) Init() tea.Cmd {
 		return tea.Quit
 	}
 
+	m.confirmationTmpl, m.Err = m.initConfirmationTemplate()
+	if m.Err != nil {
+		return tea.Quit
+	}
+
 	m.input = m.initInput()
 
 	termenv.Reset()
@@ -62,6 +69,20 @@ func (m *Model) initTemplate() (*template.Template, error) {
 	tmpl.Funcs(template.FuncMap{"Mask": m.mask})
 
 	return tmpl.Parse(m.Template)
+}
+
+func (m *Model) initConfirmationTemplate() (*template.Template, error) {
+	if m.ConfirmationTemplate == "" {
+		return nil, nil
+	}
+
+	tmpl := template.New("confirmed")
+	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
+	tmpl.Funcs(promptkit.UtilFuncMap())
+	tmpl.Funcs(m.ExtendedTemplateScope)
+	tmpl.Funcs(template.FuncMap{"Mask": m.mask})
+
+	return tmpl.Parse(m.ConfirmationTemplate)
 }
 
 func (m *Model) initInput() textinput.Model {
@@ -157,8 +178,19 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m *Model) View() string {
 	defer termenv.Reset()
 
+	if m.quitting {
+		view, err := m.confirmationView()
+		if err != nil {
+			m.Err = err
+
+			return ""
+		}
+
+		return promptkit.Wrap(view, m.width)
+	}
+
 	// avoid panics if Quit is sent during Init
-	if m.tmpl == nil || m.quitting {
+	if m.tmpl == nil {
 		return ""
 	}
 
@@ -186,7 +218,47 @@ func (m *Model) View() string {
 	return promptkit.Wrap(viewBuffer.String(), m.width)
 }
 
+func (m *Model) confirmationView() (string, error) {
+	viewBuffer := &bytes.Buffer{}
+
+	if m.ConfirmationTemplate == "" {
+		return "", nil
+	}
+
+	if m.confirmationTmpl == nil {
+		return "", fmt.Errorf("rendering confirmation without loaded template")
+	}
+
+	value, err := m.Value()
+	if err != nil {
+		return "", fmt.Errorf("obtaining value for confirmation: %w", err)
+	}
+
+	err = m.confirmationTmpl.Execute(viewBuffer, map[string]interface{}{
+		"FinalValue":    value,
+		"Prompt":        m.Prompt,
+		"InitialValue":  m.InitialValue,
+		"Placeholder":   m.Placeholder,
+		"Hidden":        m.Hidden,
+		"TerminalWidth": m.width,
+	})
+	if err != nil {
+		return "", fmt.Errorf("execute confirmation template: %w", err)
+	}
+
+	return viewBuffer.String(), nil
+}
+
 // Value returns the current value and error.
 func (m *Model) Value() (string, error) {
 	return m.input.Value(), m.Err
+}
+
+// mask replaces each character with HideMask if Hidden is true.
+func (t *TextInput) mask(s string) string {
+	if !t.Hidden {
+		return s
+	}
+
+	return strings.Repeat(string(t.HideMask), len(s))
 }

@@ -37,13 +37,25 @@ func Run(tb testing.TB, model tea.Model, events ...tea.Msg) {
 	model.Update(model.Init())
 
 	for _, event := range events {
-		switch e := event.(type) {
-		case tea.KeyType:
-			model.Update(tea.KeyMsg{Type: e})
-		default:
-			model.Update(event)
-		}
+		Update(tb, model, event)
 	}
+}
+
+// Update applies the event to an already initialized model. If the model was not
+// initialized, use Run instead.
+func Update(tb testing.TB, model tea.Model, event tea.Msg) tea.Cmd {
+	tb.Helper()
+
+	var cmd tea.Cmd
+
+	switch e := event.(type) {
+	case tea.KeyType:
+		_, cmd = model.Update(tea.KeyMsg{Type: e})
+	default:
+		_, cmd = model.Update(event)
+	}
+
+	return cmd
 }
 
 // AssertGoldenView compares the view to an exected view in an updatable golden file.

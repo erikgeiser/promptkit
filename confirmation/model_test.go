@@ -23,6 +23,8 @@ func TestDefaultYes(t *testing.T) {
 	if !value {
 		t.Errorf("default Yes produced a No")
 	}
+
+	test.AssertGoldenView(t, m, "default_yes.golden")
 }
 
 func TestDefaultNo(t *testing.T) {
@@ -38,6 +40,8 @@ func TestDefaultNo(t *testing.T) {
 	if value {
 		t.Errorf("default No produced a Yes")
 	}
+
+	test.AssertGoldenView(t, m, "default_no.golden")
 }
 
 func TestDefaultUndecided(t *testing.T) {
@@ -49,7 +53,7 @@ func TestDefaultUndecided(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	cmd := test.Update(t, m, tea.KeyEnter)
 	if cmd != nil {
 		t.Errorf("enter when undecided not produce a no-op but a %v", cmd)
 	}
@@ -58,6 +62,8 @@ func TestDefaultUndecided(t *testing.T) {
 	if err == nil {
 		t.Errorf("getting value before deciding did not return an error but %v", v)
 	}
+
+	test.AssertGoldenView(t, m, "default_undecided.golden")
 }
 
 func TestDefaultNilIsUndecided(t *testing.T) {
@@ -69,7 +75,7 @@ func TestDefaultNilIsUndecided(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	cmd := test.Update(t, m, tea.KeyEnter)
 	if cmd != nil {
 		t.Errorf("enter when undecided not produce a no-op but a %v", cmd)
 	}
@@ -78,6 +84,8 @@ func TestDefaultNilIsUndecided(t *testing.T) {
 	if err == nil {
 		t.Errorf("getting value before deciding did not return an error but %v", v)
 	}
+
+	test.AssertGoldenView(t, m, "default_nil.golden")
 }
 
 func TestImmediatelyChooseYes(t *testing.T) {
@@ -88,7 +96,7 @@ func TestImmediatelyChooseYes(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	_, cmd := m.Update(test.KeyMsg('y'))
+	cmd := test.Update(t, m, test.KeyMsg('y'))
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("direct answer selection did not result in quit message but in %v", cmd)
 	}
@@ -96,6 +104,8 @@ func TestImmediatelyChooseYes(t *testing.T) {
 	if !getValue(t, m) {
 		t.Errorf("value is not Yes after entering y")
 	}
+
+	test.AssertGoldenView(t, m, "choose_yes.golden")
 }
 
 func TestImmediatelyChooseNo(t *testing.T) {
@@ -106,7 +116,7 @@ func TestImmediatelyChooseNo(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	_, cmd := m.Update(test.KeyMsg('n'))
+	cmd := test.Update(t, m, test.KeyMsg('n'))
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("direct answer selection did not result in quit message but in %v", cmd)
 	}
@@ -114,6 +124,8 @@ func TestImmediatelyChooseNo(t *testing.T) {
 	if getValue(t, m) {
 		t.Errorf("value is not No after entering n")
 	}
+
+	test.AssertGoldenView(t, m, "choose_no.golden")
 }
 
 func TestToggle(t *testing.T) {
@@ -131,7 +143,7 @@ func TestToggle(t *testing.T) {
 
 	test.AssertGoldenView(t, m, "toggle_before.golden")
 
-	m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	test.Update(t, m, tea.KeyTab)
 
 	if !getValue(t, m) {
 		t.Fatalf("toggle did not transition from Undecided to Yes")
@@ -139,7 +151,7 @@ func TestToggle(t *testing.T) {
 
 	test.AssertGoldenView(t, m, "toggle_once.golden")
 
-	m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	test.Update(t, m, tea.KeyTab)
 
 	if getValue(t, m) {
 		t.Fatalf("toggle did not transition from Yes to No")
@@ -147,11 +159,14 @@ func TestToggle(t *testing.T) {
 
 	test.AssertGoldenView(t, m, "toggle_twice.golden")
 
-	m.Update(tea.KeyMsg{Type: tea.KeyTab})
+	test.Update(t, m, tea.KeyTab)
 
 	if !getValue(t, m) {
 		t.Fatalf("toggle did not transition from No to Yes")
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "toggle_confirmed.golden")
 }
 
 func TestSelectYes(t *testing.T) {
@@ -165,6 +180,10 @@ func TestSelectYes(t *testing.T) {
 	if !getValue(t, m) {
 		t.Fatalf("key left did not select yes")
 	}
+
+	test.AssertGoldenView(t, m, "select_yes.golden")
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "select_yes_confirmed.golden")
 }
 
 func TestSelectNo(t *testing.T) {
@@ -178,6 +197,10 @@ func TestSelectNo(t *testing.T) {
 	if getValue(t, m) {
 		t.Fatalf("key left did not select yes")
 	}
+
+	test.AssertGoldenView(t, m, "select_no.golden")
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "select_no_confirmed.golden")
 }
 
 func TestAbort(t *testing.T) {
@@ -194,6 +217,8 @@ func TestAbort(t *testing.T) {
 	if !errors.Is(m.Err, promptkit.ErrAborted) {
 		t.Fatalf("aborting produced %q instead of %q", m.Err, promptkit.ErrAborted)
 	}
+
+	test.AssertGoldenView(t, m, "abort.golden")
 }
 
 func TestSubmit(t *testing.T) {
@@ -205,14 +230,12 @@ func TestSubmit(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	cmd := test.Update(t, m, tea.KeyEnter)
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("enter did not produce quit signal")
 	}
 
-	if m.View() != "" {
-		t.Errorf("view not empty after quitting")
-	}
+	test.AssertGoldenView(t, m, "submit.golden")
 }
 
 func getValue(tb testing.TB, m *confirmation.Model) bool {

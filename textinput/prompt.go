@@ -6,17 +6,13 @@ as optional support for input validation and a customizable key map.
 package textinput
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
-	"strings"
 	"text/template"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/erikgeiser/promptkit"
-	"github.com/muesli/termenv"
 )
 
 const (
@@ -155,11 +151,6 @@ func New(prompt string) *TextInput {
 
 // RunPrompt executes the text input prompt.
 func (t *TextInput) RunPrompt() (string, error) {
-	tmpl, err := t.initConfirmationTemplate()
-	if err != nil {
-		return "", fmt.Errorf("initializing confirmation template: %w", err)
-	}
-
 	m := NewModel(t)
 
 	p := tea.NewProgram(m, tea.WithOutput(t.Output), tea.WithInput(t.Input))
@@ -172,48 +163,5 @@ func (t *TextInput) RunPrompt() (string, error) {
 		return "", fmt.Errorf("reading value: %w", err)
 	}
 
-	if t.ConfirmationTemplate == "" {
-		return value, nil
-	}
-
-	buffer := &bytes.Buffer{}
-
-	err = tmpl.Execute(buffer, map[string]interface{}{
-		"FinalValue":    value,
-		"Prompt":        m.Prompt,
-		"InitialValue":  m.InitialValue,
-		"Placeholder":   m.Placeholder,
-		"Hidden":        m.Hidden,
-		"TerminalWidth": m.width,
-	})
-	if err != nil {
-		return value, fmt.Errorf("execute confirmation template: %w", err)
-	}
-
-	_, err = fmt.Fprint(t.Output, promptkit.Wrap(buffer.String(), m.width))
-
 	return value, err
-}
-
-func (t *TextInput) initConfirmationTemplate() (*template.Template, error) {
-	if t.ConfirmationTemplate == "" {
-		return nil, nil
-	}
-
-	tmpl := template.New("confirmed")
-	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
-	tmpl.Funcs(promptkit.UtilFuncMap())
-	tmpl.Funcs(t.ExtendedTemplateScope)
-	tmpl.Funcs(template.FuncMap{"Mask": t.mask})
-
-	return tmpl.Parse(t.ConfirmationTemplate)
-}
-
-// mask replaces each character with HideMask if Hidden is true.
-func (t *TextInput) mask(s string) string {
-	if !t.Hidden {
-		return s
-	}
-
-	return strings.Repeat(string(t.HideMask), len(s))
 }

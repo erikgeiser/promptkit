@@ -6,15 +6,12 @@ map.
 package confirmation
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"os"
 	"text/template"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/erikgeiser/promptkit"
-	"github.com/muesli/termenv"
 )
 
 const (
@@ -137,11 +134,6 @@ func New(prompt string, defaultValue Value) *Confirmation {
 
 // RunPrompt executes the confirmation prompt.
 func (c *Confirmation) RunPrompt() (bool, error) {
-	tmpl, err := c.initConfirmationTemplate()
-	if err != nil {
-		return false, fmt.Errorf("initializing confirmation template: %w", err)
-	}
-
 	m := NewModel(c)
 
 	p := tea.NewProgram(m, tea.WithOutput(c.Output), tea.WithInput(c.Input))
@@ -158,35 +150,5 @@ func (c *Confirmation) RunPrompt() (bool, error) {
 		return value, nil
 	}
 
-	buffer := &bytes.Buffer{}
-
-	err = tmpl.Execute(buffer, map[string]interface{}{
-		"FinalValue":       value,
-		"FinalValueString": fmt.Sprintf("%v", value),
-		"Prompt":           m.Prompt,
-		"DefaultYes":       m.DefaultValue == Yes,
-		"DefaultNo":        m.DefaultValue == No,
-		"DefaultUndecided": m.DefaultValue == Undecided,
-		"TerminalWidth":    m.width,
-	})
-	if err != nil {
-		return value, fmt.Errorf("execute confirmation template: %w", err)
-	}
-
-	_, err = fmt.Fprint(os.Stdout, promptkit.Wrap(buffer.String(), m.width))
-
 	return value, err
-}
-
-func (c *Confirmation) initConfirmationTemplate() (*template.Template, error) {
-	if c.ConfirmationTemplate == "" {
-		return nil, nil
-	}
-
-	tmpl := template.New("confirmed")
-	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
-	tmpl.Funcs(promptkit.UtilFuncMap())
-	tmpl.Funcs(c.ExtendedTemplateScope)
-
-	return tmpl.Parse(c.ConfirmationTemplate)
 }

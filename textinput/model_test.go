@@ -35,6 +35,9 @@ func TestEnterText(t *testing.T) {
 		t.Errorf("placeholder %q is rendered after text input:\n%s",
 			m.Placeholder, test.Indent(view))
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "input_confirmed.golden")
 }
 
 func TestHidden(t *testing.T) {
@@ -65,6 +68,9 @@ func TestHidden(t *testing.T) {
 	if value != input {
 		t.Errorf("unexpected value: %q, expected %q", value, input)
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "hidden_confirmed.golden")
 }
 
 func TestPlaceholder(t *testing.T) {
@@ -86,10 +92,8 @@ func TestPlaceholder(t *testing.T) {
 		t.Errorf("placeholder %q was not rendered:\n%s", placeholder, test.Indent(view))
 	}
 
-	value := getValue(t, m)
-	if value != "" {
-		t.Errorf("value not empty: %s", value)
-	}
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "placeholder_confirmed.golden")
 }
 
 func TestInitialValue(t *testing.T) {
@@ -116,6 +120,9 @@ func TestInitialValue(t *testing.T) {
 	if value != initialValue {
 		t.Errorf("value %q is not initial value %q", value, initialValue)
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "initial_value_confirmed.golden")
 }
 
 func TestModifiedInitialValue(t *testing.T) {
@@ -153,6 +160,9 @@ func TestModifiedInitialValue(t *testing.T) {
 		t.Errorf("view does not contain modified initial value %q:\n%s",
 			modifiedInitialValue, test.Indent(view))
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "modified_initial_value_confirmed.golden")
 }
 
 func TestTemplate(t *testing.T) {
@@ -160,8 +170,9 @@ func TestTemplate(t *testing.T) {
 
 	separator := "|"
 
-	m := textinput.NewModel(textinput.New("password?"))
+	m := textinput.NewModel(textinput.New("name?"))
 	m.Template = `{{ print .Prompt Separator .Input}}`
+	m.ConfirmationTemplate = `my name is {{ .FinalValue }}`
 	m.ExtendedTemplateScope["Separator"] = func() string { return separator }
 
 	test.Run(t, m, tea.KeyLeft, tea.KeyBackspace, test.KeyMsg('s'))
@@ -172,6 +183,9 @@ func TestTemplate(t *testing.T) {
 	if !strings.Contains(test.StripANSI(view), separator) {
 		t.Errorf("sparator was not rendered:\n%s", test.Indent(view))
 	}
+
+	test.Update(t, m, tea.KeyEnter)
+	test.AssertGoldenView(t, m, "template_confirmed.golden")
 }
 
 func TestAbort(t *testing.T) {
@@ -189,25 +203,26 @@ func TestAbort(t *testing.T) {
 	if !errors.Is(m.Err, promptkit.ErrAborted) {
 		t.Fatalf("aborting produced %q instead of %q", m.Err, promptkit.ErrAborted)
 	}
+
+	test.AssertGoldenView(t, m, "abort.golden")
 }
 
 func TestSubmit(t *testing.T) {
 	t.Parallel()
 
 	m := textinput.NewModel(textinput.New("foo:"))
+	m.ConfirmationTemplate = `result: {{ .FinalValue }}`
 	m.Validate = nil
 
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	cmd := test.Update(t, m, tea.KeyEnter)
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("enter did not produce quit signal")
 	}
 
-	if m.View() != "" {
-		t.Errorf("view not empty after quitting")
-	}
+	test.AssertGoldenView(t, m, "submit.golden")
 }
 
 func TestValidate(t *testing.T) {
@@ -218,14 +233,14 @@ func TestValidate(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	_, cmd := m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	cmd := test.Update(t, m, tea.KeyEnter)
 	if cmd != nil {
 		t.Errorf("enter on input that does not validate did not produce a no-op")
 	}
 
-	_, _ = m.Update(test.KeyMsg('x'))
+	test.Update(t, m, test.KeyMsg('x'))
 
-	_, cmd = m.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	cmd = test.Update(t, m, tea.KeyEnter)
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("enter on input that validates did not produce quit signal")
 	}
