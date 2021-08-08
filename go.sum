@@ -10,6 +10,8 @@ github.com/containerd/console v1.0.2 h1:Pi6D+aZXM+oUw1czuKgH5IJ+y0jhYcwBJfx5/Ghn
 github.com/containerd/console v1.0.2/go.mod h1:ytZPjGgY2oeTkAONYafi2kSj0aYggsf8acV1PGKCbzQ=
 github.com/erikgeiser/bubbletea v0.14.2-0.20210804194433-1275db4b8fa0 h1:XuuhYKi6zWVR+dhKIjghP7Zi+v2QUqynsBSda/NvNCo=
 github.com/erikgeiser/bubbletea v0.14.2-0.20210804194433-1275db4b8fa0/go.mod h1:YTZSs2p3odhwYZdhqJheYHVUjU37c9OLgS85kw6NGQY=
+github.com/erikgeiser/bubbletea v0.14.2-0.20210808175851-9061bfe1f5b0 h1:mnxB4c7p70B2YoeNyL1KUF1dMsy78/zkSt/vaU2xMZU=
+github.com/erikgeiser/bubbletea v0.14.2-0.20210808175851-9061bfe1f5b0/go.mod h1:YTZSs2p3odhwYZdhqJheYHVUjU37c9OLgS85kw6NGQY=
 github.com/lucasb-eyer/go-colorful v1.2.0 h1:1nnpGOrhyZZuNyfu1QjKiUICQ74+3FNCN69Aj6K7nkY=
 github.com/lucasb-eyer/go-colorful v1.2.0/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
 github.com/mattn/go-isatty v0.0.12/go.mod h1:cbi8OIDigv2wuxKPP5vlRcQ1OAZbq2CE4Kysco4FUpU=
