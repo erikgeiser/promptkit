@@ -18,11 +18,7 @@ and many opportunities for heavy customization.
 
 ---
 
-**Warning:** This library is not stable yet. Currently, only one prompt can be
-run as subsequent prompts lose input events due to a bug in
-https://github.com/charmbracelet/bubbletea
-(https://github.com/charmbracelet/bubbletea/issues/24) but I'm working on it.
-I'll remove this note once this library becomes reliable.
+**Warning:** The API of library is not yet stable. Expect significant changes before 1.0.0.
 
 ---
 
@@ -66,6 +62,10 @@ The text input can also be used in hidden mode for password prompts: [Example Co
 A confirmation prompt for binary questions: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/confirmation/main.go)
 
 <a href="https://asciinema.org/a/dpQHPP22ceylJGbSthAekZwBB" target="_blank"><img src="https://asciinema.org/a/dpQHPP22ceylJGbSthAekZwBB.svg" /></a>
+
+## Widget
+
+The prompts in this library can also be used as [bubbletea](https://github.com/charmbracelet/bubbletea) widgets: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/bubbletea_widget/main.go)
 
 ## Acknowledgements
 
