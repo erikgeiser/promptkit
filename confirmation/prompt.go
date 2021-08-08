@@ -134,6 +134,11 @@ func New(prompt string, defaultValue Value) *Confirmation {
 
 // RunPrompt executes the confirmation prompt.
 func (c *Confirmation) RunPrompt() (bool, error) {
+	err := validateKeyMap(c.KeyMap)
+	if err != nil {
+		return false, fmt.Errorf("insufficient key map: %w", err)
+	}
+
 	m := NewModel(c)
 
 	p := tea.NewProgram(m, tea.WithOutput(c.Output), tea.WithInput(c.Input))

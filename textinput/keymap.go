@@ -1,6 +1,8 @@
 package textinput
 
 import (
+	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -73,16 +75,16 @@ func keyMatchesUpstreamKeyMap(key tea.KeyMsg) bool {
 // validateKeyMap returns true if the given key map contains at
 // least the bare minimum set of key bindings for the functional
 // prompt and false otherwise.
-func validateKeyMap(km *KeyMap) bool {
+func validateKeyMap(km *KeyMap) error {
 	if len(km.Submit) == 0 {
-		return false
+		return fmt.Errorf("no submit key")
 	}
 
 	if len(km.Abort) == 0 {
-		return false
+		return fmt.Errorf("no abort key")
 	}
 
-	return true
+	return nil
 }
 
 func allKeys(km *KeyMap) (keys []string) {

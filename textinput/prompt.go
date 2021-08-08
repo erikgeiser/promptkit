@@ -151,6 +151,11 @@ func New(prompt string) *TextInput {
 
 // RunPrompt executes the text input prompt.
 func (t *TextInput) RunPrompt() (string, error) {
+	err := validateKeyMap(t.KeyMap)
+	if err != nil {
+		return "", fmt.Errorf("insufficient key map: %w", err)
+	}
+
 	m := NewModel(t)
 
 	p := tea.NewProgram(m, tea.WithOutput(t.Output), tea.WithInput(t.Input))

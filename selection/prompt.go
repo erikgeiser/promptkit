@@ -174,6 +174,11 @@ func New(prompt string, choices []*Choice) *Selection {
 
 // RunPrompt executes the selection prompt.
 func (s *Selection) RunPrompt() (*Choice, error) {
+	err := validateKeyMap(s.KeyMap)
+	if err != nil {
+		return nil, fmt.Errorf("insufficient key map: %w", err)
+	}
+
 	m := NewModel(s)
 
 	p := tea.NewProgram(m, tea.WithOutput(s.Output), tea.WithInput(s.Input))
@@ -187,22 +192,6 @@ func (s *Selection) RunPrompt() (*Choice, error) {
 	}
 
 	return choice, err
-}
-
-func (s *Selection) validate() error {
-	if len(s.Choices) == 0 {
-		return fmt.Errorf("no choices provided")
-	}
-
-	if !validateKeyMap(s.KeyMap) {
-		return fmt.Errorf("insufficient key map")
-	}
-
-	if s.Template == "" {
-		return fmt.Errorf("empty template")
-	}
-
-	return nil
 }
 
 // FilterContainsCaseInsensitive returns true if the string representation of

@@ -40,12 +40,6 @@ func NewModel(confirmation *Confirmation) *Model {
 
 // Init initializes the confirmation prompt model.
 func (m *Model) Init() tea.Cmd {
-	if !validateKeyMap(m.KeyMap) {
-		m.Err = fmt.Errorf("insufficient key map")
-
-		return tea.Quit
-	}
-
 	m.tmpl, m.Err = m.initTemplate()
 	if m.Err != nil {
 		return tea.Quit

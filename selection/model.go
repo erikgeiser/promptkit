@@ -47,8 +47,15 @@ func NewModel(selection *Selection) *Model {
 func (m *Model) Init() tea.Cmd {
 	m.reindexChoices()
 
-	m.Err = m.validate()
-	if m.Err != nil {
+	if len(m.Choices) == 0 {
+		m.Err = fmt.Errorf("no choices provided")
+
+		return tea.Quit
+	}
+
+	if m.Template == "" {
+		m.Err = fmt.Errorf("empty template")
+
 		return tea.Quit
 	}
 

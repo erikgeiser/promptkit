@@ -1,6 +1,8 @@
 package confirmation
 
 import (
+	"fmt"
+
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -42,14 +44,16 @@ func keyMatches(key tea.KeyMsg, mapping []string) bool {
 // validateKeyMap returns true if the given key map contains at
 // least the bare minimum set of key bindings for the functional
 // prompt and false otherwise.
-func validateKeyMap(km *KeyMap) bool {
-	if len(km.Submit) == 0 {
-		return false
+func validateKeyMap(km *KeyMap) error {
+	if len(km.Yes) == 0 && len(km.No) == 0 && len(km.Submit) == 0 {
+		return fmt.Errorf("no submit key")
 	}
 
-	if len(km.Abort) == 0 {
-		return false
+	if !(len(km.Yes) > 0 && len(km.No) > 0) &&
+		len(km.Toggle) == 0 &&
+		!(len(km.SelectYes) > 0 && len(km.SelectNo) > 0) {
+		return fmt.Errorf("missing keys to select a value")
 	}
 
-	return true
+	return nil
 }
