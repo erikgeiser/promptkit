@@ -186,7 +186,7 @@ func (s *Selection) RunPrompt() (*Choice, error) {
 		return nil, fmt.Errorf("running prompt: %w", err)
 	}
 
-	choice, err := m.Choice()
+	choice, err := m.Value()
 	if err != nil {
 		return nil, fmt.Errorf("reading choice: %w", err)
 	}

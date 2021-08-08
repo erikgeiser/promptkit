@@ -122,9 +122,9 @@ func (m *Model) initFilterInput() textinput.Model {
 	return filterInput
 }
 
-// Choice returns the choice that is currently selected or the final
+// Value returns the choice that is currently selected or the final
 // choice after the prompt has concluded.
-func (m *Model) Choice() (*Choice, error) {
+func (m *Model) Value() (*Choice, error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
@@ -268,7 +268,7 @@ func (m *Model) confirmationView() (string, error) {
 		return "", fmt.Errorf("rendering confirmation without loaded template")
 	}
 
-	choice, err := m.Choice()
+	choice, err := m.Value()
 	if err != nil {
 		return "", fmt.Errorf("obtaining choice for confirmation: %w", err)
 	}

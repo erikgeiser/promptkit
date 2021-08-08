@@ -268,7 +268,7 @@ func TestSubmit(t *testing.T) {
 func getChoice(tb testing.TB, m *selection.Model) *selection.Choice {
 	tb.Helper()
 
-	v, err := m.Choice()
+	v, err := m.Value()
 	if err != nil {
 		tb.Fatalf("value: %v", err)
 	}

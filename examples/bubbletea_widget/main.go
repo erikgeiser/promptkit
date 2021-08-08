@@ -40,7 +40,7 @@ func (s *shoppingCart) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch {
 	case keyMsg.String() == "enter":
-		c, err := s.selection.Choice()
+		c, err := s.selection.Value()
 		if err != nil {
 			s.err = err
 
