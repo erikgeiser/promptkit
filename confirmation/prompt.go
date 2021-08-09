@@ -146,14 +146,5 @@ func (c *Confirmation) RunPrompt() (bool, error) {
 		return false, fmt.Errorf("running prompt: %w", err)
 	}
 
-	value, err := m.Value()
-	if err != nil {
-		return false, fmt.Errorf("reading value: %w", err)
-	}
-
-	if c.ConfirmationTemplate == "" {
-		return value, nil
-	}
-
-	return value, err
+	return m.Value()
 }

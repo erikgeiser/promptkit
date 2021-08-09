@@ -163,10 +163,5 @@ func (t *TextInput) RunPrompt() (string, error) {
 		return "", fmt.Errorf("running prompt: %w", err)
 	}
 
-	value, err := m.Value()
-	if err != nil {
-		return "", fmt.Errorf("reading value: %w", err)
-	}
-
-	return value, err
+	return m.Value()
 }

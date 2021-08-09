@@ -187,7 +187,7 @@ func (m *Model) confirmationView() (string, error) {
 
 	value, err := m.Value()
 	if err != nil {
-		return "", fmt.Errorf("obtaining value for confirmation: %w", err)
+		return "", err
 	}
 
 	err = m.confirmationTmpl.Execute(viewBuffer, map[string]interface{}{
