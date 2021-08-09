@@ -30,7 +30,7 @@ const TemplateYN = `
 {{- Bold .Prompt -}}
 {{ if .YesSelected -}}
 	{{- print " [" (Bold "Y") "/n]" -}}
-{{- else if .NoSelected-}}
+{{- else if .NoSelected -}}
 	{{- print " [y/" (Bold "N") "]" -}}
 {{- else -}}
 	{{- "[y/N]" -}}
