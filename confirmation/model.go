@@ -55,8 +55,6 @@ func (m *Model) Init() tea.Cmd {
 		return tea.Quit
 	}
 
-	termenv.Reset()
-
 	return textinput.Blink
 }
 
@@ -139,8 +137,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View renders the confirmation prompt.
 func (m *Model) View() string {
-	defer termenv.Reset()
-
 	// avoid panics if Quit is sent during Init
 	if m.quitting {
 		view, err := m.resultView()

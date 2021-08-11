@@ -55,8 +55,6 @@ func (m *Model) Init() tea.Cmd {
 
 	m.input = m.initInput()
 
-	termenv.Reset()
-
 	return textinput.Blink
 }
 
@@ -175,8 +173,6 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View renders the text input.
 func (m *Model) View() string {
-	defer termenv.Reset()
-
 	if m.quitting {
 		view, err := m.resultView()
 		if err != nil {

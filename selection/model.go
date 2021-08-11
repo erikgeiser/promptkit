@@ -76,8 +76,6 @@ func (m *Model) Init() tea.Cmd {
 
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
-	termenv.Reset()
-
 	return textinput.Blink
 }
 
@@ -217,8 +215,6 @@ func (m *Model) updateFilter(msg tea.Msg) (*Model, tea.Cmd) {
 
 // View renders the selection prompt.
 func (m *Model) View() string {
-	defer termenv.Reset()
-
 	viewBuffer := &bytes.Buffer{}
 
 	if m.quitting {
