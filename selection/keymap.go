@@ -15,8 +15,8 @@ func NewDefaultKeyMap() *KeyMap {
 		Select:      []string{"enter"},
 		Abort:       []string{"ctrl+c"},
 		ClearFilter: []string{"esc"},
-		ScrollDown:  []string{"pgdown", "right"},
-		ScrollUp:    []string{"pgup", "left"},
+		ScrollDown:  []string{"pgdown"},
+		ScrollUp:    []string{"pgup"},
 	}
 }
 
