@@ -1,5 +1,4 @@
 [1mfoo:[0m
 Filter: [7mT[0mype to filter choices
 ⇡   Second1
-  [1m▸ Second2
-[0m
+  [1m▸ [0m[38;5;32;1mSecond2[0m

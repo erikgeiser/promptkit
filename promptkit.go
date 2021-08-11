@@ -65,7 +65,11 @@ func WordWrap(input string, width int) string {
 	return wrap.String(wordwrap.String(input, width), width)
 }
 
+var _ WrapMode = WordWrap
+
 // HardWrap performs a hard wrap at the given width.
 func HardWrap(input string, width int) string {
 	return wrap.String(input, width)
 }
+
+var _ WrapMode = HardWrap
