@@ -128,7 +128,7 @@ type Selection struct {
 	//    scroll up hint shoud be displayed at the given index).
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
-	//  * The functions specified in ExtendedTemplateScope.
+	//  * The functions specified in ExtendedTemplateFuncs.
 	Template string
 
 	// ResultTemplate is rendered as soon as a choice has been selected.
@@ -145,7 +145,7 @@ type Selection struct {
 	//  * Final(*Choice) string: The configured FinalChoiceStyle.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
-	//  * The functions specified in ExtendedTemplateScope.
+	//  * The functions specified in ExtendedTemplateFuncs.
 	ResultTemplate string
 
 	// ExtendedTemplateFuncs can be used to add additional functions to the

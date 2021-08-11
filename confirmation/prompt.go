@@ -81,7 +81,7 @@ type Confirmation struct {
 	//  * TerminalWidth int: The width of the terminal.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
-	//  * The functions specified in ExtendedTemplateScope.
+	//  * The functions specified in ExtendedTemplateFuncs.
 	Template string
 
 	// ResultTemplate is rendered as soon as a input has been confirmed.
@@ -101,7 +101,7 @@ type Confirmation struct {
 	//  * TerminalWidth int: The width of the terminal.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
-	//  * The functions specified in ExtendedTemplateScope.
+	//  * The functions specified in ExtendedTemplateFuncs.
 	ResultTemplate string
 
 	// ExtendedTemplateFuncs can be used to add additional functions to the
