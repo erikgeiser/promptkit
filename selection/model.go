@@ -91,6 +91,20 @@ func (m *Model) initTemplate() (*template.Template, error) {
 		"IsScrollUpHintPosition": func(idx int) bool {
 			return m.canScrollUp() && idx == 0 && m.scrollOffset > 0
 		},
+		"Selected": func(c *Choice) string {
+			if m.SelectedChoiceStyle == nil {
+				return c.String
+			}
+
+			return m.SelectedChoiceStyle(c)
+		},
+		"Unselected": func(c *Choice) string {
+			if m.UnselectedChoiceStyle == nil {
+				return c.String
+			}
+
+			return m.SelectedChoiceStyle(c)
+		},
 	})
 
 	return tmpl.Parse(m.Template)
@@ -103,8 +117,17 @@ func (m *Model) initResultTemplate() (*template.Template, error) {
 
 	tmpl := template.New("result")
 	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
-	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(m.ExtendedTemplateFuncs)
+	tmpl.Funcs(promptkit.UtilFuncMap())
+	tmpl.Funcs(template.FuncMap{
+		"Final": func(c *Choice) string {
+			if m.FinalChoiceStyle == nil {
+				return c.String
+			}
+
+			return m.FinalChoiceStyle(c)
+		},
+	})
 
 	return tmpl.Parse(m.ResultTemplate)
 }

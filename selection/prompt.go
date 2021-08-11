@@ -15,6 +15,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/erikgeiser/promptkit"
+	"github.com/muesli/termenv"
 )
 
 const (
@@ -38,16 +39,16 @@ const (
   {{- end -}} 
 
   {{- if eq $.SelectedIndex $i }}
-   {{- Foreground "32" (Bold (print "▸ " $choice.String "\n")) }}
+   {{- print (Foreground "32" (Bold "▸ ")) (Selected $choice) "\n" }}
   {{- else }}
-    {{- print "  " $choice.String "\n"}}
+    {{- print "  " (Unselected $choice) "\n" }}
   {{- end }}
 {{- end}}`
 
 	// DefaultResultTemplate defines the default appearance with which the
 	// finale result of the selection is presented.
 	DefaultResultTemplate = `
-	{{- print .Prompt " " (Foreground "32"  .FinalChoice.String) "\n" -}}
+	{{- print .Prompt " " (Final .FinalChoice) "\n" -}}
 	`
 
 	// DefaultFilterPrompt is the default prompt for the filter input when
@@ -57,7 +58,19 @@ const (
 	// DefaultFilterPlaceholder is printed by default when no filter text was
 	// entered yet.
 	DefaultFilterPlaceholder = "Type to filter choices"
+
+	accentColor = termenv.ANSI256Color(32)
 )
+
+// DefaultSelectedChoiceStyle is the default style for selected choices.
+func DefaultSelectedChoiceStyle(c *Choice) string {
+	return termenv.String(c.String).Foreground(accentColor).Bold().String()
+}
+
+// DefaultFinalChoiceStyle is the default style for final choices.
+func DefaultFinalChoiceStyle(c *Choice) string {
+	return termenv.String(c.String).Foreground(accentColor).String()
+}
 
 // Selection represents a configurable selection prompt.
 type Selection struct {
@@ -107,6 +120,8 @@ type Selection struct {
 	//  * AllChoices []*Choice: All configured choices.
 	//  * NAllChoices int: The number of configured choices.
 	//  * TerminalWidth int: The width of the terminal.
+	//  * Selected(*Choice) string: The configured SelectedChoiceStyle.
+	//  * Unselected(*Choice) string: The configured UnselectedChoiceStyle.
 	//  * IsScrollDownHintPosition(idx int) bool: Returns whether
 	//    the scroll down hint shoud be displayed at the given index.
 	//  * IsScrollUpHintPosition(idx int) bool: Returns whether the
@@ -127,6 +142,7 @@ type Selection struct {
 	//  * AllChoices []*Choice: All configured choices.
 	//  * NAllChoices int: The number of configured choices.
 	//  * TerminalWidth int: The width of the terminal.
+	//  * Final(*Choice) string: The configured FinalChoiceStyle.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
 	//  * The functions specified in ExtendedTemplateScope.
@@ -144,6 +160,28 @@ type Selection struct {
 	FilterInputBackgroundStyle  lipgloss.Style
 	FilterInputPlaceholderStyle lipgloss.Style
 	FilterInputCursorStyle      lipgloss.Style
+
+	// SelectedChoice style allows to customize the appearance of the currently
+	// selected choice. By default DefaultSelectedChoiceStyle is used. If it is
+	// nil, no style will be applied and the plain string representation of the
+	// choice will be used. This style will be available as the template
+	// function Selected. Custom templates may or may not use this function.
+	SelectedChoiceStyle func(*Choice) string
+
+	// UnselectedChoiceStyle style allows to customize the appearance of the
+	// currently unselected choice. By default it is nil, such that no style
+	// will be applied and the plain string representation of the choice will be
+	// used.This style will be available as the template function Unselected.
+	// Custom templates may or may not use this function.
+	UnselectedChoiceStyle func(*Choice) string
+
+	// FinalChoiceStyle style allows to customize the appearance of the choice
+	// that was ultimately chosen. By default DefaultFinalChoiceStyle is used.
+	// If it is nil, no style will be applied and the plain string
+	// representation of the choice will be used. This style will be available
+	// as the template function Final. Custom templates may or may not use this
+	// function.
+	FinalChoiceStyle func(*Choice) string
 
 	// KeyMap determines with which keys the selection prompt is controlled. By
 	// default, DefaultKeyMap is used.
@@ -171,6 +209,8 @@ func New(prompt string, choices []*Choice) *Selection {
 		ResultTemplate:              DefaultResultTemplate,
 		Filter:                      FilterContainsCaseInsensitive,
 		FilterInputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
+		SelectedChoiceStyle:         DefaultSelectedChoiceStyle,
+		FinalChoiceStyle:            DefaultFinalChoiceStyle,
 		KeyMap:                      NewDefaultKeyMap(),
 		FilterPlaceholder:           DefaultFilterPlaceholder,
 		ExtendedTemplateFuncs:       template.FuncMap{},
