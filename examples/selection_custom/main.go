@@ -6,10 +6,10 @@ import (
 	"strings"
 
 	"github.com/erikgeiser/promptkit/selection"
+	"github.com/muesli/termenv"
 )
 
 func main() {
-	// nolint:lll
 	const (
 		customTemplate = `
 {{- if .Prompt -}}
@@ -29,9 +29,9 @@ func main() {
   {{- end -}} 
 
   {{- if eq $.SelectedIndex $i }}
-   {{- Foreground "32" (print (Bold (print "[x] " $choice.Value.Name)) (Faint (print " (" $choice.Value.ID ") " "\n"))) }}
+   {{- print "[" (Foreground "32" (Bold "x")) "] " (Selected $choice) "\n" }}
   {{- else }}
-    {{- print "[ ] " $choice.Value.Name (Faint (print " (" $choice.Value.ID ") ")) "\n"}}
+    {{- print "[ ] " (Unselected $choice) "\n" }}
   {{- end }}
 {{- end}}`
 		resultTemplate = `
@@ -52,6 +52,8 @@ func main() {
 		{ID: "444", Name: "Article E"},
 	}
 
+	blue := termenv.String().Foreground(termenv.ANSI256Color(32)) // nolint:gomnd
+
 	sp := selection.New("Choose an article!", selection.Choices(choices))
 	sp.FilterPrompt = "Filter by ID:"
 	sp.FilterPlaceholder = "Type to filter"
@@ -63,6 +65,16 @@ func main() {
 	}
 	sp.Template = customTemplate
 	sp.ResultTemplate = resultTemplate
+	sp.SelectedChoiceStyle = func(c *selection.Choice) string {
+		a, _ := c.Value.(article)
+
+		return blue.Bold().Styled(a.Name) + " " + termenv.String("("+a.ID+")").Faint().String()
+	}
+	sp.UnselectedChoiceStyle = func(c *selection.Choice) string {
+		a, _ := c.Value.(article)
+
+		return a.Name + " " + termenv.String("("+a.ID+")").Faint().String()
+	}
 	sp.ExtendedTemplateFuncs = map[string]interface{}{
 		"name": func(c *selection.Choice) string { return c.Value.(article).Name },
 	}
