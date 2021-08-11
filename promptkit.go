@@ -56,8 +56,16 @@ func UtilFuncMap() template.FuncMap {
 	}
 }
 
-// Wrap performs a word wrap on the input and forces a wrap at width if a word
+// WrapMode decides in which way text is wrapped.
+type WrapMode func(string, int) string
+
+// WordWrap performs a word wrap on the input and forces a wrap at width if a word
 // is larger that width.
-func Wrap(input string, width int) string {
+func WordWrap(input string, width int) string {
 	return wrap.String(wordwrap.String(input, width), width)
+}
+
+// HardWrap performs a hard wrap at the given width.
+func HardWrap(input string, width int) string {
+	return wrap.String(input, width)
 }

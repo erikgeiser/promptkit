@@ -226,7 +226,7 @@ func (m *Model) View() string {
 			return ""
 		}
 
-		return promptkit.Wrap(view, m.width)
+		return m.wrap(view)
 	}
 
 	// avoid panics if Quit is sent during Init
@@ -254,7 +254,7 @@ func (m *Model) View() string {
 		return "Template Error: " + err.Error()
 	}
 
-	return promptkit.Wrap(viewBuffer.String(), m.width)
+	return m.wrap(viewBuffer.String())
 }
 
 func (m *Model) resultView() (string, error) {
@@ -287,7 +287,15 @@ func (m *Model) resultView() (string, error) {
 	return viewBuffer.String(), nil
 }
 
-func (m Model) filteredAndPagedChoices() ([]*Choice, int) {
+func (m *Model) wrap(text string) string {
+	if m.WrapMode == nil {
+		return text
+	}
+
+	return m.WrapMode(text, m.width)
+}
+
+func (m *Model) filteredAndPagedChoices() ([]*Choice, int) {
 	choices := []*Choice{}
 
 	var available, ignored int

@@ -95,7 +95,7 @@ func TestPaginateScroll(t *testing.T) {
 		})))
 	m.PageSize = 2
 
-	test.Run(t, m, tea.KeyRight)
+	test.Run(t, m, tea.KeyPgDown)
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "paginate_scroll.golden")
 
@@ -128,9 +128,9 @@ func TestPaginateLast(t *testing.T) {
 		})))
 	m.PageSize = 2
 
-	test.Run(t, m, tea.KeyRight, tea.KeyRight, tea.KeyRight, tea.KeyRight,
+	test.Run(t, m, tea.KeyPgDown, tea.KeyPgDown, tea.KeyPgDown, tea.KeyPgDown,
 		tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown,
-		tea.KeyRight, tea.KeyRight, tea.KeyRight, tea.KeyRight)
+		tea.KeyPgDown, tea.KeyPgDown, tea.KeyPgDown, tea.KeyPgDown)
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "paginate_last.golden")
 

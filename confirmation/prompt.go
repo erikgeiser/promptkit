@@ -12,6 +12,7 @@ import (
 	"text/template"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/erikgeiser/promptkit"
 )
 
 const (
@@ -111,6 +112,12 @@ type Confirmation struct {
 	// By default, DefaultKeyMap is used.
 	KeyMap *KeyMap
 
+	// WrapMode decides which way the prompt view is wrapped if it does not fit
+	// the terminal. It can be a WrapMode provided by promptkit or a custom
+	// function. By default it is promptkit.WordWrap. It can also be nil which
+	// disables wrapping and likely causes output glitches.
+	WrapMode promptkit.WrapMode
+
 	// Output is the output writer, by default os.Stdout is used.
 	Output io.Writer
 	// Input is the input reader, by default, os.Stdin is used.
@@ -127,6 +134,7 @@ func New(prompt string, defaultValue Value) *Confirmation {
 		ResultTemplate:        DefaultResultTemplate,
 		KeyMap:                NewDefaultKeyMap(),
 		ExtendedTemplateFuncs: template.FuncMap{},
+		WrapMode:              promptkit.WordWrap,
 		Output:                os.Stdout,
 		Input:                 os.Stdin,
 	}
