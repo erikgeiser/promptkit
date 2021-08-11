@@ -19,6 +19,9 @@ type Model struct {
 	// the selection prompt.
 	Err error
 
+	// MaxWidth limits the width of the view using the Selection's WrapMode.
+	MaxWidth int
+
 	filterInput textinput.Model
 	// currently displayed choices, after filtering and pagination
 	currentChoices []*Choice
@@ -179,7 +182,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 	case tea.WindowSizeMsg:
-		m.width = msg.Width
+		m.width = zeroAwareMin(msg.Width, m.MaxWidth)
 
 		return m, nil
 	case error:
@@ -395,4 +398,15 @@ func min(a, b int) int {
 	}
 
 	return b
+}
+
+func zeroAwareMin(a int, b int) int {
+	switch {
+	case a == 0:
+		return b
+	case b == 0:
+		return a
+	default:
+		return min(a, b)
+	}
 }

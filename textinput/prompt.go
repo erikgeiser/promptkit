@@ -70,10 +70,10 @@ type TextInput struct {
 	// accept. If 0 or less, there's no limit.
 	CharLimit int
 
-	// Width is the maximum number of characters that can be displayed at once.
-	// It essentially treats the text field like a horizontally scrolling
+	// InputWidth is the maximum number of characters that can be displayed at
+	// once. It essentially treats the text field like a horizontally scrolling
 	// viewport. If 0 or less this setting is ignored.
-	Width int
+	InputWidth int
 
 	// Template holds the display template. A custom template can be used to
 	// completely customize the appearance of the text input. If empty,

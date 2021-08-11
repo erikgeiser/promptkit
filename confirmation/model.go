@@ -15,7 +15,12 @@ import (
 type Model struct {
 	*Confirmation
 
+	// Err holds errors that may occur during the execution of
+	// the confirmation prompt.
 	Err error
+
+	// MaxWidth limits the width of the view using the Confirmation's WrapMode.
+	MaxWidth int
 
 	tmpl       *template.Template
 	resultTmpl *template.Template
@@ -122,7 +127,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	case tea.WindowSizeMsg:
-		m.width = msg.Width
+		m.width = zeroAwareMin(msg.Width, m.MaxWidth)
 	case error:
 		m.Err = msg
 
@@ -225,4 +230,17 @@ func (m *Model) Value() (bool, error) {
 	}
 
 	return *m.value, m.Err
+}
+
+func zeroAwareMin(a int, b int) int {
+	switch {
+	case a == 0:
+		return b
+	case b == 0:
+		return a
+	case a > b:
+		return b
+	default:
+		return a
+	}
 }

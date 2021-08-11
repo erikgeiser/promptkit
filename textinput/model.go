@@ -16,7 +16,12 @@ import (
 type Model struct {
 	*TextInput
 
+	// Err holds errors that may occur during the execution of
+	// the textinput.
 	Err error
+
+	// MaxWidth limits the width of the view using the TextInput's WrapMode.
+	MaxWidth int
 
 	input textinput.Model
 
@@ -84,7 +89,7 @@ func (m *Model) initInput() textinput.Model {
 	input.Prompt = ""
 	input.Placeholder = m.Placeholder
 	input.CharLimit = m.CharLimit
-	input.Width = m.Width
+	input.Width = m.InputWidth
 	input.TextStyle = m.InputTextStyle
 	input.BackgroundStyle = m.InputBackgroundStyle
 	input.PlaceholderStyle = m.InputPlaceholderStyle
@@ -156,7 +161,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		default: // do nothing
 		}
 	case tea.WindowSizeMsg:
-		m.width = msg.Width
+		m.width = zeroAwareMin(msg.Width, m.MaxWidth)
 	case error:
 		m.Err = msg
 
@@ -263,4 +268,17 @@ func (t *TextInput) mask(s string) string {
 	}
 
 	return strings.Repeat(string(t.HideMask), len(s))
+}
+
+func zeroAwareMin(a int, b int) int {
+	switch {
+	case a == 0:
+		return b
+	case b == 0:
+		return a
+	case a > b:
+		return b
+	default:
+		return a
+	}
 }
