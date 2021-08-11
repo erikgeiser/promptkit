@@ -21,7 +21,7 @@ func main() {
 	{{- "\n┗" }}━{{ Repeat "━" (Len .Prompt) }}━┷━{{ Repeat "━" 13 }}{{ "━━━━┛" -}}
 	`
 
-	const customConfirmationTemplate = `
+	const customResultTemplate = `
 	{{- Bold (print "🖥️  Connecting to " (Foreground "32" .FinalValue) "\n") -}}
 	`
 
@@ -29,7 +29,7 @@ func main() {
 	input.Placeholder = "127.0.0.1"
 	input.Validate = func(input string) bool { return net.ParseIP(input) != nil }
 	input.Template = customTemplate
-	input.ConfirmationTemplate = customConfirmationTemplate
+	input.ResultTemplate = customResultTemplate
 	input.CharLimit = 15
 
 	ip, err := input.RunPrompt()

@@ -19,9 +19,9 @@ const (
 	// be copied as a starting point for a custom template.
 	DefaultTemplate = TemplateArrow
 
-	// DefaultConfirmationTemplate defines the default appearance with which the
+	// DefaultResultTemplate defines the default appearance with which the
 	// finale result of the prompt is presented.
-	DefaultConfirmationTemplate = ConfirmationTemplateArrow
+	DefaultResultTemplate = ResultTemplateArrow
 )
 
 // Value is the value of the confirmation prompt which can be Undecided, Yes or
@@ -83,7 +83,7 @@ type Confirmation struct {
 	//  * The functions specified in ExtendedTemplateScope.
 	Template string
 
-	// ConfirmationTemplate is rendered as soon as a input has been confirmed.
+	// ResultTemplate is rendered as soon as a input has been confirmed.
 	// It is intended to permanently indicate the result of the prompt when the
 	// input itself has disappeared. This template is only rendered in the Run()
 	// method and NOT when the text input is used as a model. The following
@@ -101,11 +101,11 @@ type Confirmation struct {
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
 	//  * The functions specified in ExtendedTemplateScope.
-	ConfirmationTemplate string
+	ResultTemplate string
 
-	// ExtendedTemplateScope can be used to add additional functions to the
+	// ExtendedTemplateFuncs can be used to add additional functions to the
 	// evaluation scope of the templates.
-	ExtendedTemplateScope template.FuncMap
+	ExtendedTemplateFuncs template.FuncMap
 
 	// KeyMap determines with which keys the confirmation prompt is controlled.
 	// By default, DefaultKeyMap is used.
@@ -124,9 +124,9 @@ func New(prompt string, defaultValue Value) *Confirmation {
 		Prompt:                prompt,
 		DefaultValue:          defaultValue,
 		Template:              DefaultTemplate,
-		ConfirmationTemplate:  DefaultConfirmationTemplate,
+		ResultTemplate:        DefaultResultTemplate,
 		KeyMap:                NewDefaultKeyMap(),
-		ExtendedTemplateScope: template.FuncMap{},
+		ExtendedTemplateFuncs: template.FuncMap{},
 		Output:                os.Stdout,
 		Input:                 os.Stdin,
 	}

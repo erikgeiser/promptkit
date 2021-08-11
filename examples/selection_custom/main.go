@@ -34,7 +34,7 @@ func main() {
     {{- print "[ ] " $choice.Value.Name (Faint (print " (" $choice.Value.ID ") ")) "\n"}}
   {{- end }}
 {{- end}}`
-		customConfirmationTempalte = `
+		resultTemplate = `
 		{{- print .Prompt " " (Foreground "32"  (name .FinalChoice)) "\n" -}}
 		`
 	)
@@ -62,8 +62,8 @@ func main() {
 		return strings.HasPrefix(chosenArticle.ID, filter)
 	}
 	sp.Template = customTemplate
-	sp.ConfirmationTemplate = customConfirmationTempalte
-	sp.ExtendedTemplateScope = map[string]interface{}{
+	sp.ResultTemplate = resultTemplate
+	sp.ExtendedTemplateFuncs = map[string]interface{}{
 		"name": func(c *selection.Choice) string { return c.Value.(article).Name },
 	}
 

@@ -20,8 +20,8 @@ type Model struct {
 
 	input textinput.Model
 
-	tmpl             *template.Template
-	confirmationTmpl *template.Template
+	tmpl       *template.Template
+	resultTmpl *template.Template
 
 	quitting bool
 
@@ -43,7 +43,7 @@ func (m *Model) Init() tea.Cmd {
 		return tea.Quit
 	}
 
-	m.confirmationTmpl, m.Err = m.initConfirmationTemplate()
+	m.resultTmpl, m.Err = m.initResultTemplate()
 	if m.Err != nil {
 		return tea.Quit
 	}
@@ -56,27 +56,27 @@ func (m *Model) Init() tea.Cmd {
 }
 
 func (m *Model) initTemplate() (*template.Template, error) {
-	tmpl := template.New("")
+	tmpl := template.New("view")
 	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
 	tmpl.Funcs(promptkit.UtilFuncMap())
-	tmpl.Funcs(m.ExtendedTemplateScope)
+	tmpl.Funcs(m.ExtendedTemplateFuncs)
 	tmpl.Funcs(template.FuncMap{"Mask": m.mask})
 
 	return tmpl.Parse(m.Template)
 }
 
-func (m *Model) initConfirmationTemplate() (*template.Template, error) {
-	if m.ConfirmationTemplate == "" {
+func (m *Model) initResultTemplate() (*template.Template, error) {
+	if m.ResultTemplate == "" {
 		return nil, nil
 	}
 
-	tmpl := template.New("confirmed")
+	tmpl := template.New("result")
 	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
 	tmpl.Funcs(promptkit.UtilFuncMap())
-	tmpl.Funcs(m.ExtendedTemplateScope)
+	tmpl.Funcs(m.ExtendedTemplateFuncs)
 	tmpl.Funcs(template.FuncMap{"Mask": m.mask})
 
-	return tmpl.Parse(m.ConfirmationTemplate)
+	return tmpl.Parse(m.ResultTemplate)
 }
 
 func (m *Model) initInput() textinput.Model {
@@ -173,7 +173,7 @@ func (m *Model) View() string {
 	defer termenv.Reset()
 
 	if m.quitting {
-		view, err := m.confirmationView()
+		view, err := m.resultView()
 		if err != nil {
 			m.Err = err
 
@@ -212,14 +212,14 @@ func (m *Model) View() string {
 	return promptkit.Wrap(viewBuffer.String(), m.width)
 }
 
-func (m *Model) confirmationView() (string, error) {
+func (m *Model) resultView() (string, error) {
 	viewBuffer := &bytes.Buffer{}
 
-	if m.ConfirmationTemplate == "" {
+	if m.ResultTemplate == "" {
 		return "", nil
 	}
 
-	if m.confirmationTmpl == nil {
+	if m.resultTmpl == nil {
 		return "", fmt.Errorf("rendering confirmation without loaded template")
 	}
 
@@ -228,7 +228,7 @@ func (m *Model) confirmationView() (string, error) {
 		return "", err
 	}
 
-	err = m.confirmationTmpl.Execute(viewBuffer, map[string]interface{}{
+	err = m.resultTmpl.Execute(viewBuffer, map[string]interface{}{
 		"FinalValue":    value,
 		"Prompt":        m.Prompt,
 		"InitialValue":  m.InitialValue,

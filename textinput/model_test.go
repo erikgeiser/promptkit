@@ -172,8 +172,8 @@ func TestTemplate(t *testing.T) {
 
 	m := textinput.NewModel(textinput.New("name?"))
 	m.Template = `{{ print .Prompt Separator .Input}}`
-	m.ConfirmationTemplate = `my name is {{ .FinalValue }}`
-	m.ExtendedTemplateScope["Separator"] = func() string { return separator }
+	m.ResultTemplate = `my name is {{ .FinalValue }}`
+	m.ExtendedTemplateFuncs["Separator"] = func() string { return separator }
 
 	test.Run(t, m, tea.KeyLeft, tea.KeyBackspace, test.KeyMsg('s'))
 	assertNoError(t, m)
@@ -211,7 +211,7 @@ func TestSubmit(t *testing.T) {
 	t.Parallel()
 
 	m := textinput.NewModel(textinput.New("foo:"))
-	m.ConfirmationTemplate = `result: {{ .FinalValue }}`
+	m.ResultTemplate = `result: {{ .FinalValue }}`
 	m.Validate = nil
 
 	test.Run(t, m)

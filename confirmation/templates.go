@@ -13,9 +13,8 @@ const TemplateArrow = `
 {{- end -}}
 `
 
-// ConfirmationTemplateArrow is the ConfirmationTempalte that matches
-// TemplateArrow.
-const ConfirmationTemplateArrow = `
+// ResultTemplateArrow is the ResultTemplate that matches TemplateArrow.
+const ResultTemplateArrow = `
 {{- print .Prompt " " -}}
 {{- if .FinalValue -}}
 	{{- Foreground "32" "Yes" -}}
@@ -33,12 +32,12 @@ const TemplateYN = `
 {{- else if .NoSelected -}}
 	{{- print " [y/" (Bold "N") "]" -}}
 {{- else -}}
-	{{- "[y/N]" -}}
+	{{- "[y/n]" -}}
 {{- end -}}
 `
 
-// ConfirmationTemplateYN is the ConfirmationTempalte that matches TemplateYN.
-const ConfirmationTemplateYN = `
+// ResultTemplateYN is the ResultTemplate that matches TemplateYN.
+const ResultTemplateYN = `
 {{- Bold .Prompt -}}
 {{ if .FinalValue -}}
 	{{- print " [" (Foreground "32" (Bold "Y")) "/n]" -}}

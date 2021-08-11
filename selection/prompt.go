@@ -43,9 +43,9 @@ const (
   {{- end }}
 {{- end}}`
 
-	// DefaultConfirmationTemplate defines the default appearance with which the
+	// DefaultResultTemplate defines the default appearance with which the
 	// finale result of the selection is presented.
-	DefaultConfirmationTemplate = `
+	DefaultResultTemplate = `
 	{{- print .Prompt " " (Foreground "32"  .FinalChoice.String) "\n" -}}
 	`
 
@@ -115,7 +115,7 @@ type Selection struct {
 	//  * The functions specified in ExtendedTemplateScope.
 	Template string
 
-	// ConfirmationTemplate is rendered as soon as a choice has been selected.
+	// ResultTemplate is rendered as soon as a choice has been selected.
 	// It is intended to permanently indicate the result of the prompt when the
 	// selection itself has disappeared. This template is only rendered in the
 	// Run() method and NOT when the selection prompt is used as a model. The
@@ -129,11 +129,11 @@ type Selection struct {
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
 	//  * The functions specified in ExtendedTemplateScope.
-	ConfirmationTemplate string
+	ResultTemplate string
 
-	// ExtendedTemplateScope can be used to add additional functions to the
+	// ExtendedTemplateFuncs can be used to add additional functions to the
 	// evaluation scope of the templates.
-	ExtendedTemplateScope template.FuncMap
+	ExtendedTemplateFuncs template.FuncMap
 
 	// Styles of the filter input field. These will be applied as inline styles.
 	//
@@ -161,12 +161,12 @@ func New(prompt string, choices []*Choice) *Selection {
 		Prompt:                      prompt,
 		FilterPrompt:                DefaultFilterPrompt,
 		Template:                    DefaultTemplate,
-		ConfirmationTemplate:        DefaultConfirmationTemplate,
+		ResultTemplate:              DefaultResultTemplate,
 		Filter:                      FilterContainsCaseInsensitive,
 		FilterInputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
 		KeyMap:                      NewDefaultKeyMap(),
 		FilterPlaceholder:           DefaultFilterPlaceholder,
-		ExtendedTemplateScope:       template.FuncMap{},
+		ExtendedTemplateFuncs:       template.FuncMap{},
 		Output:                      os.Stdout,
 		Input:                       os.Stdin,
 	}

@@ -25,9 +25,9 @@ const (
 	{{- end -}}
 	`
 
-	// DefaultConfirmationTemplate defines the default appearance with which the
+	// DefaultResultTemplate defines the default appearance with which the
 	// finale result of the prompt is presented.
-	DefaultConfirmationTemplate = `
+	DefaultResultTemplate = `
 	{{- print .Prompt " " (Foreground "32"  (Mask .FinalValue)) "\n" -}}
 	`
 
@@ -91,7 +91,7 @@ type TextInput struct {
 	//  * The functions specified in ExtendedTemplateScope.
 	Template string
 
-	// ConfirmationTemplate is rendered as soon as a input has been confirmed.
+	// ResultTemplate is rendered as soon as a input has been confirmed.
 	// It is intended to permanently indicate the result of the prompt when the
 	// input itself has disappeared. This template is only rendered in the Run()
 	// method and NOT when the text input is used as a model. The following
@@ -108,11 +108,11 @@ type TextInput struct {
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
 	//  * The functions specified in ExtendedTemplateScope.
-	ConfirmationTemplate string
+	ResultTemplate string
 
-	// ExtendedTemplateScope can be used to add additional functions to the
+	// ExtendedTemplateFuncs can be used to add additional functions to the
 	// evaluation scope of the templates.
-	ExtendedTemplateScope template.FuncMap
+	ExtendedTemplateFuncs template.FuncMap
 
 	// Styles of the actual input field. These will be applied as inline styles.
 	//
@@ -138,12 +138,12 @@ func New(prompt string) *TextInput {
 	return &TextInput{
 		Prompt:                prompt,
 		Template:              DefaultTemplate,
-		ConfirmationTemplate:  DefaultConfirmationTemplate,
+		ResultTemplate:        DefaultResultTemplate,
 		KeyMap:                NewDefaultKeyMap(),
 		InputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
 		Validate:              func(s string) bool { return len(s) > 0 },
 		HideMask:              DefaultMask,
-		ExtendedTemplateScope: template.FuncMap{},
+		ExtendedTemplateFuncs: template.FuncMap{},
 		Output:                os.Stdout,
 		Input:                 os.Stdin,
 	}
