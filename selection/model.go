@@ -103,7 +103,7 @@ func (m *Model) initTemplate() (*template.Template, error) {
 				return c.String
 			}
 
-			return m.SelectedChoiceStyle(c)
+			return m.UnselectedChoiceStyle(c)
 		},
 	})
 
