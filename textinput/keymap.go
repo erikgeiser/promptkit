@@ -21,7 +21,7 @@ func NewDefaultKeyMap() *KeyMap {
 		DeleteAllBeforeCursor:  []string{"ctrl+u"},
 		Paste:                  []string{"ctrl+v"},
 		Clear:                  []string{""},
-		Reset:                  []string{"esc"},
+		Reset:                  []string{"esc", "tab"},
 		Submit:                 []string{"enter"},
 		Abort:                  []string{"ctrl+c"},
 	}
