@@ -56,6 +56,10 @@ func (m *Model) Init() tea.Cmd {
 		return tea.Quit
 	}
 
+	if m.ColorProfile == 0 {
+		m.ColorProfile = termenv.ColorProfile()
+	}
+
 	if m.Template == "" {
 		m.Err = fmt.Errorf("empty template")
 
@@ -81,7 +85,7 @@ func (m *Model) Init() tea.Cmd {
 
 func (m *Model) initTemplate() (*template.Template, error) {
 	tmpl := template.New("view")
-	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
+	tmpl.Funcs(termenv.TemplateFuncs(m.ColorProfile))
 	tmpl.Funcs(m.ExtendedTemplateFuncs)
 	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(template.FuncMap{
@@ -116,7 +120,7 @@ func (m *Model) initResultTemplate() (*template.Template, error) {
 	}
 
 	tmpl := template.New("result")
-	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
+	tmpl.Funcs(termenv.TemplateFuncs(m.ColorProfile))
 	tmpl.Funcs(m.ExtendedTemplateFuncs)
 	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(template.FuncMap{

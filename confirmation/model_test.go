@@ -8,12 +8,14 @@ import (
 	"github.com/erikgeiser/promptkit"
 	"github.com/erikgeiser/promptkit/confirmation"
 	"github.com/erikgeiser/promptkit/test"
+	"github.com/muesli/termenv"
 )
 
 func TestDefaultYes(t *testing.T) {
 	t.Parallel()
 
 	c := confirmation.New("ready?", confirmation.Yes)
+	c.ColorProfile = termenv.TrueColor
 	m := confirmation.NewModel(c)
 
 	test.Run(t, m, tea.KeyEnter)
@@ -31,6 +33,7 @@ func TestDefaultNo(t *testing.T) {
 	t.Parallel()
 
 	c := confirmation.New("ready?", confirmation.No)
+	c.ColorProfile = termenv.TrueColor
 	m := confirmation.NewModel(c)
 
 	test.Run(t, m, tea.KeyEnter)
@@ -48,6 +51,7 @@ func TestDefaultUndecided(t *testing.T) {
 	t.Parallel()
 
 	c := confirmation.New("ready?", confirmation.Undecided)
+	c.ColorProfile = termenv.TrueColor
 	m := confirmation.NewModel(c)
 
 	test.Run(t, m)
@@ -70,6 +74,7 @@ func TestDefaultNilIsUndecided(t *testing.T) {
 	t.Parallel()
 
 	c := confirmation.New("ready?", nil)
+	c.ColorProfile = termenv.TrueColor
 	m := confirmation.NewModel(c)
 
 	test.Run(t, m)
@@ -91,7 +96,9 @@ func TestDefaultNilIsUndecided(t *testing.T) {
 func TestImmediatelyChooseYes(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
+	c := confirmation.New("ready?", confirmation.Undecided)
+	c.ColorProfile = termenv.TrueColor
+	m := confirmation.NewModel(c)
 
 	test.Run(t, m)
 	assertNoError(t, m)
@@ -111,7 +118,9 @@ func TestImmediatelyChooseYes(t *testing.T) {
 func TestImmediatelyChooseNo(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
+	c := confirmation.New("ready?", confirmation.Undecided)
+	c.ColorProfile = termenv.TrueColor
+	m := confirmation.NewModel(c)
 
 	test.Run(t, m)
 	assertNoError(t, m)
@@ -131,7 +140,9 @@ func TestImmediatelyChooseNo(t *testing.T) {
 func TestToggle(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
+	c := confirmation.New("ready?", confirmation.Undecided)
+	c.ColorProfile = termenv.TrueColor
+	m := confirmation.NewModel(c)
 
 	test.Run(t, m)
 	assertNoError(t, m)
@@ -172,7 +183,9 @@ func TestToggle(t *testing.T) {
 func TestSelectYes(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
+	c := confirmation.New("ready?", confirmation.Undecided)
+	c.ColorProfile = termenv.TrueColor
+	m := confirmation.NewModel(c)
 
 	test.Run(t, m, tea.KeyLeft)
 	assertNoError(t, m)
@@ -189,7 +202,9 @@ func TestSelectYes(t *testing.T) {
 func TestSelectNo(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
+	c := confirmation.New("ready?", confirmation.Undecided)
+	c.ColorProfile = termenv.TrueColor
+	m := confirmation.NewModel(c)
 
 	test.Run(t, m, tea.KeyRight)
 	assertNoError(t, m)
@@ -206,7 +221,9 @@ func TestSelectNo(t *testing.T) {
 func TestAbort(t *testing.T) {
 	t.Parallel()
 
-	m := confirmation.NewModel(confirmation.New("ready?", confirmation.Undecided))
+	c := confirmation.New("ready?", confirmation.Undecided)
+	c.ColorProfile = termenv.TrueColor
+	m := confirmation.NewModel(c)
 
 	test.Run(t, m, tea.KeyCtrlC)
 
@@ -225,6 +242,7 @@ func TestSubmit(t *testing.T) {
 	t.Parallel()
 
 	c := confirmation.New("ready?", confirmation.Yes)
+	c.ColorProfile = termenv.TrueColor
 	m := confirmation.NewModel(c)
 
 	test.Run(t, m)
@@ -236,6 +254,40 @@ func TestSubmit(t *testing.T) {
 	}
 
 	test.AssertGoldenView(t, m, "submit.golden")
+}
+
+func TestTemplateYN(t *testing.T) {
+	t.Parallel()
+
+	c := confirmation.New("yes or no?", confirmation.Undecided)
+	c.ColorProfile = termenv.TrueColor
+	c.Template = confirmation.TemplateYN
+	c.ResultTemplate = confirmation.ResultTemplateYN
+	m := confirmation.NewModel(c)
+
+	test.Run(t, m)
+	assertNoError(t, m)
+
+	test.AssertGoldenView(t, m, "templateyn_undecided.golden")
+
+	test.Update(t, m, tea.KeyRight)
+	assertNoError(t, m)
+
+	test.AssertGoldenView(t, m, "templateyn_no.golden")
+
+	test.Update(t, m, tea.KeyLeft)
+	assertNoError(t, m)
+
+	test.AssertGoldenView(t, m, "templateyn_yes.golden")
+
+	cmd := test.Update(t, m, tea.KeyEnter)
+	if cmd == nil || cmd() != tea.Quit() {
+		t.Errorf("enter did not produce quit signal")
+	}
+
+	assertNoError(t, m)
+
+	test.AssertGoldenView(t, m, "templateyn_result.golden")
 }
 
 func getValue(tb testing.TB, m *confirmation.Model) bool {

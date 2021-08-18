@@ -9,6 +9,7 @@ import (
 	"github.com/erikgeiser/promptkit"
 	"github.com/erikgeiser/promptkit/test"
 	"github.com/erikgeiser/promptkit/textinput"
+	"github.com/muesli/termenv"
 )
 
 func TestEnterText(t *testing.T) {
@@ -16,6 +17,7 @@ func TestEnterText(t *testing.T) {
 
 	m := textinput.NewModel(textinput.New("foo:"))
 	m.Placeholder = "placeholder"
+	m.ColorProfile = termenv.TrueColor
 
 	input := "bar"
 
@@ -46,6 +48,7 @@ func TestHidden(t *testing.T) {
 	m := textinput.NewModel(textinput.New("password?"))
 	m.Hidden = true
 	m.HideMask = 'X'
+	m.ColorProfile = termenv.TrueColor
 
 	input := "hunter2"
 
@@ -80,6 +83,7 @@ func TestPlaceholder(t *testing.T) {
 
 	m := textinput.NewModel(textinput.New("Text:"))
 	m.Placeholder = placeholder
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m)
 	assertNoError(t, m)
@@ -104,6 +108,7 @@ func TestInitialValue(t *testing.T) {
 	m := textinput.NewModel(textinput.New("question?"))
 	m.InitialValue = initialValue
 	m.Placeholder = "placeholder"
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m)
 	assertNoError(t, m)
@@ -133,6 +138,7 @@ func TestModifiedInitialValue(t *testing.T) {
 
 	m := textinput.NewModel(textinput.New("Text:"))
 	m.InitialValue = initialValue
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m, tea.KeyLeft, tea.KeyBackspace, test.KeyMsg('x'))
 	assertNoError(t, m)
@@ -174,6 +180,7 @@ func TestTemplate(t *testing.T) {
 	m.Template = `{{ print .Prompt Separator .Input}}`
 	m.ResultTemplate = `my name is {{ .FinalValue }}`
 	m.ExtendedTemplateFuncs["Separator"] = func() string { return separator }
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m, tea.KeyLeft, tea.KeyBackspace, test.KeyMsg('s'))
 	assertNoError(t, m)
@@ -193,6 +200,7 @@ func TestAbort(t *testing.T) {
 
 	m := textinput.NewModel(textinput.New("Question?"))
 	m.Validate = nil
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m, tea.KeyCtrlC)
 
@@ -213,6 +221,7 @@ func TestSubmit(t *testing.T) {
 	m := textinput.NewModel(textinput.New("foo:"))
 	m.ResultTemplate = `result: {{ .FinalValue }}`
 	m.Validate = nil
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m)
 	assertNoError(t, m)
@@ -229,6 +238,7 @@ func TestValidate(t *testing.T) {
 	t.Parallel()
 
 	m := textinput.NewModel(textinput.New("foo:"))
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m)
 	assertNoError(t, m)

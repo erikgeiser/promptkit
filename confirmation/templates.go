@@ -32,13 +32,13 @@ const TemplateYN = `
 {{- else if .NoSelected -}}
 	{{- print " [y/" (Bold "N") "]" -}}
 {{- else -}}
-	{{- "[y/n]" -}}
+	{{- " [y/n]" -}}
 {{- end -}}
 `
 
 // ResultTemplateYN is the ResultTemplate that matches TemplateYN.
 const ResultTemplateYN = `
-{{- Bold .Prompt -}}
+{{- .Prompt -}}
 {{ if .FinalValue -}}
 	{{- print " [" (Foreground "32" (Bold "Y")) "/n]" -}}
 {{- else -}}

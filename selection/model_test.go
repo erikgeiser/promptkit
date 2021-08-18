@@ -9,13 +9,15 @@ import (
 	"github.com/erikgeiser/promptkit"
 	"github.com/erikgeiser/promptkit/selection"
 	"github.com/erikgeiser/promptkit/test"
+	"github.com/muesli/termenv"
 )
 
 func TestSelectSecond(t *testing.T) {
 	t.Parallel()
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices([]string{"a", "b", "c"})))
+	s := selection.New("foo:", selection.Choices([]string{"a", "b", "c"}))
+	s.ColorProfile = termenv.TrueColor
+	m := selection.NewModel(s)
 
 	test.Run(t, m, tea.KeyDown)
 	assertNoError(t, m)
@@ -33,9 +35,10 @@ func TestSelectSecond(t *testing.T) {
 func TestPaginate(t *testing.T) {
 	t.Parallel()
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices([]string{"First1", "First2", "Second1"})))
-	m.PageSize = 2
+	s := selection.New("foo:", selection.Choices([]string{"First1", "First2", "Second1"}))
+	s.ColorProfile = termenv.TrueColor
+	s.PageSize = 2
+	m := selection.NewModel(s)
 
 	test.Run(t, m)
 	assertNoError(t, m)
@@ -61,6 +64,7 @@ func TestPaginatePush(t *testing.T) {
 			"Second1", "Second2",
 		})))
 	m.PageSize = 2
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m, tea.KeyDown, tea.KeyDown)
 	assertNoError(t, m)
@@ -94,6 +98,7 @@ func TestPaginateScroll(t *testing.T) {
 			"Second1", "Second2",
 		})))
 	m.PageSize = 2
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m, tea.KeyPgDown)
 	assertNoError(t, m)
@@ -127,6 +132,7 @@ func TestPaginateLast(t *testing.T) {
 			"Second1", "Second2",
 		})))
 	m.PageSize = 2
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m, tea.KeyPgDown, tea.KeyPgDown, tea.KeyPgDown, tea.KeyPgDown,
 		tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown,
@@ -151,6 +157,7 @@ func TestFilter(t *testing.T) {
 			"AAA", "BBB", "CCC1", "CCC2", "DDD",
 		})))
 	m.PageSize = 2
+	m.ColorProfile = termenv.TrueColor
 
 	inputs := append(test.MsgsFromText("CC"), tea.KeyDown)
 	test.Run(t, m, inputs...)
@@ -193,6 +200,7 @@ func TestNoFilter(t *testing.T) {
 		})))
 	m.Filter = nil
 	m.PageSize = 2
+	m.ColorProfile = termenv.TrueColor
 
 	inputs := append(test.MsgsFromText("CC"), tea.KeyDown)
 	test.Run(t, m, inputs...)
@@ -232,6 +240,7 @@ func TestAbort(t *testing.T) {
 		selection.Choices([]string{
 			"a", "b", "c",
 		})))
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m, tea.KeyCtrlC)
 
@@ -253,6 +262,7 @@ func TestSubmit(t *testing.T) {
 		selection.Choices([]string{
 			"a", "b", "c",
 		})))
+	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m)
 	assertNoError(t, m)

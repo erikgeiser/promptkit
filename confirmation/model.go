@@ -45,6 +45,10 @@ func NewModel(confirmation *Confirmation) *Model {
 
 // Init initializes the confirmation prompt model.
 func (m *Model) Init() tea.Cmd {
+	if m.ColorProfile == 0 {
+		m.ColorProfile = termenv.ColorProfile()
+	}
+
 	m.tmpl, m.Err = m.initTemplate()
 	if m.Err != nil {
 		return tea.Quit
@@ -60,7 +64,7 @@ func (m *Model) Init() tea.Cmd {
 
 func (m *Model) initTemplate() (*template.Template, error) {
 	tmpl := template.New("view")
-	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
+	tmpl.Funcs(termenv.TemplateFuncs(m.ColorProfile))
 	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(m.ExtendedTemplateFuncs)
 
@@ -73,7 +77,7 @@ func (m *Model) initResultTemplate() (*template.Template, error) {
 	}
 
 	tmpl := template.New("result")
-	tmpl.Funcs(termenv.TemplateFuncs(termenv.ColorProfile()))
+	tmpl.Funcs(termenv.TemplateFuncs(m.ColorProfile))
 	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(m.ExtendedTemplateFuncs)
 

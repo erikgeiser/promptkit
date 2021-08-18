@@ -197,6 +197,10 @@ type Selection struct {
 	Output io.Writer
 	// Input is the input reader, by default, os.Stdin is used.
 	Input io.Reader
+
+	// ColorProfile determines how colors are rendered. By default, the terminal
+	// is queried.
+	ColorProfile termenv.Profile
 }
 
 // New creates a new selection prompt.
