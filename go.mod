@@ -13,4 +13,4 @@ require (
 	golang.org/x/term v0.0.0-20210615171337-6886f2dfbf5b // indirect
 )
 
-replace github.com/charmbracelet/bubbletea v0.14.1 => github.com/erikgeiser/bubbletea v0.14.2-0.20210831114530-c8560c7d318e
+replace github.com/charmbracelet/bubbletea => github.com/erikgeiser/bubbletea v0.14.2-0.20210909155110-8883d47e2872
