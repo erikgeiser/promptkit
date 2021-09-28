@@ -18,13 +18,6 @@ and many opportunities for heavy customization.
 
 ---
 
-**Warning:** This library depends on some significant [upsteam changes in bubbletea](https://github.com/charmbracelet/bubbletea/pull/120). Until they are merged you can use the following workaround in your project:
-
-```
-go mod edit -replace=github.com/charmbracelet/bubbletea=github.com/erikgeiser/bubbletea@cleanup_after_termination
-go mod tidy
-```
-
 **Disclaimer:** The API of library is not yet stable. Expect significant changes before 1.0.0.
 
 ---
