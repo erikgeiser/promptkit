@@ -6,6 +6,7 @@ as optional support for input validation and a customizable key map.
 package textinput
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -22,7 +23,9 @@ const (
 	// be copied as a starting point for a custom template.
 	DefaultTemplate = `
 	{{- Bold .Prompt }} {{ .Input -}}
-	{{- if not .Valid }} {{ Foreground "1" (Bold "✘") }}
+	{{- if .ValidationError }} 
+		{{- Foreground "1" (Bold " ✘ ") -}}
+		{{- Foreground "1" .ValidationError.Error -}}
 	{{- else }} {{ Foreground "2" (Bold "✔") }}
 	{{- end -}}
 	`
@@ -57,7 +60,7 @@ type TextInput struct {
 	// valid. If it is not, the data cannot be submitted. By default, Validate
 	// ensures that the input data is not empty. If Validate is set to nil, no
 	// validation is performed.
-	Validate func(string) bool
+	Validate func(string) error
 
 	// Hidden specified whether or not the input data is considered secret and
 	// should be masked. This is useful for password prompts.
@@ -153,7 +156,12 @@ func New(prompt string) *TextInput {
 		ResultTemplate:        DefaultResultTemplate,
 		KeyMap:                NewDefaultKeyMap(),
 		InputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
-		Validate:              func(s string) bool { return len(s) > 0 },
+		Validate: func(s string) error {
+			if len(s) > 0 {
+				return nil
+			}
+			return errors.New("input cannot be empty")
+		},
 		HideMask:              DefaultMask,
 		ExtendedTemplateFuncs: template.FuncMap{},
 		WrapMode:              promptkit.WordWrap,

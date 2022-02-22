@@ -9,8 +9,16 @@ import (
 
 func main() {
 	input := textinput.New("Choose a password:")
-	input.Placeholder = "minimum 10 characters"
-	input.Validate = func(s string) bool { return len(s) >= 10 } // nolint:gomnd
+	input.Placeholder = "pick a strong password"
+	input.Validate = func(s string) error {
+		if len(s) < 10 {
+			return fmt.Errorf("needs %d more characters", 10-len(s))
+		}
+		if s == "1234567890" {
+			return fmt.Errorf("too easy")
+		}
+		return nil
+	}
 	input.Hidden = true
 
 	name, err := input.RunPrompt()
