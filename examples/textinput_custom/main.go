@@ -13,12 +13,15 @@ func main() {
 	{{- "┏" }}━{{ Repeat "━" (Len .Prompt) }}━┯━{{ Repeat "━" 13 }}{{ "━━━━┓\n" }}
 	{{- "┃" }} {{ Bold .Prompt }} │ {{ .Input -}}
 	{{- Repeat " " (Max 0 (Sub 16 (Len .Input))) }}
-	{{- if not .Valid -}}
+	{{- if .ValidationError -}}
 		{{- Foreground "1" (Bold "✘") -}}
 	{{- else -}}
 		{{- Foreground "2" (Bold "✔") -}}
 	{{- end -}}┃
-	{{- "\n┗" }}━{{ Repeat "━" (Len .Prompt) }}━┷━{{ Repeat "━" 13 }}{{ "━━━━┛" -}}
+	{{- "\n┗" }}━{{ Repeat "━" (Len .Prompt) }}━┷━{{ Repeat "━" 13 }}{{ "━━━━┛\n" -}}
+	{{- if .ValidationError -}}
+		{{- (print " Error: " (Foreground "1" .ValidationError.Error)) -}}
+	{{- end -}}
 	`
 
 	const customResultTemplate = `
@@ -27,7 +30,13 @@ func main() {
 
 	input := textinput.New("Enter an IP address")
 	input.Placeholder = "127.0.0.1"
-	input.Validate = func(input string) bool { return net.ParseIP(input) != nil }
+	input.Validate = func(input string) error {
+		if net.ParseIP(input) == nil {
+			return fmt.Errorf("invalid IP address")
+		}
+
+		return nil
+	}
 	input.Template = customTemplate
 	input.ResultTemplate = customResultTemplate
 	input.CharLimit = 15

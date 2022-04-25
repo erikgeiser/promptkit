@@ -22,7 +22,7 @@ const (
 	// be copied as a starting point for a custom template.
 	DefaultTemplate = `
 	{{- Bold .Prompt }} {{ .Input -}}
-	{{- if not .Valid }} {{ Foreground "1" (Bold "✘") }}
+	{{- if .ValidationError }} {{ Foreground "1" (Bold "✘") }}
 	{{- else }} {{ Foreground "2" (Bold "✔") }}
 	{{- end -}}
 	`
@@ -37,6 +37,10 @@ const (
 	// default if Hidden is true.
 	DefaultMask = '●'
 )
+
+// ErrInputValidation is a generic input validation error. For more detailed
+// diagnosis, feel free to return any custom error instead.
+var ErrInputValidation = fmt.Errorf("validation error")
 
 // TextInput represents a configurable selection prompt.
 type TextInput struct {
@@ -57,7 +61,7 @@ type TextInput struct {
 	// valid. If it is not, the data cannot be submitted. By default, Validate
 	// ensures that the input data is not empty. If Validate is set to nil, no
 	// validation is performed.
-	Validate func(string) bool
+	Validate func(string) error
 
 	// Hidden specified whether or not the input data is considered secret and
 	// should be masked. This is useful for password prompts.
@@ -85,7 +89,7 @@ type TextInput struct {
 	//  * InitialValue string: The configured initial value of the input.
 	//  * Placeholder string: The configured placeholder of the input.
 	//  * Input string: The actual input field.
-	//  * Valid bool: Whether or not the current value is valid according
+	//  * ValidationError error: The error value returned by Validate.
 	//    to the configured Validate function.
 	//  * TerminalWidth int: The width of the terminal.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
@@ -153,7 +157,13 @@ func New(prompt string) *TextInput {
 		ResultTemplate:        DefaultResultTemplate,
 		KeyMap:                NewDefaultKeyMap(),
 		InputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
-		Validate:              func(s string) bool { return len(s) > 0 },
+		Validate: func(s string) error {
+			if len(s) == 0 {
+				return ErrInputValidation
+			}
+
+			return nil
+		},
 		HideMask:              DefaultMask,
 		ExtendedTemplateFuncs: template.FuncMap{},
 		WrapMode:              promptkit.WordWrap,

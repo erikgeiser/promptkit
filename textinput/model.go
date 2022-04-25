@@ -120,7 +120,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case keyMatches(msg, m.KeyMap.Submit):
-			if m.Validate == nil || m.Validate(m.input.Value()) {
+			if m.Validate == nil || m.Validate(m.input.Value()) == nil {
 				m.quitting = true
 
 				return m, tea.Quit
@@ -195,18 +195,18 @@ func (m *Model) View() string {
 
 	viewBuffer := &bytes.Buffer{}
 
-	valid := true
+	var validationErr error
 	if m.Validate != nil {
-		valid = m.Validate(m.input.Value())
+		validationErr = m.Validate(m.input.Value())
 	}
 
 	err := m.tmpl.Execute(viewBuffer, map[string]interface{}{
-		"Prompt":        m.Prompt,
-		"InitialValue":  m.InitialValue,
-		"Placeholder":   m.Placeholder,
-		"Input":         m.input.View(),
-		"Valid":         valid,
-		"TerminalWidth": m.width,
+		"Prompt":          m.Prompt,
+		"InitialValue":    m.InitialValue,
+		"Placeholder":     m.Placeholder,
+		"Input":           m.input.View(),
+		"ValidationError": validationErr,
+		"TerminalWidth":   m.width,
 	})
 	if err != nil {
 		m.Err = err
