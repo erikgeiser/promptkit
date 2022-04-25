@@ -16,7 +16,10 @@ linters:
     - forbidigo
     - ifshort
     - cyclop
-    - gomoddirectives
+    - varnamelen
+    - ireturn
+    - nilnil
+    - gosec
 linters-settings:
   exhaustive:
     default-signifies-exhaustive: true
