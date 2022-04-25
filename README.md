@@ -18,7 +18,15 @@ and many opportunities for heavy customization.
 
 ---
 
-**Disclaimer:** The API of library is not yet stable. Expect significant changes before 1.0.0.
+**Disclaimers:**
+* The API of library is not yet stable. Expect significant changes in minor
+  versions before `v1.0.0`. The library will eventually require Go 1.18 and the
+  selection prompt will use generics.
+* Windows is currently not explicitly supported because input events are dropped
+  when running multiple prompts sequentially due to a bug in
+  [bubbletea](https://github.com/charmbracelet/bubbletea). See
+  https://github.com/charmbracelet/bubbletea/pull/140 and
+  https://github.com/charmbracelet/bubbletea/issues/121 for more information.
 
 ---
 
