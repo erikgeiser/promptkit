@@ -7,19 +7,27 @@ import (
 	"github.com/erikgeiser/promptkit/textinput"
 )
 
+const minCharacters = 10
+
 func main() {
-	input := textinput.New("Choose a password:")
-	input.Placeholder = "pick a strong password"
+	input := textinput.New("Choose a passphrase:")
+	input.Placeholder = "make it strong!"
 	input.Validate = func(s string) error {
-		if len(s) < 10 {
-			return fmt.Errorf("needs %d more characters", 10-len(s))
+		if s == "hunter2" {
+			return fmt.Errorf("not that one")
 		}
-		if s == "1234567890" {
-			return fmt.Errorf("too easy")
+
+		if len(s) < minCharacters {
+			return fmt.Errorf("at least %d more characters", minCharacters-len(s))
 		}
+
 		return nil
 	}
 	input.Hidden = true
+	input.Template += `
+	{{- if .ValidationError -}}
+		{{- print " " (Foreground "1" .ValidationError.Error) -}}
+	{{- end -}}`
 
 	name, err := input.RunPrompt()
 	if err != nil {

@@ -6,7 +6,6 @@ as optional support for input validation and a customizable key map.
 package textinput
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -23,9 +22,7 @@ const (
 	// be copied as a starting point for a custom template.
 	DefaultTemplate = `
 	{{- Bold .Prompt }} {{ .Input -}}
-	{{- if .ValidationError }} 
-		{{- Foreground "1" (Bold " ✘ ") -}}
-		{{- Foreground "1" .ValidationError.Error -}}
+	{{- if .ValidationError }} {{ Foreground "1" (Bold "✘") }}
 	{{- else }} {{ Foreground "2" (Bold "✔") }}
 	{{- end -}}
 	`
@@ -40,6 +37,10 @@ const (
 	// default if Hidden is true.
 	DefaultMask = '●'
 )
+
+// ErrInputValidation is a generic input validation error. For more detailed
+// diagnosis, feel free to return any custom error instead.
+var ErrInputValidation = fmt.Errorf("validation error")
 
 // TextInput represents a configurable selection prompt.
 type TextInput struct {
@@ -157,10 +158,11 @@ func New(prompt string) *TextInput {
 		KeyMap:                NewDefaultKeyMap(),
 		InputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
 		Validate: func(s string) error {
-			if len(s) > 0 {
-				return nil
+			if len(s) == 0 {
+				return ErrInputValidation
 			}
-			return errors.New("input cannot be empty")
+
+			return nil
 		},
 		HideMask:              DefaultMask,
 		ExtendedTemplateFuncs: template.FuncMap{},

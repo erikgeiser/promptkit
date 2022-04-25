@@ -18,10 +18,10 @@ func main() {
 	{{- else -}}
 		{{- Foreground "2" (Bold "✔") -}}
 	{{- end -}}┃
+	{{- "\n┗" }}━{{ Repeat "━" (Len .Prompt) }}━┷━{{ Repeat "━" 13 }}{{ "━━━━┛\n" -}}
 	{{- if .ValidationError -}}
-		{{- Foreground "1" (Bold .ValidationError.Error) -}}
+		{{- (print " Error: " (Foreground "1" .ValidationError.Error)) -}}
 	{{- end -}}
-	{{- "\n┗" }}━{{ Repeat "━" (Len .Prompt) }}━┷━{{ Repeat "━" 13 }}{{ "━━━━┛" -}}
 	`
 
 	const customResultTemplate = `
@@ -34,6 +34,7 @@ func main() {
 		if net.ParseIP(input) == nil {
 			return fmt.Errorf("invalid IP address")
 		}
+
 		return nil
 	}
 	input.Template = customTemplate

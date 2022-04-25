@@ -12,7 +12,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-var update = flag.Bool("update", false, "update the golden files")
+var (
+	update  = flag.Bool("update", false, "update the golden files")
+	inspect = flag.Bool("inspect", false, "inspect strings in detail")
+)
 
 // MsgsFromText generates KeyMsg events from a given text.
 func MsgsFromText(text string) []tea.Msg {
@@ -82,7 +85,12 @@ func AssertGoldenView(tb testing.TB, m tea.Model, expectedViewFile string) {
 	expectedView := string(goldenViewFileContent)
 
 	if view != expectedView {
-		tb.Errorf("view mismatch in %s:\nExpected:\n%s\nGot:\n%s",
+		comparison := "Expected:\n%s\nGot:\n%s"
+		if *inspect {
+			comparison = "Expected:\n%q\nGot:\n%q"
+		}
+
+		tb.Errorf("view mismatch in %s:\n"+comparison,
 			expectedViewFile, Indent(expectedView), Indent(view))
 	}
 }
