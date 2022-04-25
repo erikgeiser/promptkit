@@ -1,18 +1,24 @@
 name: Build
-on: [push]
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - main
+  pull_request:
 jobs:
   linux-builds:
     name: "linux build"
     runs-on: ubuntu-latest
     steps:
       - name: "Set up Go"
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
-          go-version: 1.16.x
+          go-version: 1.18.x
         id: go
 
       - name: "Check out code"
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       - name: "build"
         run: |

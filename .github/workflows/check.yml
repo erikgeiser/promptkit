@@ -1,14 +1,20 @@
 name: Check
-on: [push]
+on:
+  push:
+    tags:
+      - v*
+    branches:
+      - main
+  pull_request:
 jobs:
   golangci-lint:
     name: golangci-lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v2
+        uses: golangci/golangci-lint-action@v3
         with:
-          version: latest
+          version: v1.45
