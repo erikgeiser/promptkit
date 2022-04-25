@@ -89,7 +89,7 @@ type TextInput struct {
 	//  * InitialValue string: The configured initial value of the input.
 	//  * Placeholder string: The configured placeholder of the input.
 	//  * Input string: The actual input field.
-	//  * Valid bool: Whether or not the current value is valid according
+	//  * ValidationError error: The error value returned by Validate.
 	//    to the configured Validate function.
 	//  * TerminalWidth int: The width of the terminal.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
