@@ -139,7 +139,7 @@ func New(prompt string, defaultValue Value) *Confirmation {
 		ResultTemplate:        DefaultResultTemplate,
 		KeyMap:                NewDefaultKeyMap(),
 		ExtendedTemplateFuncs: template.FuncMap{},
-		WrapMode:              promptkit.WordWrap,
+		WrapMode:              promptkit.Truncate,
 		Output:                os.Stdout,
 		Input:                 os.Stdin,
 	}

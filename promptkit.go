@@ -65,6 +65,10 @@ type WrapMode func(string, int) string
 // word is still larger that width after soft wrapping. This is known to cause
 // issues with coloring in some terminals depending on the prompt style.
 func WordWrap(input string, width int) string {
+	if width == 0 {
+		return input
+	}
+
 	return wrap.String(wordwrap.String(input, width), width)
 }
 
@@ -72,6 +76,10 @@ var _ WrapMode = WordWrap
 
 // HardWrap performs a hard wrap at the given width.
 func HardWrap(input string, width int) string {
+	if width == 0 {
+		return input
+	}
+
 	return wrap.String(input, width)
 }
 
@@ -79,6 +87,10 @@ var _ WrapMode = HardWrap
 
 // Truncate cuts the string after the given width.
 func Truncate(input string, width int) string {
+	if width == 0 {
+		return input
+	}
+
 	var truncated strings.Builder
 
 	scanner := bufio.NewScanner(strings.NewReader(input))

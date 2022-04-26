@@ -166,7 +166,7 @@ func New(prompt string) *TextInput {
 		},
 		HideMask:              DefaultMask,
 		ExtendedTemplateFuncs: template.FuncMap{},
-		WrapMode:              promptkit.WordWrap,
+		WrapMode:              promptkit.Truncate,
 		Output:                os.Stdout,
 		Input:                 os.Stdin,
 	}

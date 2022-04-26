@@ -219,7 +219,7 @@ func New(prompt string, choices []*Choice) *Selection {
 		KeyMap:                      NewDefaultKeyMap(),
 		FilterPlaceholder:           DefaultFilterPlaceholder,
 		ExtendedTemplateFuncs:       template.FuncMap{},
-		WrapMode:                    promptkit.WordWrap,
+		WrapMode:                    promptkit.Truncate,
 		Output:                      os.Stdout,
 		Input:                       os.Stdin,
 	}
