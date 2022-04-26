@@ -94,16 +94,9 @@ func Truncate(input string, width int) string {
 	var truncated strings.Builder
 
 	scanner := bufio.NewScanner(strings.NewReader(input))
-	scanner.Scan()
 
-	for {
-		truncated.WriteString(truncate.String(scanner.Text(), uint(width)))
-
-		if scanner.Scan() {
-			truncated.WriteString("\n")
-		} else {
-			break
-		}
+	for scanner.Scan() {
+		truncated.WriteString(truncate.String(scanner.Text(), uint(width)) + "\n")
 	}
 
 	return truncated.String()

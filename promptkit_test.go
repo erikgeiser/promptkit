@@ -26,8 +26,8 @@ func TestHardWrap(t *testing.T) {
 func TestTruncate(t *testing.T) {
 	t.Parallel()
 
-	text := "0123456789\n0123\n0123456789"
-	expected := "012345\n0123\n012345"
+	text := "0123456789\n0123\n0123456789\n"
+	expected := "012345\n0123\n012345\n"
 	assertEqual(t, expected, promptkit.Truncate(text, 6))
 }
 
