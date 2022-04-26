@@ -15,7 +15,7 @@ import (
 func TestSelectSecond(t *testing.T) {
 	t.Parallel()
 
-	s := selection.New("foo:", selection.Choices([]string{"a", "b", "c"}))
+	s := selection.New("foo:", []string{"a", "b", "c"})
 	s.ColorProfile = termenv.TrueColor
 	m := selection.NewModel(s)
 
@@ -24,8 +24,8 @@ func TestSelectSecond(t *testing.T) {
 	test.AssertGoldenView(t, m, "select_second.golden")
 
 	choice := getChoice(t, m)
-	if choice.Value != "b" {
-		t.Errorf("unexpected choice: %v, expected b", choice.Value)
+	if choice != "b" {
+		t.Errorf("unexpected choice: %v, expected b", choice)
 	}
 
 	test.Update(t, m, tea.KeyEnter)
@@ -35,7 +35,7 @@ func TestSelectSecond(t *testing.T) {
 func TestPaginate(t *testing.T) {
 	t.Parallel()
 
-	s := selection.New("foo:", selection.Choices([]string{"First1", "First2", "Second1"}))
+	s := selection.New("foo:", []string{"First1", "First2", "Second1"})
 	s.ColorProfile = termenv.TrueColor
 	s.PageSize = 2
 	m := selection.NewModel(s)
@@ -59,10 +59,10 @@ func TestPaginatePush(t *testing.T) {
 	t.Parallel()
 
 	m := selection.NewModel(selection.New("foo:",
-		selection.Choices([]string{
+		[]string{
 			"First1", "First2",
 			"Second1", "Second2",
-		})))
+		}))
 	m.PageSize = 2
 	m.ColorProfile = termenv.TrueColor
 
@@ -92,11 +92,10 @@ func TestPaginatePush(t *testing.T) {
 func TestPaginateScroll(t *testing.T) {
 	t.Parallel()
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices([]string{
-			"First1", "First2",
-			"Second1", "Second2",
-		})))
+	m := selection.NewModel(selection.New("foo:", []string{
+		"First1", "First2",
+		"Second1", "Second2",
+	}))
 	m.PageSize = 2
 	m.ColorProfile = termenv.TrueColor
 
@@ -127,10 +126,10 @@ func TestPaginateLast(t *testing.T) {
 	t.Parallel()
 
 	m := selection.NewModel(selection.New("foo:",
-		selection.Choices([]string{
+		[]string{
 			"First1", "First2",
 			"Second1", "Second2",
-		})))
+		}))
 	m.PageSize = 2
 	m.ColorProfile = termenv.TrueColor
 
@@ -141,8 +140,8 @@ func TestPaginateLast(t *testing.T) {
 	test.AssertGoldenView(t, m, "paginate_last.golden")
 
 	choice := getChoice(t, m)
-	if choice.Value != "Second2" {
-		t.Errorf("unexpected selected element: %v", choice.Value)
+	if choice != "Second2" {
+		t.Errorf("unexpected selected element: %v", choice)
 	}
 
 	test.Update(t, m, tea.KeyEnter)
@@ -152,10 +151,9 @@ func TestPaginateLast(t *testing.T) {
 func TestFilter(t *testing.T) {
 	t.Parallel()
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices([]string{
-			"AAA", "BBB", "CCC1", "CCC2", "DDD",
-		})))
+	m := selection.NewModel(selection.New("foo:", []string{
+		"AAA", "BBB", "CCC1", "CCC2", "DDD",
+	}))
 	m.PageSize = 2
 	m.ColorProfile = termenv.TrueColor
 
@@ -165,8 +163,8 @@ func TestFilter(t *testing.T) {
 	test.AssertGoldenView(t, m, "filter.golden")
 
 	choice := getChoice(t, m)
-	if choice.Value != "CCC2" {
-		t.Errorf("unexpected selected element: %v", choice.Value)
+	if choice != "CCC2" {
+		t.Errorf("unexpected selected element: %v", choice)
 	}
 
 	view := m.View()
@@ -194,10 +192,9 @@ func TestFilter(t *testing.T) {
 func TestNoFilter(t *testing.T) {
 	t.Parallel()
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices([]string{
-			"AAA", "BBB", "CCC", "DDD",
-		})))
+	m := selection.NewModel(selection.New("foo:", []string{
+		"AAA", "BBB", "CCC", "DDD",
+	}))
 	m.Filter = nil
 	m.PageSize = 2
 	m.ColorProfile = termenv.TrueColor
@@ -208,8 +205,8 @@ func TestNoFilter(t *testing.T) {
 	test.AssertGoldenView(t, m, "no_filter.golden")
 
 	choice := getChoice(t, m)
-	if choice.Value != "BBB" {
-		t.Errorf("unexpected selected element: %v", choice.Value)
+	if choice != "BBB" {
+		t.Errorf("unexpected selected element: %v", choice)
 	}
 
 	view := m.View()
@@ -236,10 +233,9 @@ func TestNoFilter(t *testing.T) {
 func TestAbort(t *testing.T) {
 	t.Parallel()
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices([]string{
-			"a", "b", "c",
-		})))
+	m := selection.NewModel(selection.New("foo:", []string{
+		"a", "b", "c",
+	}))
 	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m, tea.KeyCtrlC)
@@ -258,10 +254,9 @@ func TestAbort(t *testing.T) {
 func TestSubmit(t *testing.T) {
 	t.Parallel()
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices([]string{
-			"a", "b", "c",
-		})))
+	m := selection.NewModel(selection.New("foo:", []string{
+		"a", "b", "c",
+	}))
 	m.ColorProfile = termenv.TrueColor
 
 	test.Run(t, m)
@@ -283,8 +278,7 @@ func TestLoopCursorTopToBottom(t *testing.T) {
 	}
 	lastElement := choices[len(choices)-1]
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices(choices)))
+	m := selection.NewModel(selection.New("foo:", choices))
 	m.ColorProfile = termenv.TrueColor
 	m.LoopCursor = true
 
@@ -292,9 +286,9 @@ func TestLoopCursorTopToBottom(t *testing.T) {
 	assertNoError(t, m)
 
 	// nolint:forcetypeassert
-	if value := getChoice(t, m).Value; value.(string) != lastElement {
+	if getChoice(t, m) != lastElement {
 		t.Fatalf("value did not loop to the last element %q but %q",
-			lastElement, value)
+			lastElement, getChoice(t, m))
 	}
 
 	test.AssertGoldenView(t, m, "loop_top_to_bottom.golden")
@@ -309,8 +303,7 @@ func TestLoopCursorBottomToTop(t *testing.T) {
 	firstElement := choices[0]
 	lastElement := choices[len(choices)-1]
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices(choices)))
+	m := selection.NewModel(selection.New("foo:", choices))
 	m.ColorProfile = termenv.TrueColor
 	m.LoopCursor = true
 
@@ -318,7 +311,7 @@ func TestLoopCursorBottomToTop(t *testing.T) {
 	assertNoError(t, m)
 
 	// nolint:forcetypeassert
-	if value := getChoice(t, m).Value; value.(string) != lastElement {
+	if value := getChoice(t, m); value != lastElement {
 		t.Fatalf("value did not loop to the last element before looping but %q",
 			value)
 	}
@@ -326,7 +319,7 @@ func TestLoopCursorBottomToTop(t *testing.T) {
 	test.Update(t, m, tea.KeyDown)
 
 	// nolint:forcetypeassert
-	if value := getChoice(t, m).Value; value.(string) != firstElement {
+	if value := getChoice(t, m); value != firstElement {
 		t.Fatalf("value did not loop to the first element %q but %q",
 			firstElement, value)
 	}
@@ -342,8 +335,7 @@ func TestLoopCursorTopToBottomPaged(t *testing.T) {
 	}
 	lastElement := choices[len(choices)-1]
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices(choices)))
+	m := selection.NewModel(selection.New("foo:", choices))
 	m.ColorProfile = termenv.TrueColor
 	m.PageSize = 3
 	m.LoopCursor = true
@@ -358,7 +350,7 @@ func TestLoopCursorTopToBottomPaged(t *testing.T) {
 	test.Update(t, m, tea.KeyUp)
 
 	// nolint:forcetypeassert
-	if value := getChoice(t, m).Value; value.(string) != lastElement {
+	if value := getChoice(t, m); value != lastElement {
 		t.Fatalf("value did not loop to the last element %q but %q",
 			lastElement, value)
 	}
@@ -375,8 +367,7 @@ func TestLoopCursorBottomToTopPaged(t *testing.T) {
 	firstElement := choices[0]
 	lastElement := choices[len(choices)-1]
 
-	m := selection.NewModel(selection.New("foo:",
-		selection.Choices(choices)))
+	m := selection.NewModel(selection.New("foo:", choices))
 	m.ColorProfile = termenv.TrueColor
 	m.PageSize = 3
 	m.LoopCursor = true
@@ -389,7 +380,7 @@ func TestLoopCursorBottomToTopPaged(t *testing.T) {
 	}
 
 	// nolint:forcetypeassert
-	if value := getChoice(t, m).Value; value.(string) != lastElement {
+	if value := getChoice(t, m); value != lastElement {
 		t.Fatalf("value did not loop to the last element before looping but %q",
 			value)
 	}
@@ -397,7 +388,7 @@ func TestLoopCursorBottomToTopPaged(t *testing.T) {
 	test.Update(t, m, tea.KeyDown)
 
 	// nolint:forcetypeassert
-	if value := getChoice(t, m).Value; value.(string) != firstElement {
+	if value := getChoice(t, m); value != firstElement {
 		t.Fatalf("value did not loop to the first element %q but %q",
 			firstElement, value)
 	}
@@ -405,7 +396,7 @@ func TestLoopCursorBottomToTopPaged(t *testing.T) {
 	test.AssertGoldenView(t, m, "loop_bottom_to_top_paged.golden")
 }
 
-func getChoice(tb testing.TB, m *selection.Model) *selection.Choice {
+func getChoice[T any](tb testing.TB, m *selection.Model[T]) T {
 	tb.Helper()
 
 	v, err := m.Value()
@@ -416,7 +407,7 @@ func getChoice(tb testing.TB, m *selection.Model) *selection.Choice {
 	return v
 }
 
-func assertNoError(tb testing.TB, m *selection.Model) {
+func assertNoError[T any](tb testing.TB, m *selection.Model[T]) {
 	tb.Helper()
 
 	if m.Err != nil {

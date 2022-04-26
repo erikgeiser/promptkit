@@ -63,21 +63,21 @@ const (
 )
 
 // DefaultSelectedChoiceStyle is the default style for selected choices.
-func DefaultSelectedChoiceStyle(c *Choice) string {
+func DefaultSelectedChoiceStyle[T any](c *Choice[T]) string {
 	return termenv.String(c.String).Foreground(accentColor).Bold().String()
 }
 
 // DefaultFinalChoiceStyle is the default style for final choices.
-func DefaultFinalChoiceStyle(c *Choice) string {
+func DefaultFinalChoiceStyle[T any](c *Choice[T]) string {
 	return termenv.String(c.String).Foreground(accentColor).String()
 }
 
 // Selection represents a configurable selection prompt.
-type Selection struct {
+type Selection[T any] struct {
 	// Choices represent all selectable choices of the selection. Slices of
 	// arbitrary types can be converted to a slice of choices using the helper
 	// selection.Choices.
-	Choices []*Choice
+	Choices []*Choice[T]
 
 	// Prompt holds the the prompt text or question that is to be answered by
 	// one of the choices.
@@ -90,7 +90,7 @@ type Selection struct {
 	// displayed based on the text entered by the user into the filter input
 	// field. If Filter is nil, filtering will be disabled. By default the
 	// filter FilterContainsCaseInsensitive is used.
-	Filter func(filterText string, choice *Choice) bool
+	Filter func(filterText string, choice *Choice[T]) bool
 
 	// FilterPlaceholder holds the text that is displayed in the filter input
 	// field when no text was entered by the user yet. If empty, the
@@ -171,14 +171,14 @@ type Selection struct {
 	// nil, no style will be applied and the plain string representation of the
 	// choice will be used. This style will be available as the template
 	// function Selected. Custom templates may or may not use this function.
-	SelectedChoiceStyle func(*Choice) string
+	SelectedChoiceStyle func(*Choice[T]) string
 
 	// UnselectedChoiceStyle style allows to customize the appearance of the
 	// currently unselected choice. By default it is nil, such that no style
 	// will be applied and the plain string representation of the choice will be
 	// used.This style will be available as the template function Unselected.
 	// Custom templates may or may not use this function.
-	UnselectedChoiceStyle func(*Choice) string
+	UnselectedChoiceStyle func(*Choice[T]) string
 
 	// FinalChoiceStyle style allows to customize the appearance of the choice
 	// that was ultimately chosen. By default DefaultFinalChoiceStyle is used.
@@ -186,7 +186,7 @@ type Selection struct {
 	// representation of the choice will be used. This style will be available
 	// as the template function Final. Custom templates may or may not use this
 	// function.
-	FinalChoiceStyle func(*Choice) string
+	FinalChoiceStyle func(*Choice[T]) string
 
 	// KeyMap determines with which keys the selection prompt is controlled. By
 	// default, DefaultKeyMap is used.
@@ -210,17 +210,17 @@ type Selection struct {
 
 // New creates a new selection prompt. See the Selection properties for more
 // documentation.
-func New(prompt string, choices []*Choice) *Selection {
-	return &Selection{
-		Choices:                     choices,
+func New[T any](prompt string, choices []T) *Selection[T] {
+	return &Selection[T]{
+		Choices:                     asChoices(choices),
 		Prompt:                      prompt,
 		FilterPrompt:                DefaultFilterPrompt,
 		Template:                    DefaultTemplate,
 		ResultTemplate:              DefaultResultTemplate,
-		Filter:                      FilterContainsCaseInsensitive,
+		Filter:                      FilterContainsCaseInsensitive[T],
 		FilterInputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
-		SelectedChoiceStyle:         DefaultSelectedChoiceStyle,
-		FinalChoiceStyle:            DefaultFinalChoiceStyle,
+		SelectedChoiceStyle:         DefaultSelectedChoiceStyle[T],
+		FinalChoiceStyle:            DefaultFinalChoiceStyle[T],
 		KeyMap:                      NewDefaultKeyMap(),
 		FilterPlaceholder:           DefaultFilterPlaceholder,
 		ExtendedTemplateFuncs:       template.FuncMap{},
@@ -231,17 +231,19 @@ func New(prompt string, choices []*Choice) *Selection {
 }
 
 // RunPrompt executes the selection prompt.
-func (s *Selection) RunPrompt() (*Choice, error) {
+func (s *Selection[T]) RunPrompt() (T, error) {
+	var zeroValue T
+
 	err := validateKeyMap(s.KeyMap)
 	if err != nil {
-		return nil, fmt.Errorf("insufficient key map: %w", err)
+		return zeroValue, fmt.Errorf("insufficient key map: %w", err)
 	}
 
 	m := NewModel(s)
 
 	p := tea.NewProgram(m, tea.WithOutput(s.Output), tea.WithInput(s.Input))
 	if err := p.Start(); err != nil {
-		return nil, fmt.Errorf("running prompt: %w", err)
+		return zeroValue, fmt.Errorf("running prompt: %w", err)
 	}
 
 	return m.Value()
@@ -249,12 +251,12 @@ func (s *Selection) RunPrompt() (*Choice, error) {
 
 // FilterContainsCaseInsensitive returns true if the string representation of
 // the choice contains the filter string without regard for capitalization.
-func FilterContainsCaseInsensitive(filter string, choice *Choice) bool {
+func FilterContainsCaseInsensitive[T any](filter string, choice *Choice[T]) bool {
 	return strings.Contains(strings.ToLower(choice.String), strings.ToLower(filter))
 }
 
 // FilterContainsCaseSensitive returns true if the string representation of the
 // choice contains the filter string respecting capitalization.
-func FilterContainsCaseSensitive(filter string, choice *Choice) bool {
+func FilterContainsCaseSensitive[T any](filter string, choice *Choice[T]) bool {
 	return strings.Contains(choice.String, filter)
 }

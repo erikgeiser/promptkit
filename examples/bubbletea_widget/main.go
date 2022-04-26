@@ -12,7 +12,7 @@ import (
 type shoppingCart struct {
 	availableItems []string
 	addedItems     map[string]int
-	selection      *selection.Model
+	selection      *selection.Model[string]
 	err            error
 }
 
@@ -23,8 +23,7 @@ func newShoppingCart(items ...string) *shoppingCart {
 var _ tea.Model = &shoppingCart{}
 
 func (s *shoppingCart) Init() tea.Cmd {
-	sel := selection.New("Add Items to Your Shopping Cart:",
-		selection.Choices(s.availableItems))
+	sel := selection.New("Add Items to Your Shopping Cart:", s.availableItems)
 	sel.Filter = nil
 
 	s.selection = selection.NewModel(sel)
@@ -47,7 +46,7 @@ func (s *shoppingCart) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return s, tea.Quit
 		}
 
-		s.addedItems[c.Value.(string)]++ // nolint:forcetypeassert
+		s.addedItems[c]++
 	case keyMsg.String() == "esc":
 		return s, tea.Quit
 	default:

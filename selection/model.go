@@ -13,8 +13,8 @@ import (
 )
 
 // Model implements the bubbletea.Model for a selection prompt.
-type Model struct {
-	*Selection
+type Model[T any] struct {
+	*Selection[T]
 
 	// Err holds errors that may occur during the execution of
 	// the selection prompt.
@@ -25,7 +25,7 @@ type Model struct {
 
 	filterInput textinput.Model
 	// currently displayed choices, after filtering and pagination
-	currentChoices []*Choice
+	currentChoices []*Choice[T]
 	// number of available choices after filtering
 	availableChoices int
 	// index of current selection in currentChoices slice
@@ -41,16 +41,16 @@ type Model struct {
 }
 
 // ensure that the Model interface is implemented.
-var _ tea.Model = &Model{}
+var _ tea.Model = &Model[any]{}
 
 // NewModel returns a new selection prompt model for the
 // provided choices.
-func NewModel(selection *Selection) *Model {
-	return &Model{Selection: selection}
+func NewModel[T any](selection *Selection[T]) *Model[T] {
+	return &Model[T]{Selection: selection}
 }
 
 // Init initializes the selection prompt model.
-func (m *Model) Init() tea.Cmd {
+func (m *Model[T]) Init() tea.Cmd {
 	m.reindexChoices()
 
 	if len(m.Choices) == 0 {
@@ -88,7 +88,7 @@ func (m *Model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m *Model) initTemplate() (*template.Template, error) {
+func (m *Model[T]) initTemplate() (*template.Template, error) {
 	tmpl := template.New("view")
 	tmpl.Funcs(termenv.TemplateFuncs(m.ColorProfile))
 	tmpl.Funcs(m.ExtendedTemplateFuncs)
@@ -100,14 +100,14 @@ func (m *Model) initTemplate() (*template.Template, error) {
 		"IsScrollUpHintPosition": func(idx int) bool {
 			return m.canScrollUp() && idx == 0 && m.scrollOffset > 0
 		},
-		"Selected": func(c *Choice) string {
+		"Selected": func(c *Choice[T]) string {
 			if m.SelectedChoiceStyle == nil {
 				return c.String
 			}
 
 			return m.SelectedChoiceStyle(c)
 		},
-		"Unselected": func(c *Choice) string {
+		"Unselected": func(c *Choice[T]) string {
 			if m.UnselectedChoiceStyle == nil {
 				return c.String
 			}
@@ -119,7 +119,7 @@ func (m *Model) initTemplate() (*template.Template, error) {
 	return tmpl.Parse(m.Template)
 }
 
-func (m *Model) initResultTemplate() (*template.Template, error) {
+func (m *Model[T]) initResultTemplate() (*template.Template, error) {
 	if m.ResultTemplate == "" {
 		return nil, nil // nolint:nilnil
 	}
@@ -129,7 +129,7 @@ func (m *Model) initResultTemplate() (*template.Template, error) {
 	tmpl.Funcs(m.ExtendedTemplateFuncs)
 	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(template.FuncMap{
-		"Final": func(c *Choice) string {
+		"Final": func(c *Choice[T]) string {
 			if m.FinalChoiceStyle == nil {
 				return c.String
 			}
@@ -141,7 +141,7 @@ func (m *Model) initResultTemplate() (*template.Template, error) {
 	return tmpl.Parse(m.ResultTemplate)
 }
 
-func (m *Model) initFilterInput() textinput.Model {
+func (m *Model[T]) initFilterInput() textinput.Model {
 	filterInput := textinput.NewModel()
 	filterInput.Prompt = ""
 	filterInput.TextStyle = m.FilterInputTextStyle
@@ -155,9 +155,7 @@ func (m *Model) initFilterInput() textinput.Model {
 	return filterInput
 }
 
-// Value returns the choice that is currently selected or the final
-// choice after the prompt has concluded.
-func (m *Model) Value() (*Choice, error) {
+func (m *Model[T]) ValueAsChoice() (*Choice[T], error) {
 	if m.Err != nil {
 		return nil, m.Err
 	}
@@ -173,8 +171,21 @@ func (m *Model) Value() (*Choice, error) {
 	return m.currentChoices[m.currentIdx], nil
 }
 
+// Value returns the choice that is currently selected or the final
+// choice after the prompt has concluded.
+func (m *Model[T]) Value() (T, error) {
+	choice, err := m.ValueAsChoice()
+	if err != nil {
+		var zeroValue T
+
+		return zeroValue, err
+	}
+
+	return choice.Value, nil
+}
+
 // Update updates the model based on the received message.
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if m.Err != nil {
 		return m, tea.Quit
 	}
@@ -231,7 +242,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *Model) forceUpdatePageSizeForHeight() {
+func (m *Model[T]) forceUpdatePageSizeForHeight() {
 	if m.requestedPageSize == 0 {
 		m.PageSize = len(m.Choices)
 	} else {
@@ -251,7 +262,7 @@ func (m *Model) forceUpdatePageSizeForHeight() {
 	}
 }
 
-func (m *Model) updateFilter(msg tea.Msg) (*Model, tea.Cmd) {
+func (m *Model[T]) updateFilter(msg tea.Msg) (*Model[T], tea.Cmd) {
 	if m.Filter == nil {
 		return m, nil
 	}
@@ -271,7 +282,7 @@ func (m *Model) updateFilter(msg tea.Msg) (*Model, tea.Cmd) {
 }
 
 // View renders the selection prompt.
-func (m *Model) View() string {
+func (m *Model[T]) View() string {
 	viewBuffer := &bytes.Buffer{}
 
 	if m.quitting {
@@ -313,7 +324,7 @@ func (m *Model) View() string {
 	return m.wrap(viewBuffer.String())
 }
 
-func (m *Model) resultView() (string, error) {
+func (m *Model[T]) resultView() (string, error) {
 	viewBuffer := &bytes.Buffer{}
 
 	if m.ResultTemplate == "" {
@@ -324,7 +335,7 @@ func (m *Model) resultView() (string, error) {
 		return "", fmt.Errorf("rendering confirmation without loaded template")
 	}
 
-	choice, err := m.Value()
+	choice, err := m.ValueAsChoice()
 	if err != nil {
 		return "", err
 	}
@@ -343,7 +354,7 @@ func (m *Model) resultView() (string, error) {
 	return viewBuffer.String(), nil
 }
 
-func (m *Model) wrap(text string) string {
+func (m *Model[T]) wrap(text string) string {
 	if m.WrapMode == nil {
 		return text
 	}
@@ -351,8 +362,8 @@ func (m *Model) wrap(text string) string {
 	return m.WrapMode(text, m.width)
 }
 
-func (m *Model) filteredAndPagedChoices() ([]*Choice, int) {
-	choices := []*Choice{}
+func (m *Model[T]) filteredAndPagedChoices() ([]*Choice[T], int) {
+	choices := []*Choice[T]{}
 
 	var available, ignored int
 
@@ -375,7 +386,7 @@ func (m *Model) filteredAndPagedChoices() ([]*Choice, int) {
 	return choices, available
 }
 
-func (m *Model) canScrollDown() bool {
+func (m *Model[T]) canScrollDown() bool {
 	if m.PageSize <= 0 || m.availableChoices <= m.PageSize {
 		return false
 	}
@@ -387,11 +398,11 @@ func (m *Model) canScrollDown() bool {
 	return true
 }
 
-func (m *Model) canScrollUp() bool {
+func (m *Model[T]) canScrollUp() bool {
 	return m.scrollOffset > 0
 }
 
-func (m *Model) cursorDown() {
+func (m *Model[T]) cursorDown() {
 	if m.currentIdx == len(m.currentChoices)-1 {
 		if m.canScrollDown() {
 			m.scrollDown()
@@ -405,7 +416,7 @@ func (m *Model) cursorDown() {
 	m.currentIdx = min(len(m.currentChoices)-1, m.currentIdx+1)
 }
 
-func (m *Model) cursorUp() {
+func (m *Model[T]) cursorUp() {
 	if m.currentIdx == 0 {
 		if m.canScrollUp() {
 			m.scrollUp()
@@ -419,7 +430,7 @@ func (m *Model) cursorUp() {
 	m.currentIdx = max(0, m.currentIdx-1)
 }
 
-func (m *Model) scrollDown() {
+func (m *Model[T]) scrollDown() {
 	if m.PageSize <= 0 || m.scrollOffset+m.PageSize >= m.availableChoices {
 		return
 	}
@@ -429,7 +440,7 @@ func (m *Model) scrollDown() {
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
 
-func (m *Model) scrollToBottom() {
+func (m *Model[T]) scrollToBottom() {
 	m.currentIdx = len(m.currentChoices) - 1
 
 	if m.PageSize <= 0 || m.availableChoices < m.PageSize {
@@ -440,7 +451,7 @@ func (m *Model) scrollToBottom() {
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
 
-func (m *Model) scrollUp() {
+func (m *Model[T]) scrollUp() {
 	if m.PageSize <= 0 || m.scrollOffset <= 0 {
 		return
 	}
@@ -450,7 +461,7 @@ func (m *Model) scrollUp() {
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
 
-func (m *Model) scrollToTop() {
+func (m *Model[T]) scrollToTop() {
 	m.currentIdx = 0
 
 	if m.PageSize <= 0 || m.availableChoices < m.PageSize {
@@ -461,7 +472,7 @@ func (m *Model) scrollToTop() {
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
 
-func (m *Model) reindexChoices() {
+func (m *Model[T]) reindexChoices() {
 	for i, choice := range m.Choices {
 		choice.Index = i
 	}

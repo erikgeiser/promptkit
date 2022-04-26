@@ -54,31 +54,25 @@ func main() {
 
 	blue := termenv.String().Foreground(termenv.ANSI256Color(32)) // nolint:gomnd
 
-	sp := selection.New("Choose an article!", selection.Choices(choices))
+	sp := selection.New("Choose an article!", choices)
 	sp.FilterPrompt = "Filter by ID:"
 	sp.FilterPlaceholder = "Type to filter"
 	sp.PageSize = 3
 	sp.LoopCursor = true
-	sp.Filter = func(filter string, choice *selection.Choice) bool {
-		chosenArticle, _ := choice.Value.(article)
-
-		return strings.HasPrefix(chosenArticle.ID, filter)
+	sp.Filter = func(filter string, choice *selection.Choice[article]) bool {
+		return strings.HasPrefix(choice.Value.ID, filter)
 	}
 	sp.Template = customTemplate
 	sp.ResultTemplate = resultTemplate
-	sp.SelectedChoiceStyle = func(c *selection.Choice) string {
-		a, _ := c.Value.(article)
-
-		return blue.Bold().Styled(a.Name) + " " + termenv.String("("+a.ID+")").Faint().String()
+	sp.SelectedChoiceStyle = func(c *selection.Choice[article]) string {
+		return (blue.Bold().Styled(c.Value.Name) + " " +
+			termenv.String("("+c.Value.ID+")").Faint().String())
 	}
-	sp.UnselectedChoiceStyle = func(c *selection.Choice) string {
-		a, _ := c.Value.(article)
-
-		return a.Name + " " + termenv.String("("+a.ID+")").Faint().String()
+	sp.UnselectedChoiceStyle = func(c *selection.Choice[article]) string {
+		return c.Value.Name + " " + termenv.String("("+c.Value.ID+")").Faint().String()
 	}
 	sp.ExtendedTemplateFuncs = map[string]interface{}{
-		// nolint:forcetypeassert
-		"name": func(c *selection.Choice) string { return c.Value.(article).Name },
+		"name": func(c *selection.Choice[article]) string { return c.Value.Name },
 	}
 
 	choice, err := sp.RunPrompt()
