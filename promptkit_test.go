@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/erikgeiser/promptkit"
+	_ "github.com/erikgeiser/promptkit/test"
 )
 
 func TestWordWrap(t *testing.T) {
