@@ -13,8 +13,12 @@ import (
 )
 
 var (
-	update  = flag.Bool("update", false, "update the golden files")
-	inspect = flag.Bool("inspect", false, "inspect strings in detail")
+	// UpdateGoldenFiles specifies whether the golden files should be updated.
+	UpdateGoldenFiles = flag.Bool("update", false, "update the golden files")
+
+	// Inspect prints string mismatches escaped such that the differences can be
+	// inspected in detail.
+	Inspect = flag.Bool("inspect", false, "inspect strings in detail")
 )
 
 // MsgsFromText generates KeyMsg events from a given text.
@@ -68,7 +72,7 @@ func AssertGoldenView(tb testing.TB, m tea.Model, expectedViewFile string) {
 	view := m.View()
 	goldenFilePath := filepath.Join("testdata", expectedViewFile)
 
-	if _, err := os.Stat(goldenFilePath); errors.Is(err, os.ErrNotExist) || *update {
+	if _, err := os.Stat(goldenFilePath); errors.Is(err, os.ErrNotExist) || *UpdateGoldenFiles {
 		err := os.WriteFile(goldenFilePath, []byte(view), 0o664) // nolint:gosec,gomnd
 		if err != nil {
 			tb.Fatalf("updating golden view: %v", err)
@@ -86,7 +90,7 @@ func AssertGoldenView(tb testing.TB, m tea.Model, expectedViewFile string) {
 
 	if view != expectedView {
 		comparison := "Expected:\n%s\nGot:\n%s"
-		if *inspect {
+		if *Inspect {
 			comparison = "Expected:\n%q\nGot:\n%q"
 		}
 

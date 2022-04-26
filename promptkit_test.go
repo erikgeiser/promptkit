@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/erikgeiser/promptkit"
-	_ "github.com/erikgeiser/promptkit/test"
+	"github.com/erikgeiser/promptkit/test"
 )
 
 func TestWordWrap(t *testing.T) {
@@ -12,11 +12,7 @@ func TestWordWrap(t *testing.T) {
 
 	text := "ab cde fgh ijklmnopq rs"
 	expected := "ab cde\nfgh\nijklmno\npq\nrs"
-	got := promptkit.WordWrap(text, 7)
-
-	if got != expected {
-		t.Errorf("unexpected result:\nExpected:\n%s\nGot:\n%s", expected, got)
-	}
+	assertEqual(t, expected, promptkit.WordWrap(text, 7))
 }
 
 func TestHardWrap(t *testing.T) {
@@ -24,9 +20,28 @@ func TestHardWrap(t *testing.T) {
 
 	text := "ab cde fgh ijklmnopq rs"
 	expected := "ab cde \nfgh ijk\nlmnopq \nrs"
-	got := promptkit.HardWrap(text, 7)
+	assertEqual(t, expected, promptkit.HardWrap(text, 7))
+}
 
-	if got != expected {
-		t.Errorf("unexpected result:\nExpected:\n%s\nGot:\n%s", expected, got)
+func TestTruncate(t *testing.T) {
+	t.Parallel()
+
+	text := "0123456789\n0123\n0123456789"
+	expected := "012345\n0123\n012345"
+	assertEqual(t, expected, promptkit.Truncate(text, 6))
+}
+
+func assertEqual(tb testing.TB, expected string, got string) {
+	tb.Helper()
+
+	if expected == got {
+		return
 	}
+
+	comparison := "Expected:\n%s\nGot:\n%s"
+	if *test.Inspect {
+		comparison = "Expected:\n%q\nGot:\n%q"
+	}
+
+	tb.Errorf("unexpected result:\n"+comparison, expected, got)
 }
