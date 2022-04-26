@@ -33,10 +33,10 @@ const (
   {{- if IsScrollUpHintPosition $i }}
     {{- "⇡ " -}}
   {{- else if IsScrollDownHintPosition $i -}}
-    {{- "⇣ " -}} 
+    {{- "⇣ " -}}
   {{- else -}}
     {{- "  " -}}
-  {{- end -}} 
+  {{- end -}}
 
   {{- if eq $.SelectedIndex $i }}
    {{- print (Foreground "32" (Bold "▸ ")) (Selected $choice) "\n" }}
@@ -100,7 +100,8 @@ type Selection struct {
 
 	// PageSize is the number of choices that are displayed at once. If PageSize
 	// is smaller than the number of choices, pagination is enabled. If PageSize
-	// is 0, pagenation is always disabled.
+	// is 0, pagenation is disabled. Regardless of the value of PageSize,
+	// pagination is always enabled when the prompt does not fit the terminal.
 	PageSize int
 
 	// Template holds the display template. A custom template can be used to

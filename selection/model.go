@@ -3,6 +3,7 @@ package selection
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -28,11 +29,13 @@ type Model struct {
 	// number of available choices after filtering
 	availableChoices int
 	// index of current selection in currentChoices slice
-	currentIdx   int
-	scrollOffset int
-	width        int
-	tmpl         *template.Template
-	resultTmpl   *template.Template
+	currentIdx        int
+	scrollOffset      int
+	width             int
+	height            int
+	tmpl              *template.Template
+	resultTmpl        *template.Template
+	requestedPageSize int
 
 	quitting bool
 }
@@ -80,6 +83,8 @@ func (m *Model) Init() tea.Cmd {
 
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
+	m.requestedPageSize = m.PageSize
+
 	return textinput.Blink
 }
 
@@ -116,7 +121,7 @@ func (m *Model) initTemplate() (*template.Template, error) {
 
 func (m *Model) initResultTemplate() (*template.Template, error) {
 	if m.ResultTemplate == "" {
-		return nil, nil
+		return nil, nil // nolint:nilnil
 	}
 
 	tmpl := template.New("result")
@@ -209,6 +214,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = zeroAwareMin(msg.Width, m.MaxWidth)
 
+		if m.height != msg.Height {
+			m.height = msg.Height
+			m.forceUpdatePageSizeForHeight()
+		}
+
 		return m, nil
 	case error:
 		m.Err = msg
@@ -219,6 +229,26 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	return m, cmd
+}
+
+func (m *Model) forceUpdatePageSizeForHeight() {
+	if m.requestedPageSize == 0 {
+		m.PageSize = len(m.Choices)
+	} else {
+		m.PageSize = min(len(m.Choices), m.requestedPageSize)
+	}
+
+	for m.PageSize > 1 {
+		m.currentIdx = 0
+		m.scrollOffset = 0
+		m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
+
+		if len(strings.Split(m.View(), "\n")) <= m.height {
+			break
+		}
+
+		m.PageSize--
+	}
 }
 
 func (m *Model) updateFilter(msg tea.Msg) (*Model, tea.Cmd) {
