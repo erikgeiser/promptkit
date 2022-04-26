@@ -8,11 +8,13 @@ The actual prompt components can be found in the sub directories.
 package promptkit
 
 import (
+	"bufio"
 	"fmt"
 	"strings"
 	"text/template"
 
 	"github.com/muesli/reflow/ansi"
+	"github.com/muesli/reflow/truncate"
 	"github.com/muesli/reflow/wordwrap"
 	"github.com/muesli/reflow/wrap"
 )
@@ -73,3 +75,18 @@ func HardWrap(input string, width int) string {
 }
 
 var _ WrapMode = HardWrap
+
+// Truncate cuts the string after the given width.
+func Truncate(input string, width int) string {
+	var truncated strings.Builder
+
+	scanner := bufio.NewScanner(strings.NewReader(input))
+
+	for scanner.Scan() {
+		truncated.WriteString(truncate.String(scanner.Text(), uint(width)) + "\n")
+	}
+
+	return truncated.String()
+}
+
+var _ WrapMode = Truncate
