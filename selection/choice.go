@@ -6,19 +6,21 @@ import (
 
 // Choice represents a single choice. This type used as an input
 // for the selection prompt, for filtering and as a result value.
-// The index is populated by the prompt itself and is exported
-// to be accessed when filtering.
 type Choice[T any] struct {
-	Index  int
+	idx    int
 	String string
 	Value  T
+}
+
+func (c *Choice[T]) Index() int {
+	return c.idx
 }
 
 // newChoice creates a new choice for a given input and chooses
 // a suitable string representation. The index is left at 0 to
 // be populated by the selection prompt later on.
 func newChoice[T any](item T) *Choice[T] {
-	choice := &Choice[T]{Index: 0, Value: item}
+	choice := &Choice[T]{idx: 0, Value: item}
 
 	switch i := any(item).(type) {
 	case Choice[T]:

@@ -53,7 +53,7 @@ func NewModel[T any](selection *Selection[T]) *Model[T] {
 func (m *Model[T]) Init() tea.Cmd {
 	m.reindexChoices()
 
-	if len(m.Choices) == 0 {
+	if len(m.choices) == 0 {
 		m.Err = fmt.Errorf("no choices provided")
 
 		return tea.Quit
@@ -244,9 +244,9 @@ func (m *Model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *Model[T]) forceUpdatePageSizeForHeight() {
 	if m.requestedPageSize == 0 {
-		m.PageSize = len(m.Choices)
+		m.PageSize = len(m.choices)
 	} else {
-		m.PageSize = min(len(m.Choices), m.requestedPageSize)
+		m.PageSize = min(len(m.choices), m.requestedPageSize)
 	}
 
 	for m.PageSize > 1 {
@@ -311,8 +311,8 @@ func (m *Model[T]) View() string {
 		"SelectedIndex": m.currentIdx,
 		"PageSize":      m.PageSize,
 		"IsPaged":       m.PageSize > 0 && len(m.currentChoices) > m.PageSize,
-		"AllChoices":    m.Choices,
-		"NAllChoices":   len(m.Choices),
+		"AllChoices":    m.choices,
+		"NAllChoices":   len(m.choices),
 		"TerminalWidth": m.width,
 	})
 	if err != nil {
@@ -343,8 +343,8 @@ func (m *Model[T]) resultView() (string, error) {
 	err = m.resultTmpl.Execute(viewBuffer, map[string]interface{}{
 		"FinalChoice":   choice,
 		"Prompt":        m.Prompt,
-		"AllChoices":    m.Choices,
-		"NAllChoices":   len(m.Choices),
+		"AllChoices":    m.choices,
+		"NAllChoices":   len(m.choices),
 		"TerminalWidth": m.width,
 	})
 	if err != nil {
@@ -367,7 +367,7 @@ func (m *Model[T]) filteredAndPagedChoices() ([]*Choice[T], int) {
 
 	var available, ignored int
 
-	for _, choice := range m.Choices {
+	for _, choice := range m.choices {
 		if m.Filter != nil && !m.Filter(m.filterInput.Value(), choice) {
 			continue
 		}
@@ -391,7 +391,7 @@ func (m *Model[T]) canScrollDown() bool {
 		return false
 	}
 
-	if m.scrollOffset+m.PageSize >= len(m.Choices) {
+	if m.scrollOffset+m.PageSize >= len(m.choices) {
 		return false
 	}
 
@@ -473,8 +473,8 @@ func (m *Model[T]) scrollToTop() {
 }
 
 func (m *Model[T]) reindexChoices() {
-	for i, choice := range m.Choices {
-		choice.Index = i
+	for i, choice := range m.choices {
+		choice.idx = i
 	}
 }
 

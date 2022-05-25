@@ -74,10 +74,10 @@ func DefaultFinalChoiceStyle[T any](c *Choice[T]) string {
 
 // Selection represents a configurable selection prompt.
 type Selection[T any] struct {
-	// Choices represent all selectable choices of the selection. Slices of
+	// choices represent all selectable choices of the selection. Slices of
 	// arbitrary types can be converted to a slice of choices using the helper
-	// selection.Choices.
-	Choices []*Choice[T]
+	// selection.choices.
+	choices []*Choice[T]
 
 	// Prompt holds the the prompt text or question that is to be answered by
 	// one of the choices.
@@ -176,7 +176,7 @@ type Selection[T any] struct {
 	// UnselectedChoiceStyle style allows to customize the appearance of the
 	// currently unselected choice. By default it is nil, such that no style
 	// will be applied and the plain string representation of the choice will be
-	// used.This style will be available as the template function Unselected.
+	// used. This style will be available as the template function Unselected.
 	// Custom templates may or may not use this function.
 	UnselectedChoiceStyle func(*Choice[T]) string
 
@@ -212,7 +212,7 @@ type Selection[T any] struct {
 // documentation.
 func New[T any](prompt string, choices []T) *Selection[T] {
 	return &Selection[T]{
-		Choices:                     asChoices(choices),
+		choices:                     asChoices(choices),
 		Prompt:                      prompt,
 		FilterPrompt:                DefaultFilterPrompt,
 		Template:                    DefaultTemplate,
