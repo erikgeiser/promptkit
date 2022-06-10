@@ -125,6 +125,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 				return m, tea.Quit
 			}
+		case keyMatches(msg, m.KeyMap.AutoComplete):
+			if m.AutoComplete != nil {
+				m.input.SetValue(m.autoCompleteResult(m.input.Value()))
+				m.input.CursorEnd()
+			}
 		case keyMatches(msg, m.KeyMap.Abort):
 			m.Err = promptkit.ErrAborted
 			m.quitting = true
@@ -132,6 +137,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case keyMatches(msg, m.KeyMap.Reset):
 			m.input.SetValue(m.InitialValue)
+			m.input.CursorStart()
 
 			return m, cmd
 		case keyMatches(msg, m.KeyMap.Clear):
@@ -268,6 +274,21 @@ func (t *TextInput) mask(s string) string {
 	}
 
 	return strings.Repeat(string(t.HideMask), len(s))
+}
+
+func (t *TextInput) autoCompleteResult(input string) string {
+	if t.AutoComplete == nil {
+		return input
+	}
+
+	switch candidates := t.AutoComplete(input); len(candidates) {
+	case 0:
+		return input
+	case 1:
+		return candidates[0]
+	default:
+		return commonPrefix(candidates)
+	}
 }
 
 func zeroAwareMin(a int, b int) int {
