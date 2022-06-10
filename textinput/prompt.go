@@ -63,6 +63,13 @@ type TextInput struct {
 	// validation is performed.
 	Validate func(string) error
 
+	// AutoComplete is a function that suggests multiple candidates for
+	// auto-completion based on a given input. If it returns only a single
+	// candidate, this candidate is auto-completed. If it returns multiple
+	// candidates, these candidates may be displayed in custom templates.
+	// If AutoComplete is nil, no auto-completion is performed.
+	AutoComplete func(string) []string
+
 	// Hidden specified whether or not the input data is considered secret and
 	// should be masked. This is useful for password prompts.
 	Hidden bool

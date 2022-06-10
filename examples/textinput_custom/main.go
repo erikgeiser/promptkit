@@ -25,8 +25,7 @@ func main() {
 	`
 
 	const customResultTemplate = `
-	{{- Bold (print "🖥️  Connecting to " (Foreground "32" .FinalValue) "\n") -}}
-	`
+	{{- Bold (print "🖥️  Connecting to " (Foreground "32" .FinalValue) ) -}}`
 
 	input := textinput.New("Enter an IP address")
 	input.Placeholder = "127.0.0.1"
@@ -40,6 +39,11 @@ func main() {
 	input.Template = customTemplate
 	input.ResultTemplate = customResultTemplate
 	input.CharLimit = 15
+	input.AutoComplete = textinput.AutoCompleteFromSliceWithDefault([]string{
+		"10.0.0.1",
+		"127.0.0.1",
+		"fe80::1",
+	}, input.Placeholder)
 
 	ip, err := input.RunPrompt()
 	if err != nil {

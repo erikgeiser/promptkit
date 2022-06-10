@@ -19,9 +19,10 @@ func NewDefaultKeyMap() *KeyMap {
 		DeleteUnderCursor:      []string{"delete", "ctrl+d"},
 		DeleteAllAfterCursor:   []string{"ctrl+k"},
 		DeleteAllBeforeCursor:  []string{"ctrl+u"},
+		AutoComplete:           []string{"tab"},
 		Paste:                  []string{"ctrl+v"},
 		Clear:                  []string{"esc"},
-		Reset:                  []string{"tab"},
+		Reset:                  []string{},
 		Submit:                 []string{"enter"},
 		Abort:                  []string{"ctrl+c"},
 	}
@@ -51,6 +52,7 @@ type KeyMap struct {
 	DeleteUnderCursor      []string
 	DeleteAllAfterCursor   []string
 	DeleteAllBeforeCursor  []string
+	AutoComplete           []string
 	Paste                  []string
 	Clear                  []string
 	Reset                  []string
@@ -96,6 +98,7 @@ func allKeys(km *KeyMap) (keys []string) {
 	keys = append(keys, km.DeleteUnderCursor...)
 	keys = append(keys, km.DeleteAllAfterCursor...)
 	keys = append(keys, km.DeleteAllBeforeCursor...)
+	keys = append(keys, km.AutoComplete...)
 	keys = append(keys, km.Paste...)
 	keys = append(keys, km.Clear...)
 	keys = append(keys, km.Reset...)
