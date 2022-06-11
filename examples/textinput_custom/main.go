@@ -18,9 +18,15 @@ func main() {
 	{{- else -}}
 		{{- Foreground "2" (Bold "✔") -}}
 	{{- end -}}┃
-	{{- "\n┗" }}━{{ Repeat "━" (Len .Prompt) }}━┷━{{ Repeat "━" 13 }}{{ "━━━━┛\n" -}}
 	{{- if .ValidationError -}}
 		{{- (print " Error: " (Foreground "1" .ValidationError.Error)) -}}
+	{{- end -}}
+	{{- "\n┗" }}━{{ Repeat "━" (Len .Prompt) }}━┷━{{ Repeat "━" 13 }}{{ "━━━━┛\n" -}}
+	{{- if .AutoCompleteIndecisive -}}
+		{{ print "  Suggestions: " }}
+		{{- range $suggestion := AutoCompleteCandidates -}}
+			{{- print $suggestion " " -}}
+		{{- end -}}
 	{{- end -}}
 	`
 
@@ -41,6 +47,7 @@ func main() {
 	input.CharLimit = 15
 	input.AutoComplete = textinput.AutoCompleteFromSliceWithDefault([]string{
 		"10.0.0.1",
+		"10.0.0.2",
 		"127.0.0.1",
 		"fe80::1",
 	}, input.Placeholder)

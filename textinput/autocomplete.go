@@ -58,7 +58,7 @@ func autoCompleteFromSlice(choices []string, caseSensitive bool) func(string) []
 			v = strings.ToLower(value)
 		}
 
-		var candidates []string
+		var suggestions []string
 
 		for _, choice := range choices {
 			ch := choice
@@ -67,35 +67,34 @@ func autoCompleteFromSlice(choices []string, caseSensitive bool) func(string) []
 			}
 
 			if strings.HasPrefix(ch, v) {
-				candidates = append(candidates, choice)
+				suggestions = append(suggestions, choice)
 			}
 		}
 
-		return candidates
+		return suggestions
 	}
 }
 
-func commonPrefix(candidates []string) string {
-	if len(candidates) == 0 {
+func commonPrefix(suggestions []string) string {
+	if len(suggestions) == 0 {
 		return ""
+	} else if len(suggestions) == 1 {
+		return suggestions[0]
 	}
 
-	commonPrefix := ""
-	endPrefix := false
+	// by sorting we ensure that the prefixes differ the most between the first
+	// and the last element in the slice, therefore it is sufficient only to
+	// determine the common prefix between these two
+	sort.Strings(suggestions) // O(n*log(n))
 
-	if len(candidates) > 0 {
-		sort.Strings(candidates)
-		first := candidates[0]
-		last := candidates[len(candidates)-1]
+	first := suggestions[0]
+	last := suggestions[len(suggestions)-1]
 
-		for i := 0; i < len(first); i++ {
-			if !endPrefix && string(last[i]) == string(first[i]) {
-				commonPrefix += string(last[i])
-			} else {
-				endPrefix = true
-			}
+	for i := 0; i < len(first); i++ {
+		if last[i] != first[i] {
+			return first[:i]
 		}
 	}
 
-	return commonPrefix
+	return first
 }
