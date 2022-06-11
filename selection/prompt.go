@@ -204,7 +204,8 @@ type Selection struct {
 	ColorProfile termenv.Profile
 }
 
-// New creates a new selection prompt.
+// New creates a new selection prompt. See the Selection properties for more
+// documentation.
 func New(prompt string, choices []*Choice) *Selection {
 	return &Selection{
 		Choices:                     choices,

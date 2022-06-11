@@ -130,7 +130,7 @@ type Confirmation struct {
 }
 
 // New creates a new text input. If the default value is nil it is equivalent to
-// Undecided.
+// Undecided. See the Confirmation properties for more documentation.
 func New(prompt string, defaultValue Value) *Confirmation {
 	return &Confirmation{
 		Prompt:                prompt,
