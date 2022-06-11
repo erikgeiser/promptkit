@@ -24,7 +24,7 @@ func main() {
 	{{- "\n┗" }}━{{ Repeat "━" (Len .Prompt) }}━┷━{{ Repeat "━" 13 }}{{ "━━━━┛\n" -}}
 	{{- if .AutoCompleteIndecisive -}}
 		{{ print "  Suggestions: " }}
-		{{- range $suggestion := AutoCompleteCandidates -}}
+		{{- range $suggestion := AutoCompleteSuggestions -}}
 			{{- print $suggestion " " -}}
 		{{- end -}}
 	{{- end -}}
