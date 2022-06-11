@@ -66,8 +66,10 @@ type TextInput struct {
 	// AutoComplete is a function that suggests multiple candidates for
 	// auto-completion based on a given input. If it returns only a single
 	// candidate, this candidate is auto-completed. If it returns multiple
-	// candidates, these candidates may be displayed in custom templates.
-	// If AutoComplete is nil, no auto-completion is performed.
+	// candidates, these candidates may be displayed in custom templates using
+	// the variables AutoCompleteTriggered, AutoCompleteIndecisive as well as
+	// the function AutoCompleteSuggestions. If AutoComplete is nil, no
+	// auto-completion is performed.
 	AutoComplete func(string) []string
 
 	// Hidden specified whether or not the input data is considered secret and
@@ -115,6 +117,13 @@ type TextInput struct {
 	//  * InitialValue string: The configured initial value of the input.
 	//  * Placeholder string: The configured placeholder of the input.
 	//  * TerminalWidth int: The width of the terminal.
+	//  * AutoCompleteTriggered bool: An indication that auto-complete was
+	//    just triggered by the user. It resets after further input.
+	//  * AutoCompleteIndecisive bool: An indication that auto-complete was
+	//    just triggered by the user with an indecisive results. It resets
+	//    after further input.
+	//  * AutoCompleteSuggestions() []string: A function that returns the
+	//    auto-complete suggestions for the current input.
 	//  * Mask(string) string: A function that replaces all characters of
 	//    a string with the character specified in HideMask if Hidden is
 	//    true and returns the input string if Hidden is false.
@@ -156,7 +165,8 @@ type TextInput struct {
 	ColorProfile termenv.Profile
 }
 
-// New creates a new text input.
+// New creates a new text input. See the TextInput properties for more
+// documentation.
 func New(prompt string) *TextInput {
 	return &TextInput{
 		Prompt:                prompt,
@@ -164,13 +174,7 @@ func New(prompt string) *TextInput {
 		ResultTemplate:        DefaultResultTemplate,
 		KeyMap:                NewDefaultKeyMap(),
 		InputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
-		Validate: func(s string) error {
-			if len(s) == 0 {
-				return ErrInputValidation
-			}
-
-			return nil
-		},
+		Validate:              ValidateNotEmpty,
 		HideMask:              DefaultMask,
 		ExtendedTemplateFuncs: template.FuncMap{},
 		WrapMode:              promptkit.Truncate,
@@ -194,4 +198,14 @@ func (t *TextInput) RunPrompt() (string, error) {
 	}
 
 	return m.Value()
+}
+
+// ValidateNotEmpty is a validation function that ensures that the input is not
+// empty.
+func ValidateNotEmpty(s string) error {
+	if len(s) == 0 {
+		return ErrInputValidation
+	}
+
+	return nil
 }

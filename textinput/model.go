@@ -28,6 +28,9 @@ type Model struct {
 	tmpl       *template.Template
 	resultTmpl *template.Template
 
+	autoCompleteTriggered  bool
+	autoCompleteIndecisive bool
+
 	quitting bool
 
 	width int
@@ -67,7 +70,12 @@ func (m *Model) initTemplate() (*template.Template, error) {
 	tmpl.Funcs(termenv.TemplateFuncs(m.ColorProfile))
 	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(m.ExtendedTemplateFuncs)
-	tmpl.Funcs(template.FuncMap{"Mask": m.mask})
+	tmpl.Funcs(template.FuncMap{
+		"Mask": m.mask,
+		"AutoCompleteSuggestions": func() []string {
+			return m.AutoComplete(m.input.Value())
+		},
+	})
 
 	return tmpl.Parse(m.Template)
 }
@@ -81,7 +89,9 @@ func (m *Model) initResultTemplate() (*template.Template, error) {
 	tmpl.Funcs(termenv.TemplateFuncs(m.ColorProfile))
 	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(m.ExtendedTemplateFuncs)
-	tmpl.Funcs(template.FuncMap{"Mask": m.mask})
+	tmpl.Funcs(template.FuncMap{
+		"Mask": m.mask,
+	})
 
 	return tmpl.Parse(m.ResultTemplate)
 }
@@ -118,6 +128,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
+		m.autoCompleteTriggered = false
+		m.autoCompleteIndecisive = false
+
 		switch {
 		case keyMatches(msg, m.KeyMap.Submit):
 			if m.Validate == nil || m.Validate(m.input.Value()) == nil {
@@ -207,12 +220,14 @@ func (m *Model) View() string {
 	}
 
 	err := m.tmpl.Execute(viewBuffer, map[string]interface{}{
-		"Prompt":          m.Prompt,
-		"InitialValue":    m.InitialValue,
-		"Placeholder":     m.Placeholder,
-		"Input":           m.input.View(),
-		"ValidationError": validationErr,
-		"TerminalWidth":   m.width,
+		"Prompt":                 m.Prompt,
+		"InitialValue":           m.InitialValue,
+		"Placeholder":            m.Placeholder,
+		"Input":                  m.input.View(),
+		"ValidationError":        validationErr,
+		"TerminalWidth":          m.width,
+		"AutoCompleteTriggered":  m.autoCompleteTriggered,
+		"AutoCompleteIndecisive": m.autoCompleteIndecisive,
 	})
 	if err != nil {
 		m.Err = err
@@ -268,25 +283,29 @@ func (m *Model) Value() (string, error) {
 }
 
 // mask replaces each character with HideMask if Hidden is true.
-func (t *TextInput) mask(s string) string {
-	if !t.Hidden {
+func (m *Model) mask(s string) string {
+	if !m.Hidden {
 		return s
 	}
 
-	return strings.Repeat(string(t.HideMask), len(s))
+	return strings.Repeat(string(m.HideMask), len(s))
 }
 
-func (t *TextInput) autoCompleteResult(input string) string {
-	if t.AutoComplete == nil {
+func (m *Model) autoCompleteResult(input string) string {
+	m.autoCompleteTriggered = true
+
+	if m.AutoComplete == nil {
 		return input
 	}
 
-	switch candidates := t.AutoComplete(input); len(candidates) {
+	switch candidates := m.AutoComplete(input); len(candidates) {
 	case 0:
 		return input
 	case 1:
 		return candidates[0]
 	default:
+		m.autoCompleteIndecisive = true
+
 		return commonPrefix(candidates)
 	}
 }
