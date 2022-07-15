@@ -58,6 +58,7 @@ func main() {
 	sp.FilterPrompt = "Filter by ID:"
 	sp.FilterPlaceholder = "Type to filter"
 	sp.PageSize = 3
+	sp.LoopCursor = true
 	sp.Filter = func(filter string, choice *selection.Choice) bool {
 		chosenArticle, _ := choice.Value.(article)
 
@@ -76,6 +77,7 @@ func main() {
 		return a.Name + " " + termenv.String("("+a.ID+")").Faint().String()
 	}
 	sp.ExtendedTemplateFuncs = map[string]interface{}{
+		// nolint:forcetypeassert
 		"name": func(c *selection.Choice) string { return c.Value.(article).Name },
 	}
 
