@@ -104,6 +104,10 @@ type Selection struct {
 	// pagination is always enabled when the prompt does not fit the terminal.
 	PageSize int
 
+	// LoopCursor enables the cursor to loop around to the first choice when
+	// navigating down from the last choice and the other way around.
+	LoopCursor bool
+
 	// Template holds the display template. A custom template can be used to
 	// completely customize the appearance of the selection prompt. If empty,
 	// the DefaultTemplate is used. The following variables and functions are

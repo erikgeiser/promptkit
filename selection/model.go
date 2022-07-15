@@ -363,11 +363,7 @@ func (m *Model) filteredAndPagedChoices() ([]*Choice, int) {
 
 		available++
 
-		if m.PageSize > 0 && len(choices) >= m.PageSize {
-			break
-		}
-
-		if (m.PageSize > 0) && (ignored < m.scrollOffset) {
+		if m.PageSize > 0 && (len(choices) >= m.PageSize || ignored < m.scrollOffset) {
 			ignored++
 
 			continue
@@ -396,16 +392,28 @@ func (m *Model) canScrollUp() bool {
 }
 
 func (m *Model) cursorDown() {
-	if m.currentIdx == len(m.currentChoices)-1 && m.canScrollDown() {
-		m.scrollDown()
+	if m.currentIdx == len(m.currentChoices)-1 {
+		if m.canScrollDown() {
+			m.scrollDown()
+		} else if m.LoopCursor {
+			m.scrollToTop()
+
+			return
+		}
 	}
 
 	m.currentIdx = min(len(m.currentChoices)-1, m.currentIdx+1)
 }
 
 func (m *Model) cursorUp() {
-	if m.currentIdx == 0 && m.canScrollUp() {
-		m.scrollUp()
+	if m.currentIdx == 0 {
+		if m.canScrollUp() {
+			m.scrollUp()
+		} else if m.LoopCursor {
+			m.scrollToBottom()
+
+			return
+		}
 	}
 
 	m.currentIdx = max(0, m.currentIdx-1)
@@ -421,6 +429,16 @@ func (m *Model) scrollDown() {
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
 
+func (m *Model) scrollToBottom() {
+	if m.PageSize <= 0 || m.availableChoices < m.PageSize {
+		return
+	}
+
+	m.currentIdx = len(m.currentChoices) - 1
+	m.scrollOffset = m.availableChoices - m.PageSize
+	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
+}
+
 func (m *Model) scrollUp() {
 	if m.PageSize <= 0 || m.scrollOffset <= 0 {
 		return
@@ -428,6 +446,16 @@ func (m *Model) scrollUp() {
 
 	m.currentIdx = min(len(m.currentChoices)-1, m.currentIdx+1)
 	m.scrollOffset--
+	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
+}
+
+func (m *Model) scrollToTop() {
+	if m.PageSize <= 0 || m.availableChoices < m.PageSize {
+		return
+	}
+
+	m.currentIdx = 0
+	m.scrollOffset = 0
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
 
