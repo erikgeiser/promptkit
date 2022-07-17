@@ -275,6 +275,136 @@ func TestSubmit(t *testing.T) {
 	test.AssertGoldenView(t, m, "submit.golden")
 }
 
+func TestLoopCursorTopToBottom(t *testing.T) {
+	t.Parallel()
+
+	choices := []string{
+		"a", "b", "c", "d", "lastelement",
+	}
+	lastElement := choices[len(choices)-1]
+
+	m := selection.NewModel(selection.New("foo:",
+		selection.Choices(choices)))
+	m.ColorProfile = termenv.TrueColor
+	m.LoopCursor = true
+
+	test.Run(t, m, tea.KeyUp)
+	assertNoError(t, m)
+
+	// nolint:forcetypeassert
+	if value := getChoice(t, m).Value; value.(string) != lastElement {
+		t.Fatalf("value did not loop to the last element %q but %q",
+			lastElement, value)
+	}
+
+	test.AssertGoldenView(t, m, "loop_top_to_bottom.golden")
+}
+
+func TestLoopCursorBottomToTop(t *testing.T) {
+	t.Parallel()
+
+	choices := []string{
+		"firstelement", "b", "c", "d", "lastelement",
+	}
+	firstElement := choices[0]
+	lastElement := choices[len(choices)-1]
+
+	m := selection.NewModel(selection.New("foo:",
+		selection.Choices(choices)))
+	m.ColorProfile = termenv.TrueColor
+	m.LoopCursor = true
+
+	test.Run(t, m, tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown)
+	assertNoError(t, m)
+
+	// nolint:forcetypeassert
+	if value := getChoice(t, m).Value; value.(string) != lastElement {
+		t.Fatalf("value did not loop to the last element before looping but %q",
+			value)
+	}
+
+	test.Update(t, m, tea.KeyDown)
+
+	// nolint:forcetypeassert
+	if value := getChoice(t, m).Value; value.(string) != firstElement {
+		t.Fatalf("value did not loop to the first element %q but %q",
+			firstElement, value)
+	}
+
+	test.AssertGoldenView(t, m, "loop_bottom_to_top.golden")
+}
+
+func TestLoopCursorTopToBottomPaged(t *testing.T) {
+	t.Parallel()
+
+	choices := []string{
+		"a", "b", "c", "d", "lastelement",
+	}
+	lastElement := choices[len(choices)-1]
+
+	m := selection.NewModel(selection.New("foo:",
+		selection.Choices(choices)))
+	m.ColorProfile = termenv.TrueColor
+	m.PageSize = 3
+	m.LoopCursor = true
+
+	test.Run(t, m)
+	assertNoError(t, m)
+
+	if strings.Contains(m.View(), lastElement) {
+		t.Fatalf("last element is already shown before looping")
+	}
+
+	test.Update(t, m, tea.KeyUp)
+
+	// nolint:forcetypeassert
+	if value := getChoice(t, m).Value; value.(string) != lastElement {
+		t.Fatalf("value did not loop to the last element %q but %q",
+			lastElement, value)
+	}
+
+	test.AssertGoldenView(t, m, "loop_top_to_bottom_paged.golden")
+}
+
+func TestLoopCursorBottomToTopPaged(t *testing.T) {
+	t.Parallel()
+
+	choices := []string{
+		"firstelement", "b", "c", "d", "lastelement",
+	}
+	firstElement := choices[0]
+	lastElement := choices[len(choices)-1]
+
+	m := selection.NewModel(selection.New("foo:",
+		selection.Choices(choices)))
+	m.ColorProfile = termenv.TrueColor
+	m.PageSize = 3
+	m.LoopCursor = true
+
+	test.Run(t, m, tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown)
+	assertNoError(t, m)
+
+	if strings.Contains(m.View(), firstElement) {
+		t.Fatalf("first element is already shown before looping")
+	}
+
+	// nolint:forcetypeassert
+	if value := getChoice(t, m).Value; value.(string) != lastElement {
+		t.Fatalf("value did not loop to the last element before looping but %q",
+			value)
+	}
+
+	test.Update(t, m, tea.KeyDown)
+
+	// nolint:forcetypeassert
+	if value := getChoice(t, m).Value; value.(string) != firstElement {
+		t.Fatalf("value did not loop to the first element %q but %q",
+			firstElement, value)
+	}
+
+	test.AssertGoldenView(t, m, "loop_bottom_to_top_paged.golden")
+}
+
 func getChoice(tb testing.TB, m *selection.Model) *selection.Choice {
 	tb.Helper()
 
