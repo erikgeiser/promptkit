@@ -430,11 +430,12 @@ func (m *Model) scrollDown() {
 }
 
 func (m *Model) scrollToBottom() {
+	m.currentIdx = len(m.currentChoices) - 1
+
 	if m.PageSize <= 0 || m.availableChoices < m.PageSize {
 		return
 	}
 
-	m.currentIdx = len(m.currentChoices) - 1
 	m.scrollOffset = m.availableChoices - m.PageSize
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
@@ -450,11 +451,12 @@ func (m *Model) scrollUp() {
 }
 
 func (m *Model) scrollToTop() {
+	m.currentIdx = 0
+
 	if m.PageSize <= 0 || m.availableChoices < m.PageSize {
 		return
 	}
 
-	m.currentIdx = 0
 	m.scrollOffset = 0
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
