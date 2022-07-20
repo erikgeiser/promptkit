@@ -285,7 +285,6 @@ func TestLoopCursorTopToBottom(t *testing.T) {
 	test.Run(t, m, tea.KeyUp)
 	assertNoError(t, m)
 
-	// nolint:forcetypeassert
 	if getChoice(t, m) != lastElement {
 		t.Fatalf("value did not loop to the last element %q but %q",
 			lastElement, getChoice(t, m))
@@ -310,7 +309,6 @@ func TestLoopCursorBottomToTop(t *testing.T) {
 	test.Run(t, m, tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown)
 	assertNoError(t, m)
 
-	// nolint:forcetypeassert
 	if value := getChoice(t, m); value != lastElement {
 		t.Fatalf("value did not loop to the last element before looping but %q",
 			value)
@@ -318,7 +316,6 @@ func TestLoopCursorBottomToTop(t *testing.T) {
 
 	test.Update(t, m, tea.KeyDown)
 
-	// nolint:forcetypeassert
 	if value := getChoice(t, m); value != firstElement {
 		t.Fatalf("value did not loop to the first element %q but %q",
 			firstElement, value)
@@ -349,7 +346,6 @@ func TestLoopCursorTopToBottomPaged(t *testing.T) {
 
 	test.Update(t, m, tea.KeyUp)
 
-	// nolint:forcetypeassert
 	if value := getChoice(t, m); value != lastElement {
 		t.Fatalf("value did not loop to the last element %q but %q",
 			lastElement, value)
@@ -379,7 +375,6 @@ func TestLoopCursorBottomToTopPaged(t *testing.T) {
 		t.Fatalf("first element is already shown before looping")
 	}
 
-	// nolint:forcetypeassert
 	if value := getChoice(t, m); value != lastElement {
 		t.Fatalf("value did not loop to the last element before looping but %q",
 			value)
@@ -387,7 +382,6 @@ func TestLoopCursorBottomToTopPaged(t *testing.T) {
 
 	test.Update(t, m, tea.KeyDown)
 
-	// nolint:forcetypeassert
 	if value := getChoice(t, m); value != firstElement {
 		t.Fatalf("value did not loop to the first element %q but %q",
 			firstElement, value)
