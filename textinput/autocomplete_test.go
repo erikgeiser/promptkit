@@ -105,7 +105,7 @@ func TestAutoCompleteFromSlice(t *testing.T) {
 		{"Fo", []string{"foo"}},
 	}
 
-	for i, testCase := range testCases { // nolint:paralleltest
+	for i, testCase := range testCases {
 		i, testCase := i, testCase
 
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -137,7 +137,7 @@ func TestAutoCompleteFromSliceWithDefault(t *testing.T) {
 		{"Fo", []string{"foo"}},
 	}
 
-	for i, testCase := range testCases { // nolint:paralleltest
+	for i, testCase := range testCases {
 		i, testCase := i, testCase
 
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -169,7 +169,7 @@ func TestCaseSensitiveAutoCompleteFromSlice(t *testing.T) {
 		{"Fo", nil},
 	}
 
-	for i, testCase := range testCases { // nolint:paralleltest
+	for i, testCase := range testCases {
 		i, testCase := i, testCase
 
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -202,7 +202,7 @@ func TestCaseSensitiveAutoCompleteFromSliceWithDefault(t *testing.T) {
 		{"Fo", nil},
 	}
 
-	for i, testCase := range testCases { // nolint:paralleltest
+	for i, testCase := range testCases {
 		i, testCase := i, testCase
 
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
@@ -229,7 +229,7 @@ func TestCommonPrefix(t *testing.T) {
 		{[]string{"foobar", "fo", "foobarbaz"}, "fo"},
 	}
 
-	for i, testCase := range testCases { // nolint:paralleltest
+	for i, testCase := range testCases {
 		i, testCase := i, testCase
 
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
