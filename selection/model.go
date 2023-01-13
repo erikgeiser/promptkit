@@ -59,10 +59,6 @@ func (m *Model[T]) Init() tea.Cmd {
 		return tea.Quit
 	}
 
-	if m.ColorProfile == 0 {
-		m.ColorProfile = termenv.ColorProfile()
-	}
-
 	if m.Template == "" {
 		m.Err = fmt.Errorf("empty template")
 

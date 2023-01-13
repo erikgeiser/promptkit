@@ -46,10 +46,6 @@ func NewModel(textInput *TextInput) *Model {
 
 // Init initializes the text input model.
 func (m *Model) Init() tea.Cmd {
-	if m.ColorProfile == 0 {
-		m.ColorProfile = termenv.ColorProfile()
-	}
-
 	m.tmpl, m.Err = m.initTemplate()
 	if m.Err != nil {
 		return tea.Quit
