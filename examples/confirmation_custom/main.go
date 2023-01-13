@@ -1,3 +1,4 @@
+// Package main demonstrates how promptkit/confirmation can be customized.
 package main
 
 import (

@@ -1,3 +1,4 @@
+// Package main demonstrates how promptkit/textinput is used.
 package main
 
 import (

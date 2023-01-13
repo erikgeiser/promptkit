@@ -1,3 +1,4 @@
+// Package main demonstrates how promptkit/textinput can be customized.
 package main
 
 import (

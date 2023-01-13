@@ -1,3 +1,4 @@
+// Package main demonstrates how promptkit/selection is used.
 package main
 
 import (

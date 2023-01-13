@@ -1,3 +1,5 @@
+// Package main demonstrates how promptkit/textinput can be used to ask for
+// passphrases.
 package main
 
 import (

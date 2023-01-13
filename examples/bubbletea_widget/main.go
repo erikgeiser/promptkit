@@ -1,3 +1,4 @@
+// Package main demonstrates how promptkit can be used as a bubbletea widget.
 package main
 
 import (
@@ -85,7 +86,9 @@ func main() {
 	model := newShoppingCart("Apples", "Milk", "Bread")
 
 	p := tea.NewProgram(model)
-	if err := p.Start(); err != nil {
+
+	_, err := p.Run()
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v", err)
 
 		os.Exit(1)
