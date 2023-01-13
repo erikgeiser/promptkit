@@ -117,7 +117,7 @@ func (m *Model[T]) initTemplate() (*template.Template, error) {
 
 func (m *Model[T]) initResultTemplate() (*template.Template, error) {
 	if m.ResultTemplate == "" {
-		return nil, nil // nolint:nilnil
+		return nil, nil //nolint:nilnil
 	}
 
 	tmpl := template.New("result")
@@ -151,6 +151,7 @@ func (m *Model[T]) initFilterInput() textinput.Model {
 	return filterInput
 }
 
+// ValueAsChoice returns the selected value wrapped in a Choice struct.
 func (m *Model[T]) ValueAsChoice() (*Choice[T], error) {
 	if m.Err != nil {
 		return nil, m.Err

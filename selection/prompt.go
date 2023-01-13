@@ -1,7 +1,7 @@
 /*
-Package selection implements a selection prompt that allows users to to select
-one of the pre-defined choices. It also offers customizable appreance and key
-map as well as optional support for pagination, filtering.
+Package selection implements a selection prompt that allows users to select one
+of the pre-defined choices. It also offers customizable appreance and key map as
+well as optional support for pagination, filtering.
 */
 package selection
 
@@ -79,8 +79,8 @@ type Selection[T any] struct {
 	// selection.choices.
 	choices []*Choice[T]
 
-	// Prompt holds the the prompt text or question that is to be answered by
-	// one of the choices.
+	// Prompt holds the prompt text or question that is to be answered by one of
+	// the choices.
 	Prompt string
 
 	// FilterPrompt is the prompt for the filter if filtering is enabled.
@@ -242,7 +242,9 @@ func (s *Selection[T]) RunPrompt() (T, error) {
 	m := NewModel(s)
 
 	p := tea.NewProgram(m, tea.WithOutput(s.Output), tea.WithInput(s.Input))
-	if err := p.Start(); err != nil {
+
+	_, err = p.Run()
+	if err != nil {
 		return zeroValue, fmt.Errorf("running prompt: %w", err)
 	}
 

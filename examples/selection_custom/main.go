@@ -52,7 +52,7 @@ func main() {
 		{ID: "444", Name: "Article E"},
 	}
 
-	blue := termenv.String().Foreground(termenv.ANSI256Color(32)) // nolint:gomnd
+	blue := termenv.String().Foreground(termenv.ANSI256Color(32)) //nolint:gomnd
 
 	sp := selection.New("Choose an article!", choices)
 	sp.FilterPrompt = "Filter by ID:"

@@ -44,7 +44,7 @@ var ErrInputValidation = fmt.Errorf("validation error")
 
 // TextInput represents a configurable selection prompt.
 type TextInput struct {
-	// Prompt holds the the prompt text or question that is printed above the
+	// Prompt holds the prompt text or question that is printed above the
 	// choices in the default template (if not empty).
 	Prompt string
 
@@ -193,7 +193,9 @@ func (t *TextInput) RunPrompt() (string, error) {
 	m := NewModel(t)
 
 	p := tea.NewProgram(m, tea.WithOutput(t.Output), tea.WithInput(t.Input))
-	if err := p.Start(); err != nil {
+
+	_, err = p.Run()
+	if err != nil {
 		return "", fmt.Errorf("running prompt: %w", err)
 	}
 

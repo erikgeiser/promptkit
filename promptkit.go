@@ -25,15 +25,15 @@ var ErrAborted = fmt.Errorf("prompt aborted")
 // UtilFuncMap returns a template.FuncMap with handy utility functions for
 // prompt templates.
 //
-//  * Repeat(string, int) string: Identical to strings.Repeat.
-//  * Len(string): reflow/ansi.PrintableRuneWidth, Len works like len but is
-//    aware of ansi codes and returns the length of the string as it appears
-//    on the screen.
-//  * Min(int, int) int: The minimum of two ints.
-//  * Max(int, int) int: The maximum of two ints.
-//  * Add(int, int) int: The sum of two ints.
-//  * Sub(int, int) int: The difference of two ints.
-//  * Mul(int, int) int: The product of two ints.
+//   - Repeat(string, int) string: Identical to strings.Repeat.
+//   - Len(string): reflow/ansi.PrintableRuneWidth, Len works like len but is
+//     aware of ansi codes and returns the length of the string as it appears
+//     on the screen.
+//   - Min(int, int) int: The minimum of two ints.
+//   - Max(int, int) int: The maximum of two ints.
+//   - Add(int, int) int: The sum of two ints.
+//   - Sub(int, int) int: The difference of two ints.
+//   - Mul(int, int) int: The product of two ints.
 func UtilFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"Repeat": strings.Repeat,

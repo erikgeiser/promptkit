@@ -60,7 +60,7 @@ type Confirmation struct {
 	Prompt string
 
 	// DefaultValue decides if a value should already be selected at startup. By
-	// default it it Undecided but it can be set to Yes (corresponds to true)
+	// default it is Undecided but it can be set to Yes (corresponds to true)
 	// and No (corresponds to false).
 	DefaultValue Value
 
@@ -155,7 +155,9 @@ func (c *Confirmation) RunPrompt() (bool, error) {
 	m := NewModel(c)
 
 	p := tea.NewProgram(m, tea.WithOutput(c.Output), tea.WithInput(c.Input))
-	if err := p.Start(); err != nil {
+
+	_, err = p.Run()
+	if err != nil {
 		return false, fmt.Errorf("running prompt: %w", err)
 	}
 

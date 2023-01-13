@@ -73,7 +73,7 @@ func AssertGoldenView(tb testing.TB, m tea.Model, expectedViewFile string) {
 	goldenFilePath := filepath.Join("testdata", expectedViewFile)
 
 	if _, err := os.Stat(goldenFilePath); errors.Is(err, os.ErrNotExist) || *UpdateGoldenFiles {
-		err := os.WriteFile(goldenFilePath, []byte(view), 0o664) // nolint:gosec,gomnd
+		err := os.WriteFile(goldenFilePath, []byte(view), 0o664) //nolint:gosec,gomnd
 		if err != nil {
 			tb.Fatalf("updating golden view: %v", err)
 		}

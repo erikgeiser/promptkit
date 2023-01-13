@@ -12,6 +12,7 @@ type Choice[T any] struct {
 	Value  T
 }
 
+// Index returns the current index of the choice.
 func (c *Choice[T]) Index() int {
 	return c.idx
 }
