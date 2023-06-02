@@ -76,10 +76,8 @@ func (m *Model[T]) Init() tea.Cmd {
 	}
 
 	m.filterInput = m.initFilterInput()
-
-	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
-
 	m.requestedPageSize = m.PageSize
+	m.forceUpdatePageSizeForHeight()
 
 	return textinput.Blink
 }
