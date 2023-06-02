@@ -3,11 +3,11 @@ package selection
 import (
 	"bytes"
 	"fmt"
-	"strings"
 	"text/template"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/termenv"
 )
@@ -227,7 +227,7 @@ func (m *Model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.forceUpdatePageSizeForHeight()
 		}
 
-		return m, nil
+		return m, tea.ClearScrollArea
 	case error:
 		m.Err = msg
 
@@ -251,7 +251,7 @@ func (m *Model[T]) forceUpdatePageSizeForHeight() {
 		m.scrollOffset = 0
 		m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
-		if len(strings.Split(m.View(), "\n")) <= m.height {
+		if lipgloss.Height(m.View()) <= m.height {
 			break
 		}
 
