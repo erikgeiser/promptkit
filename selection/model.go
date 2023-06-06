@@ -3,6 +3,7 @@ package selection
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"text/template"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -10,6 +11,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/termenv"
+	"golang.org/x/term"
 )
 
 // Model implements the bubbletea.Model for a selection prompt.
@@ -80,6 +82,16 @@ func (m *Model[T]) Init() tea.Cmd {
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
 	m.requestedPageSize = m.PageSize
+
+	// try to get an initial terminal size in order to avoid initial overdrawing
+	// which can cause ugly glitches on some terminals
+	outputFile, ok := m.Output.(*os.File)
+	if ok {
+		width, height, err := term.GetSize(int(outputFile.Fd()))
+		if err == nil {
+			m.resize(width, height)
+		}
+	}
 
 	return textinput.Blink
 }
@@ -220,12 +232,7 @@ func (m *Model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		return m, nil
 	case tea.WindowSizeMsg:
-		m.width = zeroAwareMin(msg.Width, m.MaxWidth)
-
-		if m.height != msg.Height {
-			m.height = msg.Height
-			m.forceUpdatePageSizeForHeight()
-		}
+		m.resize(msg.Width, msg.Height)
 
 		return m, tea.ClearScrollArea
 	case error:
@@ -239,24 +246,45 @@ func (m *Model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+func (m *Model[T]) resize(width int, height int) {
+	m.width = zeroAwareMin(width, m.MaxWidth)
+
+	if m.height != height {
+		m.height = height
+		m.forceUpdatePageSizeForHeight()
+	}
+}
+
 func (m *Model[T]) forceUpdatePageSizeForHeight() {
-	if m.requestedPageSize == 0 {
-		m.PageSize = len(m.choices)
-	} else {
-		m.PageSize = min(len(m.choices), m.requestedPageSize)
+	maxAcceptablePageSize := len(m.choices)
+	if m.requestedPageSize != 0 {
+		maxAcceptablePageSize = min(len(m.choices), m.requestedPageSize)
 	}
 
-	for m.PageSize > 1 {
-		m.currentIdx = 0
-		m.scrollOffset = 0
+	// try preferred page size first
+	m.PageSize = maxAcceptablePageSize
+	m.currentIdx = 0
+	m.scrollOffset = 0
+	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
+
+	if lipgloss.Height(m.View()) < m.height {
+		return
+	}
+
+	// if it does not fit, brute force a fitting page size
+	for m.PageSize = 1; m.PageSize <= maxAcceptablePageSize; m.PageSize++ {
 		m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
-		if lipgloss.Height(m.View()) <= m.height {
-			break
-		}
+		if lipgloss.Height(m.View()) >= m.height {
+			m.PageSize--
+			m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
-		m.PageSize--
+			return
+		}
 	}
+
+	m.PageSize--
+	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 }
 
 func (m *Model[T]) updateFilter(msg tea.Msg) (*Model[T], tea.Cmd) {
