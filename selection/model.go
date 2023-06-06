@@ -150,12 +150,11 @@ func (m *Model[T]) initResultTemplate() (*template.Template, error) {
 }
 
 func (m *Model[T]) initFilterInput() textinput.Model {
-	filterInput := textinput.NewModel()
+	filterInput := textinput.New()
 	filterInput.Prompt = ""
 	filterInput.TextStyle = m.FilterInputTextStyle
-	filterInput.BackgroundStyle = m.FilterInputBackgroundStyle
 	filterInput.PlaceholderStyle = m.FilterInputPlaceholderStyle
-	filterInput.CursorStyle = m.FilterInputCursorStyle
+	filterInput.Cursor.Style = m.FilterInputCursorStyle
 	filterInput.Placeholder = m.FilterPlaceholder
 	filterInput.Width = 80
 	filterInput.Focus()
