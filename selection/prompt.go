@@ -162,7 +162,7 @@ type Selection[T any] struct {
 	// For an introduction to styling with Lip Gloss see:
 	// https://github.com/charmbracelet/lipgloss
 	FilterInputTextStyle        lipgloss.Style
-	FilterInputBackgroundStyle  lipgloss.Style
+	FilterInputBackgroundStyle  lipgloss.Style // Deprecated: This property is not used anymore.
 	FilterInputPlaceholderStyle lipgloss.Style
 	FilterInputCursorStyle      lipgloss.Style
 
