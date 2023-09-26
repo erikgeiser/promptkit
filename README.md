@@ -72,7 +72,8 @@ A confirmation prompt for binary questions: [Example Code](https://github.com/er
 
 ## Widget
 
-The prompts in this library can also be used as [bubbletea](https://github.com/charmbracelet/bubbletea) widgets: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/bubbletea_widget/main.go)
+The prompts in this library can also be used as [bubbletea](https://github.com/charmbracelet/bubbletea) widgets: Example [selection code](https://github.com/erikgeiser/promptkit/blob/main/examples/selection_bubbletea_widget/main.go) 
+and [prompt code](https://github.com/erikgeiser/promptkit/blob/main/examples/confirmation_bubbletea_widget/main.go)
 
 ## Acknowledgements
 
