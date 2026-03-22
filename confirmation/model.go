@@ -156,7 +156,7 @@ func (m *Model) View() string {
 
 	viewBuffer := &bytes.Buffer{}
 
-	err := m.tmpl.Execute(viewBuffer, map[string]interface{}{
+	err := m.tmpl.Execute(viewBuffer, map[string]any{
 		"Prompt":           m.Prompt,
 		"YesSelected":      m.value == Yes,
 		"NoSelected":       m.value == No,
@@ -191,7 +191,7 @@ func (m *Model) resultView() (string, error) {
 		return "", err
 	}
 
-	err = m.resultTmpl.Execute(viewBuffer, map[string]interface{}{
+	err = m.resultTmpl.Execute(viewBuffer, map[string]any{
 		"FinalValue":       value,
 		"FinalValueString": fmt.Sprintf("%v", value),
 		"Prompt":           m.Prompt,

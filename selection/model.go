@@ -325,7 +325,7 @@ func (m *Model[T]) View() string {
 		return ""
 	}
 
-	err := m.tmpl.Execute(viewBuffer, map[string]interface{}{
+	err := m.tmpl.Execute(viewBuffer, map[string]any{
 		"Prompt":        m.Prompt,
 		"IsFiltered":    m.Filter != nil,
 		"FilterPrompt":  m.FilterPrompt,
@@ -364,7 +364,7 @@ func (m *Model[T]) resultView() (string, error) {
 		return "", err
 	}
 
-	err = m.resultTmpl.Execute(viewBuffer, map[string]interface{}{
+	err = m.resultTmpl.Execute(viewBuffer, map[string]any{
 		"FinalChoice":   choice,
 		"Prompt":        m.Prompt,
 		"AllChoices":    m.choices,
@@ -500,22 +500,6 @@ func (m *Model[T]) reindexChoices() {
 	for i, choice := range m.choices {
 		choice.idx = i
 	}
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-
-	return b
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-
-	return b
 }
 
 func zeroAwareMin(a int, b int) int {

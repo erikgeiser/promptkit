@@ -2,6 +2,7 @@ package textinput
 
 import (
 	"fmt"
+	"slices"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -61,13 +62,7 @@ type KeyMap struct {
 }
 
 func keyMatches(key tea.KeyMsg, mapping []string) bool {
-	for _, m := range mapping {
-		if m == key.String() {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(mapping, key.String())
 }
 
 func keyMatchesUpstreamKeyMap(key tea.KeyMsg) bool {
