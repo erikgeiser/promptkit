@@ -1,36 +1,101 @@
+version: "2"
 linters:
-  enable-all: true
-  disable:
-    - golint
-    - interfacer
-    - scopelint
-    - maligned
-    - rowserrcheck
-    - funlen
-    - depguard
-    - goerr113
-    - exhaustivestruct
-    - testpackage
-    - gochecknoglobals
-    - wrapcheck
-    - forbidigo
-    - ifshort
-    - cyclop
-    - varnamelen
-    - ireturn
-    - nilnil
-    - gosec
-    - exhaustruct
-    - nonamedreturns
-    - varcheck
-    - nosnakecase
-    - structcheck
-    - deadcode
+  default: none
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - bodyclose
+    - canonicalheader
+    - containedctx
+    - decorder
+    - dupl
+    - dupword
+    - durationcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - fatcontext
+    - forcetypeassert
+    - ginkgolinter
+    - gocheckcompilerdirectives
+    - gochecksumtype
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - goheader
+    - gomodguard
+    - goprintffuncname
+    - gosmopolitan
+    - govet
+    - grouper
+    - importas
+    - inamedparam
+    - ineffassign
+    - interfacebloat
+    - lll
+    - loggercheck
+    - maintidx
+    - makezero
+    - mirror
+    - misspell
+    - nakedret
+    - nestif
+    - nilerr
+    - nlreturn
+    - noctx
+    - nolintlint
+    - nosprintfhostport
+    - prealloc
+    - predeclared
+    - promlinter
+    - protogetter
+    - reassign
+    - sloglint
+    - spancheck
     - sqlclosecheck
-linters-settings:
-  exhaustive:
-    default-signifies-exhaustive: true
-issues:
-  exclude-use-default: false
-run:
-  skip-dirs-use-default: false
+    - staticcheck
+    - tagalign
+    - tagliatelle
+    - usetesting
+    - testableexamples
+    - testifylint
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+    - wsl_v5
+    - zerologlint
+    - noinlineerr
+  settings:
+    lll:
+      line-length: 130
+      tab-width: 4
+    exhaustive:
+      default-signifies-exhaustive: true
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - golines
+    - goimports
+  settings:
+    golines:
+      max-len: 130
+      tab-len: 4
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$

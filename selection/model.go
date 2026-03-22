@@ -233,7 +233,7 @@ func (m *Model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.resize(msg.Width, msg.Height)
 
-		return m, tea.ClearScrollArea
+		return m, nil
 	case error:
 		m.Err = msg
 
@@ -294,6 +294,7 @@ func (m *Model[T]) updateFilter(msg tea.Msg) (*Model[T], tea.Cmd) {
 	previousFilter := m.filterInput.Value()
 
 	var cmd tea.Cmd
+
 	m.filterInput, cmd = m.filterInput.Update(msg)
 
 	if m.filterInput.Value() != previousFilter {

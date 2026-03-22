@@ -107,7 +107,6 @@ func TestAutoCompleteFromSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
 
@@ -138,7 +137,6 @@ func TestAutoCompleteFromSliceWithDefault(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
 
@@ -169,7 +167,6 @@ func TestCaseSensitiveAutoCompleteFromSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
 
@@ -201,7 +198,6 @@ func TestCaseSensitiveAutoCompleteFromSliceWithDefault(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
 
@@ -227,7 +223,6 @@ func TestCommonPrefix(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
 
