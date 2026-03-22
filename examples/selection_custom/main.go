@@ -72,7 +72,7 @@ func main() {
 	sp.UnselectedChoiceStyle = func(c *selection.Choice[article]) string {
 		return c.Value.Name + " " + termenv.String("("+c.Value.ID+")").Faint().String()
 	}
-	sp.ExtendedTemplateFuncs = map[string]interface{}{
+	sp.ExtendedTemplateFuncs = map[string]any{
 		"name": func(c *selection.Choice[article]) string { return c.Value.Name },
 	}
 

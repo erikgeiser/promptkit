@@ -214,7 +214,7 @@ func (m *Model) View() string {
 		validationErr = m.Validate(m.input.Value())
 	}
 
-	err := m.tmpl.Execute(viewBuffer, map[string]interface{}{
+	err := m.tmpl.Execute(viewBuffer, map[string]any{
 		"Prompt":                 m.Prompt,
 		"InitialValue":           m.InitialValue,
 		"Placeholder":            m.Placeholder,
@@ -249,7 +249,7 @@ func (m *Model) resultView() (string, error) {
 		return "", err
 	}
 
-	err = m.resultTmpl.Execute(viewBuffer, map[string]interface{}{
+	err = m.resultTmpl.Execute(viewBuffer, map[string]any{
 		"FinalValue":    value,
 		"Prompt":        m.Prompt,
 		"InitialValue":  m.InitialValue,

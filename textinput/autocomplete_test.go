@@ -2,6 +2,7 @@
 package textinput
 
 import (
+	"slices"
 	"strconv"
 	"testing"
 
@@ -106,7 +107,6 @@ func TestAutoCompleteFromSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		i, testCase := i, testCase
 
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
@@ -138,7 +138,6 @@ func TestAutoCompleteFromSliceWithDefault(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		i, testCase := i, testCase
 
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
@@ -170,7 +169,6 @@ func TestCaseSensitiveAutoCompleteFromSlice(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		i, testCase := i, testCase
 
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
@@ -203,7 +201,6 @@ func TestCaseSensitiveAutoCompleteFromSliceWithDefault(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		i, testCase := i, testCase
 
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
@@ -230,7 +227,6 @@ func TestCommonPrefix(t *testing.T) {
 	}
 
 	for i, testCase := range testCases {
-		i, testCase := i, testCase
 
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			t.Parallel()
@@ -272,15 +268,7 @@ func assertSameContents(tb testing.TB, got []string, want []string) {
 	}
 
 	for _, w := range want {
-		found := false
-
-		for _, g := range got {
-			if g == w {
-				found = true
-
-				break
-			}
-		}
+		found := slices.Contains(got, w)
 
 		if !found {
 			tb.Fatalf("entry %q missing in %#v", w, got)
