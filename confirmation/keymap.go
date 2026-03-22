@@ -44,9 +44,9 @@ func validateKeyMap(km *KeyMap) error {
 		return fmt.Errorf("no submit key")
 	}
 
-	if !(len(km.Yes) > 0 && len(km.No) > 0) &&
+	if (len(km.Yes) == 0 || len(km.No) == 0) &&
 		len(km.Toggle) == 0 &&
-		!(len(km.SelectYes) > 0 && len(km.SelectNo) > 0) {
+		(len(km.SelectYes) == 0 || len(km.SelectNo) == 0) {
 		return fmt.Errorf("missing keys to select a value")
 	}
 
