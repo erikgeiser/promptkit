@@ -4,11 +4,19 @@ import (
 	"errors"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/erikgeiser/promptkit"
 	"github.com/erikgeiser/promptkit/confirmation"
 	"github.com/erikgeiser/promptkit/test"
 	"github.com/muesli/termenv"
+)
+
+var (
+	keyEnter = tea.KeyPressMsg{Code: tea.KeyEnter}
+	keyCtrlC = tea.KeyPressMsg{Code: 'c', Mod: tea.ModCtrl}
+	keyTab   = tea.KeyPressMsg{Code: tea.KeyTab}
+	keyLeft  = tea.KeyPressMsg{Code: tea.KeyLeft}
+	keyRight = tea.KeyPressMsg{Code: tea.KeyRight}
 )
 
 func TestDefaultYes(t *testing.T) {
@@ -18,7 +26,7 @@ func TestDefaultYes(t *testing.T) {
 	c.ColorProfile = termenv.TrueColor
 	m := confirmation.NewModel(c)
 
-	test.Run(t, m, tea.KeyEnter)
+	test.Run(t, m, keyEnter)
 	assertNoError(t, m)
 
 	value := getValue(t, m)
@@ -36,7 +44,7 @@ func TestDefaultNo(t *testing.T) {
 	c.ColorProfile = termenv.TrueColor
 	m := confirmation.NewModel(c)
 
-	test.Run(t, m, tea.KeyEnter)
+	test.Run(t, m, keyEnter)
 	assertNoError(t, m)
 
 	value := getValue(t, m)
@@ -57,7 +65,7 @@ func TestDefaultUndecided(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	cmd := test.Update(t, m, tea.KeyEnter)
+	cmd := test.Update(t, m, keyEnter)
 	if cmd != nil {
 		t.Errorf("enter when undecided not produce a no-op but a %v", cmd)
 	}
@@ -80,7 +88,7 @@ func TestDefaultNilIsUndecided(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	cmd := test.Update(t, m, tea.KeyEnter)
+	cmd := test.Update(t, m, keyEnter)
 	if cmd != nil {
 		t.Errorf("enter when undecided not produce a no-op but a %v", cmd)
 	}
@@ -154,7 +162,7 @@ func TestToggle(t *testing.T) {
 
 	test.AssertGoldenView(t, m, "toggle_before.golden")
 
-	test.Update(t, m, tea.KeyTab)
+	test.Update(t, m, keyTab)
 
 	if !getValue(t, m) {
 		t.Fatalf("toggle did not transition from Undecided to Yes")
@@ -162,7 +170,7 @@ func TestToggle(t *testing.T) {
 
 	test.AssertGoldenView(t, m, "toggle_once.golden")
 
-	test.Update(t, m, tea.KeyTab)
+	test.Update(t, m, keyTab)
 
 	if getValue(t, m) {
 		t.Fatalf("toggle did not transition from Yes to No")
@@ -170,13 +178,13 @@ func TestToggle(t *testing.T) {
 
 	test.AssertGoldenView(t, m, "toggle_twice.golden")
 
-	test.Update(t, m, tea.KeyTab)
+	test.Update(t, m, keyTab)
 
 	if !getValue(t, m) {
 		t.Fatalf("toggle did not transition from No to Yes")
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "toggle_confirmed.golden")
 }
 
@@ -187,7 +195,7 @@ func TestSelectYes(t *testing.T) {
 	c.ColorProfile = termenv.TrueColor
 	m := confirmation.NewModel(c)
 
-	test.Run(t, m, tea.KeyLeft)
+	test.Run(t, m, keyLeft)
 	assertNoError(t, m)
 
 	if !getValue(t, m) {
@@ -195,7 +203,7 @@ func TestSelectYes(t *testing.T) {
 	}
 
 	test.AssertGoldenView(t, m, "select_yes.golden")
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "select_yes_confirmed.golden")
 }
 
@@ -206,7 +214,7 @@ func TestSelectNo(t *testing.T) {
 	c.ColorProfile = termenv.TrueColor
 	m := confirmation.NewModel(c)
 
-	test.Run(t, m, tea.KeyRight)
+	test.Run(t, m, keyRight)
 	assertNoError(t, m)
 
 	if getValue(t, m) {
@@ -214,7 +222,7 @@ func TestSelectNo(t *testing.T) {
 	}
 
 	test.AssertGoldenView(t, m, "select_no.golden")
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "select_no_confirmed.golden")
 }
 
@@ -225,7 +233,7 @@ func TestAbort(t *testing.T) {
 	c.ColorProfile = termenv.TrueColor
 	m := confirmation.NewModel(c)
 
-	test.Run(t, m, tea.KeyCtrlC)
+	test.Run(t, m, keyCtrlC)
 
 	if m.Err == nil {
 		t.Fatalf("aborting did not produce an error")
@@ -248,7 +256,7 @@ func TestSubmit(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	cmd := test.Update(t, m, tea.KeyEnter)
+	cmd := test.Update(t, m, keyEnter)
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("enter did not produce quit signal")
 	}
@@ -270,17 +278,17 @@ func TestTemplateYN(t *testing.T) {
 
 	test.AssertGoldenView(t, m, "templateyn_undecided.golden")
 
-	test.Update(t, m, tea.KeyRight)
+	test.Update(t, m, keyRight)
 	assertNoError(t, m)
 
 	test.AssertGoldenView(t, m, "templateyn_no.golden")
 
-	test.Update(t, m, tea.KeyLeft)
+	test.Update(t, m, keyLeft)
 	assertNoError(t, m)
 
 	test.AssertGoldenView(t, m, "templateyn_yes.golden")
 
-	cmd := test.Update(t, m, tea.KeyEnter)
+	cmd := test.Update(t, m, keyEnter)
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("enter did not produce quit signal")
 	}

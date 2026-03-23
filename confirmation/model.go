@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
 	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/termenv"
 )
@@ -89,7 +89,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		switch {
 		case keyMatches(msg, m.KeyMap.Submit):
 			if m.value != Undecided {
@@ -136,7 +136,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // View renders the confirmation prompt.
-func (m *Model) View() string {
+func (m *Model) View() tea.View {
+	return tea.NewView(m.view())
+}
+
+func (m *Model) view() string {
 	// avoid panics if Quit is sent during Init
 	if m.quitting {
 		view, err := m.resultView()

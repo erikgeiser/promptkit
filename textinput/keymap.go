@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"slices"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 )
 
 // NewDefaultKeyMap returns a KeyMap with sensible default key mappings that can
@@ -61,11 +61,11 @@ type KeyMap struct {
 	Abort                  []string
 }
 
-func keyMatches(key tea.KeyMsg, mapping []string) bool {
+func keyMatches(key tea.KeyPressMsg, mapping []string) bool {
 	return slices.Contains(mapping, key.String())
 }
 
-func keyMatchesUpstreamKeyMap(key tea.KeyMsg) bool {
+func keyMatchesUpstreamKeyMap(key tea.KeyPressMsg) bool {
 	return keyMatches(key, allKeys(upsteamKeyMap))
 }
 

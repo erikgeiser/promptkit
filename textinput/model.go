@@ -6,8 +6,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
 	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/termenv"
 )
@@ -96,11 +96,16 @@ func (m *Model) initInput() textinput.Model {
 	input := textinput.New()
 	input.Prompt = ""
 	input.Placeholder = m.Placeholder
+
 	input.CharLimit = m.CharLimit
-	input.Width = m.InputWidth
-	input.TextStyle = m.InputTextStyle
-	input.PlaceholderStyle = m.InputPlaceholderStyle
-	input.Cursor.Style = m.InputCursorStyle
+	if m.InputWidth > 0 {
+		input.SetWidth(m.InputWidth)
+	}
+
+	styles := input.Styles()
+	styles.Focused.Text = m.InputTextStyle
+	styles.Focused.Placeholder = m.InputPlaceholderStyle
+	input.SetStyles(styles)
 
 	if m.Hidden {
 		input.EchoMode = textinput.EchoPassword
@@ -114,15 +119,15 @@ func (m *Model) initInput() textinput.Model {
 }
 
 // Update updates the model based on the received message.
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 	if m.Err != nil {
 		return m, tea.Quit
 	}
 
 	var cmd tea.Cmd
 
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	switch msg := message.(type) {
+	case tea.KeyPressMsg:
 		m.autoCompleteTriggered = false
 		m.autoCompleteIndecisive = false
 
@@ -153,25 +158,25 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			return m, cmd
 		case keyMatches(msg, m.KeyMap.DeleteAllAfterCursor):
-			msg.Type = tea.KeyCtrlK
+			message = tea.KeyPressMsg{Code: 'k', Mod: tea.ModCtrl}
 		case keyMatches(msg, m.KeyMap.DeleteAllBeforeCursor):
-			msg.Type = tea.KeyCtrlU
+			message = tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl}
 		case keyMatches(msg, m.KeyMap.DeleteWordBeforeCursor):
-			msg.Type = tea.KeyCtrlW
+			message = tea.KeyPressMsg{Code: 'w', Mod: tea.ModCtrl}
 		case keyMatches(msg, m.KeyMap.DeleteUnderCursor):
-			msg.Type = tea.KeyDelete
+			message = tea.KeyPressMsg{Code: tea.KeyDelete}
 		case keyMatches(msg, m.KeyMap.DeleteBeforeCursor):
-			msg.Type = tea.KeyBackspace
+			message = tea.KeyPressMsg{Code: tea.KeyBackspace}
 		case keyMatches(msg, m.KeyMap.MoveBackward):
-			msg.Type = tea.KeyLeft
+			message = tea.KeyPressMsg{Code: tea.KeyLeft}
 		case keyMatches(msg, m.KeyMap.MoveForward):
-			msg.Type = tea.KeyRight
+			message = tea.KeyPressMsg{Code: tea.KeyRight}
 		case keyMatches(msg, m.KeyMap.JumpToBeginning):
-			msg.Type = tea.KeyHome
+			message = tea.KeyPressMsg{Code: tea.KeyHome}
 		case keyMatches(msg, m.KeyMap.JumpToEnd):
-			msg.Type = tea.KeyEnd
+			message = tea.KeyPressMsg{Code: tea.KeyEnd}
 		case keyMatches(msg, m.KeyMap.Paste):
-			msg.Type = tea.KeyCtrlV
+			message = tea.KeyPressMsg{Code: 'v', Mod: tea.ModCtrl}
 		case keyMatchesUpstreamKeyMap(msg):
 			return m, cmd // do not pass to bubbles/textinput
 		default: // do nothing
@@ -184,13 +189,37 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	}
 
-	m.input, cmd = m.input.Update(msg)
+	m.input, cmd = m.input.Update(message)
 
 	return m, cmd
 }
 
 // View renders the text input.
-func (m *Model) View() string {
+func (m *Model) View() tea.View {
+	return tea.NewView(m.view())
+}
+
+// inputView returns the rendered input, working around a bubbles v2 bug where
+// placeholderView() only renders 1 character when Width=0 (because it allocates
+// p := make([]rune, Width+1) which is length 1, triggering an early return).
+// When no fixed width is configured we render the placeholder ourselves so the
+// dynamic (non-scrolling) width is preserved.
+func (m *Model) inputView() string {
+	if m.InputWidth <= 0 && m.input.Value() == "" && m.Placeholder != "" {
+		ph := []rune(m.Placeholder)
+
+		cursor := m.InputPlaceholderStyle.Render(string(ph[:1]))
+		if len(ph) > 1 {
+			return cursor + m.InputPlaceholderStyle.Render(string(ph[1:]))
+		}
+
+		return cursor
+	}
+
+	return m.input.View()
+}
+
+func (m *Model) view() string {
 	if m.quitting {
 		view, err := m.resultView()
 		if err != nil {
@@ -218,7 +247,7 @@ func (m *Model) View() string {
 		"Prompt":                 m.Prompt,
 		"InitialValue":           m.InitialValue,
 		"Placeholder":            m.Placeholder,
-		"Input":                  m.input.View(),
+		"Input":                  m.inputView(),
 		"ValidationError":        validationErr,
 		"TerminalWidth":          m.width,
 		"AutoCompleteTriggered":  m.autoCompleteTriggered,

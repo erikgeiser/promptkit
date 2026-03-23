@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 	Inspect = flag.Bool("inspect", false, "inspect strings in detail")
 )
 
-// MsgsFromText generates KeyMsg events from a given text.
+// MsgsFromText generates KeyPressMsg events from a given text.
 func MsgsFromText(text string) []tea.Msg {
 	msgs := make([]tea.Msg, 0, len(text))
 
@@ -32,9 +32,9 @@ func MsgsFromText(text string) []tea.Msg {
 	return msgs
 }
 
-// KeyMsg returns the KeyMsg that corresponds to the given rune.
+// KeyMsg returns the KeyPressMsg that corresponds to the given rune.
 func KeyMsg(r rune) tea.Msg {
-	return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{r}}
+	return tea.KeyPressMsg{Code: r, Text: string(r)}
 }
 
 // Run initializes the model and applies all events.
@@ -55,12 +55,7 @@ func Update(tb testing.TB, model tea.Model, event tea.Msg) tea.Cmd {
 
 	var cmd tea.Cmd
 
-	switch e := event.(type) {
-	case tea.KeyType:
-		_, cmd = model.Update(tea.KeyMsg{Type: e})
-	default:
-		_, cmd = model.Update(event)
-	}
+	_, cmd = model.Update(event)
 
 	return cmd
 }
@@ -69,7 +64,7 @@ func Update(tb testing.TB, model tea.Model, event tea.Msg) tea.Cmd {
 func AssertGoldenView(tb testing.TB, m tea.Model, expectedViewFile string) {
 	tb.Helper()
 
-	view := m.View()
+	view := m.View().Content
 	goldenFilePath := filepath.Join("testdata", expectedViewFile)
 
 	_, err := os.Stat(goldenFilePath)
