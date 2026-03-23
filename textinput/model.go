@@ -6,8 +6,8 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
 	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/termenv"
 )
@@ -97,10 +97,19 @@ func (m *Model) initInput() textinput.Model {
 	input.Prompt = ""
 	input.Placeholder = m.Placeholder
 	input.CharLimit = m.CharLimit
-	input.Width = m.InputWidth
-	input.TextStyle = m.InputTextStyle
-	input.PlaceholderStyle = m.InputPlaceholderStyle
-	input.Cursor.Style = m.InputCursorStyle
+	// In bubbles v2, Width must be > 0 for placeholders to render correctly.
+	// Use the configured InputWidth, or fall back to the placeholder length.
+	width := m.InputWidth
+	if width <= 0 && m.Placeholder != "" {
+		width = len(m.Placeholder)
+	}
+	if width > 0 {
+		input.SetWidth(width)
+	}
+	styles := input.Styles()
+	styles.Focused.Text = m.InputTextStyle
+	styles.Focused.Placeholder = m.InputPlaceholderStyle
+	input.SetStyles(styles)
 
 	if m.Hidden {
 		input.EchoMode = textinput.EchoPassword
@@ -122,7 +131,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		m.autoCompleteTriggered = false
 		m.autoCompleteIndecisive = false
 
@@ -153,25 +162,25 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 			return m, cmd
 		case keyMatches(msg, m.KeyMap.DeleteAllAfterCursor):
-			msg.Type = tea.KeyCtrlK
+			msg = tea.KeyPressMsg{Code: 'k', Mod: tea.ModCtrl}
 		case keyMatches(msg, m.KeyMap.DeleteAllBeforeCursor):
-			msg.Type = tea.KeyCtrlU
+			msg = tea.KeyPressMsg{Code: 'u', Mod: tea.ModCtrl}
 		case keyMatches(msg, m.KeyMap.DeleteWordBeforeCursor):
-			msg.Type = tea.KeyCtrlW
+			msg = tea.KeyPressMsg{Code: 'w', Mod: tea.ModCtrl}
 		case keyMatches(msg, m.KeyMap.DeleteUnderCursor):
-			msg.Type = tea.KeyDelete
+			msg = tea.KeyPressMsg{Code: tea.KeyDelete}
 		case keyMatches(msg, m.KeyMap.DeleteBeforeCursor):
-			msg.Type = tea.KeyBackspace
+			msg = tea.KeyPressMsg{Code: tea.KeyBackspace}
 		case keyMatches(msg, m.KeyMap.MoveBackward):
-			msg.Type = tea.KeyLeft
+			msg = tea.KeyPressMsg{Code: tea.KeyLeft}
 		case keyMatches(msg, m.KeyMap.MoveForward):
-			msg.Type = tea.KeyRight
+			msg = tea.KeyPressMsg{Code: tea.KeyRight}
 		case keyMatches(msg, m.KeyMap.JumpToBeginning):
-			msg.Type = tea.KeyHome
+			msg = tea.KeyPressMsg{Code: tea.KeyHome}
 		case keyMatches(msg, m.KeyMap.JumpToEnd):
-			msg.Type = tea.KeyEnd
+			msg = tea.KeyPressMsg{Code: tea.KeyEnd}
 		case keyMatches(msg, m.KeyMap.Paste):
-			msg.Type = tea.KeyCtrlV
+			msg = tea.KeyPressMsg{Code: 'v', Mod: tea.ModCtrl}
 		case keyMatchesUpstreamKeyMap(msg):
 			return m, cmd // do not pass to bubbles/textinput
 		default: // do nothing
@@ -190,7 +199,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // View renders the text input.
-func (m *Model) View() string {
+func (m *Model) View() tea.View {
+	return tea.NewView(m.view())
+}
+
+func (m *Model) view() string {
 	if m.quitting {
 		view, err := m.resultView()
 		if err != nil {

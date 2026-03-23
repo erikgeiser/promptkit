@@ -5,11 +5,20 @@ import (
 	"strings"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/erikgeiser/promptkit"
 	"github.com/erikgeiser/promptkit/selection"
 	"github.com/erikgeiser/promptkit/test"
 	"github.com/muesli/termenv"
+)
+
+var (
+	keyDown    = tea.KeyPressMsg{Code: tea.KeyDown}
+	keyUp      = tea.KeyPressMsg{Code: tea.KeyUp}
+	keyEnter   = tea.KeyPressMsg{Code: tea.KeyEnter}
+	keyCtrlC   = tea.KeyPressMsg{Code: 'c', Mod: tea.ModCtrl}
+	keyPgDown  = tea.KeyPressMsg{Code: tea.KeyPgDown}
+	keyPgUp    = tea.KeyPressMsg{Code: tea.KeyPgUp}
 )
 
 func TestSelectSecond(t *testing.T) {
@@ -19,7 +28,7 @@ func TestSelectSecond(t *testing.T) {
 	s.ColorProfile = termenv.TrueColor
 	m := selection.NewModel(s)
 
-	test.Run(t, m, tea.KeyDown)
+	test.Run(t, m, keyDown)
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "select_second.golden")
 
@@ -28,7 +37,7 @@ func TestSelectSecond(t *testing.T) {
 		t.Errorf("unexpected choice: %v, expected b", choice)
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "select_second_confirmed.golden")
 }
 
@@ -44,14 +53,14 @@ func TestPaginate(t *testing.T) {
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "paginate.golden")
 
-	view := m.View()
+	view := m.View().Content
 	strippedView := test.StripANSI(view)
 
 	if strings.Contains(strippedView, "Second1") {
 		t.Errorf("initial paginated view contains element of second page:\n%s", view)
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "paginate_confirmed.golden")
 }
 
@@ -66,11 +75,11 @@ func TestPaginatePush(t *testing.T) {
 	m.PageSize = 2
 	m.ColorProfile = termenv.TrueColor
 
-	test.Run(t, m, tea.KeyDown, tea.KeyDown)
+	test.Run(t, m, keyDown, keyDown)
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "paginate_push.golden")
 
-	view := m.View()
+	view := m.View().Content
 	strippedView := test.StripANSI(view)
 
 	if !strings.Contains(strippedView, "Second1") {
@@ -85,7 +94,7 @@ func TestPaginatePush(t *testing.T) {
 		t.Errorf("scolled view contains \"First1\" from first page")
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "paginate_push_confirmed.golden")
 }
 
@@ -99,11 +108,11 @@ func TestPaginateScroll(t *testing.T) {
 	m.PageSize = 2
 	m.ColorProfile = termenv.TrueColor
 
-	test.Run(t, m, tea.KeyPgDown)
+	test.Run(t, m, keyPgDown)
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "paginate_scroll.golden")
 
-	view := m.View()
+	view := m.View().Content
 	strippedView := test.StripANSI(view)
 
 	if !strings.Contains(strippedView, "Second1") {
@@ -118,7 +127,7 @@ func TestPaginateScroll(t *testing.T) {
 		t.Errorf("scolled view contains \"First1\" from first page")
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "paginate_scroll_confirmed.golden")
 }
 
@@ -133,9 +142,9 @@ func TestPaginateLast(t *testing.T) {
 	m.PageSize = 2
 	m.ColorProfile = termenv.TrueColor
 
-	test.Run(t, m, tea.KeyPgDown, tea.KeyPgDown, tea.KeyPgDown, tea.KeyPgDown,
-		tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown,
-		tea.KeyPgDown, tea.KeyPgDown, tea.KeyPgDown, tea.KeyPgDown)
+	test.Run(t, m, keyPgDown, keyPgDown, keyPgDown, keyPgDown,
+		keyDown, keyDown, keyDown, keyDown, keyDown,
+		keyPgDown, keyPgDown, keyPgDown, keyPgDown)
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "paginate_last.golden")
 
@@ -144,7 +153,7 @@ func TestPaginateLast(t *testing.T) {
 		t.Errorf("unexpected selected element: %v", choice)
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "paginate_last_confirmed.golden")
 }
 
@@ -157,7 +166,7 @@ func TestFilter(t *testing.T) {
 	m.PageSize = 2
 	m.ColorProfile = termenv.TrueColor
 
-	inputs := append(test.MsgsFromText("CC"), tea.KeyDown)
+	inputs := append(test.MsgsFromText("CC"), keyDown)
 	test.Run(t, m, inputs...)
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "filter.golden")
@@ -167,7 +176,7 @@ func TestFilter(t *testing.T) {
 		t.Errorf("unexpected selected element: %v", choice)
 	}
 
-	view := m.View()
+	view := m.View().Content
 	strippedView := test.StripANSI(view)
 
 	if !strings.Contains(strippedView, "CCC1") {
@@ -185,7 +194,7 @@ func TestFilter(t *testing.T) {
 		t.Errorf("filtered contains elements that do not match filter:\n%s", view)
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "filter_confirmed.golden")
 }
 
@@ -199,7 +208,7 @@ func TestNoFilter(t *testing.T) {
 	m.PageSize = 2
 	m.ColorProfile = termenv.TrueColor
 
-	inputs := append(test.MsgsFromText("CC"), tea.KeyDown)
+	inputs := append(test.MsgsFromText("CC"), keyDown)
 	test.Run(t, m, inputs...)
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "no_filter.golden")
@@ -209,7 +218,7 @@ func TestNoFilter(t *testing.T) {
 		t.Errorf("unexpected selected element: %v", choice)
 	}
 
-	view := m.View()
+	view := m.View().Content
 	strippedView := test.StripANSI(view)
 
 	if !strings.Contains(strippedView, "AAA") {
@@ -226,7 +235,7 @@ func TestNoFilter(t *testing.T) {
 		t.Errorf("filtered contains elements that do not match filter:\n%s", view)
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "no_filter_confirmed.golden")
 }
 
@@ -238,7 +247,7 @@ func TestAbort(t *testing.T) {
 	}))
 	m.ColorProfile = termenv.TrueColor
 
-	test.Run(t, m, tea.KeyCtrlC)
+	test.Run(t, m, keyCtrlC)
 
 	if m.Err == nil {
 		t.Fatalf("aborting did not produce an error")
@@ -262,7 +271,7 @@ func TestSubmit(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	cmd := test.Update(t, m, tea.KeyEnter)
+	cmd := test.Update(t, m, keyEnter)
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("enter did not produce quit signal")
 	}
@@ -282,7 +291,7 @@ func TestLoopCursorTopToBottom(t *testing.T) {
 	m.ColorProfile = termenv.TrueColor
 	m.LoopCursor = true
 
-	test.Run(t, m, tea.KeyUp)
+	test.Run(t, m, keyUp)
 	assertNoError(t, m)
 
 	if getChoice(t, m) != lastElement {
@@ -306,7 +315,7 @@ func TestLoopCursorBottomToTop(t *testing.T) {
 	m.ColorProfile = termenv.TrueColor
 	m.LoopCursor = true
 
-	test.Run(t, m, tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown)
+	test.Run(t, m, keyDown, keyDown, keyDown, keyDown)
 	assertNoError(t, m)
 
 	if value := getChoice(t, m); value != lastElement {
@@ -314,7 +323,7 @@ func TestLoopCursorBottomToTop(t *testing.T) {
 			value)
 	}
 
-	test.Update(t, m, tea.KeyDown)
+	test.Update(t, m, keyDown)
 
 	if value := getChoice(t, m); value != firstElement {
 		t.Fatalf("value did not loop to the first element %q but %q",
@@ -340,11 +349,11 @@ func TestLoopCursorTopToBottomPaged(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	if strings.Contains(m.View(), lastElement) {
+	if strings.Contains(m.View().Content, lastElement) {
 		t.Fatalf("last element is already shown before looping")
 	}
 
-	test.Update(t, m, tea.KeyUp)
+	test.Update(t, m, keyUp)
 
 	if value := getChoice(t, m); value != lastElement {
 		t.Fatalf("value did not loop to the last element %q but %q",
@@ -368,10 +377,10 @@ func TestLoopCursorBottomToTopPaged(t *testing.T) {
 	m.PageSize = 3
 	m.LoopCursor = true
 
-	test.Run(t, m, tea.KeyDown, tea.KeyDown, tea.KeyDown, tea.KeyDown)
+	test.Run(t, m, keyDown, keyDown, keyDown, keyDown)
 	assertNoError(t, m)
 
-	if strings.Contains(m.View(), firstElement) {
+	if strings.Contains(m.View().Content, firstElement) {
 		t.Fatalf("first element is already shown before looping")
 	}
 
@@ -380,7 +389,7 @@ func TestLoopCursorBottomToTopPaged(t *testing.T) {
 			value)
 	}
 
-	test.Update(t, m, tea.KeyDown)
+	test.Update(t, m, keyDown)
 
 	if value := getChoice(t, m); value != firstElement {
 		t.Fatalf("value did not loop to the first element %q but %q",

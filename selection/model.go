@@ -6,9 +6,9 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/termenv"
 	"golang.org/x/term"
@@ -152,11 +152,12 @@ func (m *Model[T]) initResultTemplate() (*template.Template, error) {
 func (m *Model[T]) initFilterInput() textinput.Model {
 	filterInput := textinput.New()
 	filterInput.Prompt = ""
-	filterInput.TextStyle = m.FilterInputTextStyle
-	filterInput.PlaceholderStyle = m.FilterInputPlaceholderStyle
-	filterInput.Cursor.Style = m.FilterInputCursorStyle
+	styles := filterInput.Styles()
+	styles.Focused.Text = m.FilterInputTextStyle
+	styles.Focused.Placeholder = m.FilterInputPlaceholderStyle
+	filterInput.SetStyles(styles)
 	filterInput.Placeholder = m.FilterPlaceholder
-	filterInput.Width = 80
+	filterInput.SetWidth(80)
 	filterInput.Focus()
 
 	return filterInput
@@ -199,7 +200,7 @@ func (m *Model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	switch msg := msg.(type) {
-	case tea.KeyMsg:
+	case tea.KeyPressMsg:
 		switch {
 		case keyMatches(msg, m.KeyMap.Abort):
 			m.Err = promptkit.ErrAborted
@@ -266,7 +267,7 @@ func (m *Model[T]) forceUpdatePageSizeForHeight() {
 	m.scrollOffset = 0
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
-	if lipgloss.Height(m.View()) < m.height {
+	if lipgloss.Height(m.view()) < m.height {
 		return
 	}
 
@@ -274,7 +275,7 @@ func (m *Model[T]) forceUpdatePageSizeForHeight() {
 	for m.PageSize = 1; m.PageSize <= maxAcceptablePageSize; m.PageSize++ {
 		m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
-		if lipgloss.Height(m.View()) >= m.height {
+		if lipgloss.Height(m.view()) >= m.height {
 			m.PageSize--
 			m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 
@@ -307,7 +308,11 @@ func (m *Model[T]) updateFilter(msg tea.Msg) (*Model[T], tea.Cmd) {
 }
 
 // View renders the selection prompt.
-func (m *Model[T]) View() string {
+func (m *Model[T]) View() tea.View {
+	return tea.NewView(m.view())
+}
+
+func (m *Model[T]) view() string {
 	viewBuffer := &bytes.Buffer{}
 
 	if m.quitting {

@@ -11,7 +11,7 @@ import (
 	"os"
 	"text/template"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/termenv"
 )

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/erikgeiser/promptkit/test"
 )
 
@@ -24,7 +24,7 @@ func TestAutocomplete(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	test.Update(t, m, tea.KeyTab)
+	test.Update(t, m, tea.KeyPressMsg{Code: tea.KeyTab})
 
 	if !m.autoCompleteTriggered {
 		t.Fatalf("auto-complete trigger indication missing")
@@ -40,7 +40,7 @@ func TestAutocomplete(t *testing.T) {
 			v, defaultValue)
 	}
 
-	test.Update(t, m, tea.KeyEsc) // reset
+	test.Update(t, m, tea.KeyPressMsg{Code: tea.KeyEsc}) // reset
 
 	test.Update(t, m, test.KeyMsg('a'))
 
@@ -48,7 +48,7 @@ func TestAutocomplete(t *testing.T) {
 		t.Fatalf("auto-complete trigger was not reset")
 	}
 
-	test.Update(t, m, tea.KeyTab)
+	test.Update(t, m, tea.KeyPressMsg{Code: tea.KeyTab})
 
 	if !m.autoCompleteTriggered {
 		t.Fatalf("auto-complete trigger indication missing")
@@ -70,7 +70,7 @@ func TestAutocomplete(t *testing.T) {
 		t.Fatalf("auto-complete trigger was not reset")
 	}
 
-	test.Update(t, m, tea.KeyTab)
+	test.Update(t, m, tea.KeyPressMsg{Code: tea.KeyTab})
 
 	if !m.autoCompleteTriggered {
 		t.Fatalf("auto-complete trigger indication missing")
