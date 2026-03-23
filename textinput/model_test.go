@@ -5,11 +5,18 @@ import (
 	"strings"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/erikgeiser/promptkit"
 	"github.com/erikgeiser/promptkit/test"
 	"github.com/erikgeiser/promptkit/textinput"
 	"github.com/muesli/termenv"
+)
+
+var (
+	keyEnter     = tea.KeyPressMsg{Code: tea.KeyEnter}
+	keyLeft      = tea.KeyPressMsg{Code: tea.KeyLeft}
+	keyBackspace = tea.KeyPressMsg{Code: tea.KeyBackspace}
+	keyCtrlC     = tea.KeyPressMsg{Code: 'c', Mod: tea.ModCtrl}
 )
 
 func TestEnterText(t *testing.T) {
@@ -30,7 +37,7 @@ func TestEnterText(t *testing.T) {
 		t.Errorf("unexpected value: %q, expected %q", value, input)
 	}
 
-	view := m.View()
+	view := m.View().Content
 	strippedView := test.StripANSI(view)
 
 	if strings.Contains(strippedView, m.Placeholder) {
@@ -38,7 +45,7 @@ func TestEnterText(t *testing.T) {
 			m.Placeholder, test.Indent(view))
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "input_confirmed.golden")
 }
 
@@ -56,7 +63,7 @@ func TestHidden(t *testing.T) {
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "hidden.golden")
 
-	view := m.View()
+	view := m.View().Content
 	strippedView := test.StripANSI(view)
 
 	if strings.Contains(strippedView, input) {
@@ -72,7 +79,7 @@ func TestHidden(t *testing.T) {
 		t.Errorf("unexpected value: %q, expected %q", value, input)
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "hidden_confirmed.golden")
 }
 
@@ -89,14 +96,14 @@ func TestPlaceholder(t *testing.T) {
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "placeholder.golden")
 
-	view := m.View()
+	view := m.View().Content
 	strippedView := test.StripANSI(view)
 
 	if !strings.Contains(strippedView, placeholder) {
 		t.Errorf("placeholder %q was not rendered:\n%s", placeholder, test.Indent(view))
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "placeholder_confirmed.golden")
 }
 
@@ -114,7 +121,7 @@ func TestInitialValue(t *testing.T) {
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "initial_value.golden")
 
-	view := m.View()
+	view := m.View().Content
 	strippedView := test.StripANSI(view)
 
 	if strings.Contains(strippedView, m.Placeholder) {
@@ -126,7 +133,7 @@ func TestInitialValue(t *testing.T) {
 		t.Errorf("value %q is not initial value %q", value, initialValue)
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "initial_value_confirmed.golden")
 }
 
@@ -140,11 +147,11 @@ func TestModifiedInitialValue(t *testing.T) {
 	m.InitialValue = initialValue
 	m.ColorProfile = termenv.TrueColor
 
-	test.Run(t, m, tea.KeyLeft, tea.KeyBackspace, test.KeyMsg('x'))
+	test.Run(t, m, keyLeft, keyBackspace, test.KeyMsg('x'))
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "modified_initial_value.golden")
 
-	view := m.View()
+	view := m.View().Content
 	strippedView := test.StripANSI(view)
 	value := getValue(t, m)
 
@@ -167,7 +174,7 @@ func TestModifiedInitialValue(t *testing.T) {
 			modifiedInitialValue, test.Indent(view))
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "modified_initial_value_confirmed.golden")
 }
 
@@ -182,16 +189,16 @@ func TestTemplate(t *testing.T) {
 	m.ExtendedTemplateFuncs["Separator"] = func() string { return separator }
 	m.ColorProfile = termenv.TrueColor
 
-	test.Run(t, m, tea.KeyLeft, tea.KeyBackspace, test.KeyMsg('s'))
+	test.Run(t, m, keyLeft, keyBackspace, test.KeyMsg('s'))
 	assertNoError(t, m)
 	test.AssertGoldenView(t, m, "template.golden")
 
-	view := m.View()
+	view := m.View().Content
 	if !strings.Contains(test.StripANSI(view), separator) {
 		t.Errorf("sparator was not rendered:\n%s", test.Indent(view))
 	}
 
-	test.Update(t, m, tea.KeyEnter)
+	test.Update(t, m, keyEnter)
 	test.AssertGoldenView(t, m, "template_confirmed.golden")
 }
 
@@ -202,7 +209,7 @@ func TestAbort(t *testing.T) {
 	m.Validate = nil
 	m.ColorProfile = termenv.TrueColor
 
-	test.Run(t, m, tea.KeyCtrlC)
+	test.Run(t, m, keyCtrlC)
 
 	if m.Err == nil {
 		t.Fatalf("aborting did not produce an error")
@@ -226,7 +233,7 @@ func TestSubmit(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	cmd := test.Update(t, m, tea.KeyEnter)
+	cmd := test.Update(t, m, keyEnter)
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("enter did not produce quit signal")
 	}
@@ -243,14 +250,14 @@ func TestValidate(t *testing.T) {
 	test.Run(t, m)
 	assertNoError(t, m)
 
-	cmd := test.Update(t, m, tea.KeyEnter)
+	cmd := test.Update(t, m, keyEnter)
 	if cmd != nil {
 		t.Errorf("enter on input that does not validate did not produce a no-op")
 	}
 
 	test.Update(t, m, test.KeyMsg('x'))
 
-	cmd = test.Update(t, m, tea.KeyEnter)
+	cmd = test.Update(t, m, keyEnter)
 	if cmd == nil || cmd() != tea.Quit() {
 		t.Errorf("enter on input that validates did not produce quit signal")
 	}

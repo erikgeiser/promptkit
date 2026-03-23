@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"slices"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 )
 
 // NewDefaultKeyMap returns a KeyMap with sensible default key mappings that can
@@ -32,7 +32,7 @@ type KeyMap struct {
 	ScrollUp    []string
 }
 
-func keyMatches(key tea.KeyMsg, mapping []string) bool {
+func keyMatches(key tea.KeyPressMsg, mapping []string) bool {
 	return slices.Contains(mapping, key.String())
 }
 

@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/erikgeiser/promptkit/selection"
 )
 
@@ -33,7 +33,7 @@ func (s *shoppingCart) Init() tea.Cmd {
 }
 
 func (s *shoppingCart) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	keyMsg, ok := msg.(tea.KeyMsg)
+	keyMsg, ok := msg.(tea.KeyPressMsg)
 	if !ok {
 		return s, nil
 	}
@@ -59,27 +59,27 @@ func (s *shoppingCart) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return s, nil
 }
 
-func (s *shoppingCart) View() string {
+func (s *shoppingCart) View() tea.View {
 	if s.err != nil {
-		return fmt.Sprintf("Error: %v", s.err)
+		return tea.NewView(fmt.Sprintf("Error: %v", s.err))
 	}
 
 	var b strings.Builder
 
-	b.WriteString(s.selection.View())
+	b.WriteString(s.selection.View().Content)
 	b.WriteString("=== Your Shopping Cart: ===\n")
 
 	if len(s.addedItems) == 0 {
 		b.WriteString("no items\n")
 
-		return b.String()
+		return tea.NewView(b.String())
 	}
 
 	for item, amount := range s.addedItems {
 		fmt.Fprintf(&b, "%dx %s\n", amount, item)
 	}
 
-	return b.String()
+	return tea.NewView(b.String())
 }
 
 func main() {
