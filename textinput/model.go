@@ -97,14 +97,8 @@ func (m *Model) initInput() textinput.Model {
 	input.Prompt = ""
 	input.Placeholder = m.Placeholder
 	input.CharLimit = m.CharLimit
-	// In bubbles v2, Width must be > 0 for placeholders to render correctly.
-	// Use the configured InputWidth, or fall back to the placeholder length.
-	width := m.InputWidth
-	if width <= 0 && m.Placeholder != "" {
-		width = len(m.Placeholder)
-	}
-	if width > 0 {
-		input.SetWidth(width)
+	if m.InputWidth > 0 {
+		input.SetWidth(m.InputWidth)
 	}
 	styles := input.Styles()
 	styles.Focused.Text = m.InputTextStyle
@@ -203,6 +197,25 @@ func (m *Model) View() tea.View {
 	return tea.NewView(m.view())
 }
 
+// inputView returns the rendered input, working around a bubbles v2 bug where
+// placeholderView() only renders 1 character when Width=0 (because it allocates
+// p := make([]rune, Width+1) which is length 1, triggering an early return).
+// When no fixed width is configured we render the placeholder ourselves so the
+// dynamic (non-scrolling) width is preserved.
+func (m *Model) inputView() string {
+	if m.InputWidth <= 0 && m.input.Value() == "" && m.Placeholder != "" {
+		ph := []rune(m.Placeholder)
+		cursor := m.InputPlaceholderStyle.Render(string(ph[:1]))
+		if len(ph) > 1 {
+			return cursor + m.InputPlaceholderStyle.Render(string(ph[1:]))
+		}
+
+		return cursor
+	}
+
+	return m.input.View()
+}
+
 func (m *Model) view() string {
 	if m.quitting {
 		view, err := m.resultView()
@@ -231,7 +244,7 @@ func (m *Model) view() string {
 		"Prompt":                 m.Prompt,
 		"InitialValue":           m.InitialValue,
 		"Placeholder":            m.Placeholder,
-		"Input":                  m.input.View(),
+		"Input":                  m.inputView(),
 		"ValidationError":        validationErr,
 		"TerminalWidth":          m.width,
 		"AutoCompleteTriggered":  m.autoCompleteTriggered,
