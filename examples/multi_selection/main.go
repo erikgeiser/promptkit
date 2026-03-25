@@ -12,6 +12,8 @@ func main() {
 	sp := selection.NewMulti("What do you want to eat?",
 		[]string{"Pizza", "Burger", "Sushi", "Salad", "Pasta", "Tacos"})
 	sp.PageSize = 4
+	sp.MinSelections = 2
+	// sp.MaxSelections = 4
 
 	choices, err := sp.RunPrompt()
 	if err != nil {

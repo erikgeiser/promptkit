@@ -17,10 +17,15 @@ const (
 	// prompt and can be copied as a starting point for a custom template.
 	DefaultMultiTemplate = `
 {{- if .Prompt -}}
-  {{ Bold .Prompt }}{{ if eq .NMarkedChoices 0 -}}
-    {{- if and (gt .MinSelections 0) (gt .MaxSelections 0) }} {{ Faint (print "Select " .MinSelections "-" .MaxSelections " items") -}}
-    {{- else if gt .MinSelections 0 }} {{ Faint (print "Select at least " .MinSelections " items") -}}
-    {{- else if gt .MaxSelections 0 }} {{ Faint (print "Select up to " .MaxSelections " items") -}}
+  {{ Bold .Prompt }}{{ if and (gt .MinSelections 0) (gt .MaxSelections 0) -}}
+    {{- if not (and (ge .NMarkedChoices .MinSelections) (le .NMarkedChoices .MaxSelections)) }} {{ Faint (print "Select " .MinSelections
+        "-" .MaxSelections " items") -}}
+    {{- end -}}
+  {{- else if gt .MinSelections 0 -}}
+    {{- if lt .NMarkedChoices .MinSelections }} {{ Faint (print "Select at least " .MinSelections " items") -}}
+    {{- end -}}
+  {{- else if gt .MaxSelections 0 -}}
+    {{- if gt .NMarkedChoices .MaxSelections }} {{ Faint (print "Select up to " .MaxSelections " items") -}}
     {{- end -}}
   {{- end }}
 {{ end -}}

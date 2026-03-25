@@ -207,6 +207,7 @@ func (m *Model) View() tea.View {
 func (m *Model) inputView() string {
 	if m.InputWidth <= 0 && m.input.Value() == "" && m.Placeholder != "" {
 		ph := []rune(m.Placeholder)
+
 		cursor := m.InputPlaceholderStyle.Render(string(ph[:1]))
 		if len(ph) > 1 {
 			return cursor + m.InputPlaceholderStyle.Render(string(ph[1:]))

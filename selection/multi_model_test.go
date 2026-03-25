@@ -298,6 +298,78 @@ func TestMultiResultOrder(t *testing.T) {
 	}
 }
 
+func TestMultiSelectionAnnotation(t *testing.T) {
+	t.Parallel()
+
+	choices := []string{"a", "b", "c", "d"}
+
+	cases := []struct {
+		name          string
+		minSelections int
+		maxSelections int
+		keys          []tea.Msg // keys to send after init
+		golden        string
+	}{
+		{
+			name:          "min_and_max_none_selected",
+			minSelections: 2,
+			maxSelections: 4,
+			keys:          nil,
+			golden:        "annotation_min_max_none_selected.golden",
+		},
+		{
+			name:          "min_and_max_within_range",
+			minSelections: 2,
+			maxSelections: 4,
+			keys:          []tea.Msg{keySpace, keyDown, keySpace},
+			golden:        "annotation_min_max_within_range.golden",
+		},
+		{
+			name:          "min_and_max_below_min",
+			minSelections: 2,
+			maxSelections: 4,
+			keys:          []tea.Msg{keySpace},
+			golden:        "annotation_min_max_below_min.golden",
+		},
+		{
+			name:          "only_min_below",
+			minSelections: 2,
+			maxSelections: 0,
+			keys:          []tea.Msg{keySpace},
+			golden:        "annotation_only_min_below.golden",
+		},
+		{
+			name:          "only_min_satisfied",
+			minSelections: 2,
+			maxSelections: 0,
+			keys:          []tea.Msg{keySpace, keyDown, keySpace},
+			golden:        "annotation_only_min_satisfied.golden",
+		},
+		{
+			name:          "only_max_within",
+			minSelections: 0,
+			maxSelections: 3,
+			keys:          []tea.Msg{keySpace, keyDown, keySpace},
+			golden:        "annotation_only_max_within.golden",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			m := selection.NewMultiModel(selection.NewMulti("Pick:", choices))
+			m.ColorProfile = termenv.TrueColor
+			m.MinSelections = tc.minSelections
+			m.MaxSelections = tc.maxSelections
+
+			test.Run(t, m, tc.keys...)
+			assertMultiNoError(t, m)
+			test.AssertGoldenView(t, m, tc.golden)
+		})
+	}
+}
+
 func TestMultiZeroMinSelections(t *testing.T) {
 	t.Parallel()
 
