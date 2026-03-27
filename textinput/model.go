@@ -252,6 +252,7 @@ func (m *Model) view() string {
 		"TerminalWidth":          m.width,
 		"AutoCompleteTriggered":  m.autoCompleteTriggered,
 		"AutoCompleteIndecisive": m.autoCompleteIndecisive,
+		"KeyMap":                 m.KeyMap,
 	})
 	if err != nil {
 		m.Err = err
@@ -285,6 +286,7 @@ func (m *Model) resultView() (string, error) {
 		"Placeholder":   m.Placeholder,
 		"Hidden":        m.Hidden,
 		"TerminalWidth": m.width,
+		"KeyMap":        m.KeyMap,
 	})
 	if err != nil {
 		return "", fmt.Errorf("execute confirmation template: %w", err)
