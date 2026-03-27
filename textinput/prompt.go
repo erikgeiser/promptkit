@@ -128,7 +128,6 @@ type TextInput struct {
 	//  * Mask(string) string: A function that replaces all characters of
 	//    a string with the character specified in HideMask if Hidden is
 	//    true and returns the input string if Hidden is false.
-	//  * KeyMap *KeyMap: The configured key map.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
 	//  * The functions specified in ExtendedTemplateFuncs.

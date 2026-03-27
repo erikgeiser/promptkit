@@ -148,7 +148,6 @@ type Selection[T any] struct {
 	//  * AllChoices []*Choice: All configured choices.
 	//  * NAllChoices int: The number of configured choices.
 	//  * TerminalWidth int: The width of the terminal.
-	//  * KeyMap *KeyMap: The configured key map.
 	//  * Final(*Choice) string: The configured FinalChoiceStyle.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).

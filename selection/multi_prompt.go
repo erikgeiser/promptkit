@@ -144,6 +144,7 @@ type MultiSelection[T any] struct {
 	//    page because they are scrolled out of view or filtered out.
 	//  * NOffscreenMarkedChoices int: The number of offscreen marked choices.
 	//  * TerminalWidth int: The width of the terminal.
+	//  * KeyMap *MultiKeyMap: The configured key map.
 	//  * IsMarked(*Choice) bool: Whether the given choice is marked.
 	//  * Cursor(*Choice) string: The configured CursorChoiceStyle.
 	//  * CursorMarked(*Choice) string: The configured CursorMarkedChoiceStyle.
@@ -171,6 +172,7 @@ type MultiSelection[T any] struct {
 	//  * AllChoices []*Choice: All configured choices.
 	//  * NAllChoices int: The number of configured choices.
 	//  * TerminalWidth int: The width of the terminal.
+	//  * KeyMap *MultiKeyMap: The configured key map.
 	//  * Final(*Choice) string: The configured FinalChoiceStyle.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).

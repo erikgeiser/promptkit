@@ -22,7 +22,7 @@ const (
 {{- if .ValidationError }} {{ Foreground "1" (Bold "✘") }}
 {{- else }} {{ Foreground "2" (Bold "✔") }}
 {{- end }}
-{{ Faint (printf "%s to submit • %s for newline" (index .KeyMap.Submit 0) (index .KeyMap.InsertNewline 0)) -}}
+{{ Faint (printf "Submit: %s • Newline: %s" (index .KeyMap.Submit 0) (index .KeyMap.InsertNewline 0)) -}}
 `
 
 	// DefaultAreaResultTemplate defines the default appearance with which the
@@ -97,7 +97,6 @@ type TextArea struct {
 	//  * InitialValue string: The configured initial value.
 	//  * Placeholder string: The configured placeholder.
 	//  * TerminalWidth int: The width of the terminal.
-	//  * KeyMap *AreaKeyMap: The configured key map.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
 	//  * The functions specified in ExtendedTemplateFuncs.
@@ -142,7 +141,7 @@ func NewArea(prompt string) *TextArea {
 		ResultTemplate:        DefaultAreaResultTemplate,
 		KeyMap:                NewDefaultAreaKeyMap(),
 		InputPlaceholderStyle: lipgloss.NewStyle().Foreground(lipgloss.Color("240")),
-		Validate: ValidateNotEmpty,
+		Validate:              ValidateNotEmpty,
 		ExtendedTemplateFuncs: template.FuncMap{},
 		WrapMode:              promptkit.WordWrap,
 		Output:                os.Stdout,

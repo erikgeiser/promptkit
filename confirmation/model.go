@@ -204,7 +204,6 @@ func (m *Model) resultView() (string, error) {
 		"DefaultNo":        m.DefaultValue == No,
 		"DefaultUndecided": m.DefaultValue == Undecided,
 		"TerminalWidth":    m.width,
-		"KeyMap":           m.KeyMap,
 	})
 	if err != nil {
 		return "", fmt.Errorf("execute confirmation template: %w", err)

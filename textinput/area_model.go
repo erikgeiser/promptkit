@@ -270,7 +270,6 @@ func (m *AreaModel) areaResultView() (string, error) {
 		"InitialValue":  m.InitialValue,
 		"Placeholder":   m.Placeholder,
 		"TerminalWidth": m.width,
-		"KeyMap":        m.KeyMap,
 	})
 	if err != nil {
 		return "", fmt.Errorf("execute result template: %w", err)

@@ -397,6 +397,7 @@ func (m *MultiModel[T]) view() string {
 		"TerminalWidth":           m.width,
 		"MinSelections":           m.MinSelections,
 		"MaxSelections":           m.MaxSelections,
+		"KeyMap":                  m.KeyMap,
 	})
 	if err != nil {
 		m.Err = err
@@ -427,6 +428,7 @@ func (m *MultiModel[T]) resultView() (string, error) {
 		"AllChoices":      m.choices,
 		"NAllChoices":     len(m.choices),
 		"TerminalWidth":   m.width,
+		"KeyMap":          m.KeyMap,
 	})
 	if err != nil {
 		return "", fmt.Errorf("execute result template: %w", err)

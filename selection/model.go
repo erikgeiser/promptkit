@@ -377,7 +377,6 @@ func (m *Model[T]) resultView() (string, error) {
 		"AllChoices":    m.choices,
 		"NAllChoices":   len(m.choices),
 		"TerminalWidth": m.width,
-		"KeyMap":        m.KeyMap,
 	})
 	if err != nil {
 		return "", fmt.Errorf("execute confirmation template: %w", err)

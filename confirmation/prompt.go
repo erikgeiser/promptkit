@@ -101,7 +101,6 @@ type Confirmation struct {
 	//  * DefaultUndecided bool: Whether or not Undecided is confiured as
 	//    default value.
 	//  * TerminalWidth int: The width of the terminal.
-	//  * KeyMap *KeyMap: The configured key map.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
 	//  * The functions specified in ExtendedTemplateFuncs.
