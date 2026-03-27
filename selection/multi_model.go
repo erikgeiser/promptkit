@@ -102,9 +102,6 @@ func (m *MultiModel[T]) initTemplate() (*template.Template, error) {
 	tmpl.Funcs(m.ExtendedTemplateFuncs)
 	tmpl.Funcs(promptkit.UtilFuncMap())
 	tmpl.Funcs(template.FuncMap{
-		"Faint": func(s string) string {
-			return termenv.String(s).Faint().String()
-		},
 		"IsScrollDownHintPosition": func(idx int) bool {
 			return m.canScrollDown() && (idx == len(m.currentChoices)-1)
 		},
