@@ -22,7 +22,10 @@ const (
 {{- if .ValidationError }} {{ Foreground "1" (Bold "✘") }}
 {{- else }} {{ Foreground "2" (Bold "✔") }}
 {{- end }}
-{{ Faint (printf "Submit: %s • Newline: %s" (index .KeyMap.Submit 0) (index .KeyMap.InsertNewline 0)) -}}
+{{ Faint "Newline: " -}}
+{{- Faint (Foreground "6" (Join .KeyMap.InsertNewline "|")) -}}
+{{- Faint " • Submit: " -}}
+{{- Faint (Foreground "6" (Join .KeyMap.Submit "|")) -}}
 `
 
 	// DefaultAreaResultTemplate defines the default appearance with which the

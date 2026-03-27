@@ -34,10 +34,16 @@ var ErrAborted = fmt.Errorf("prompt aborted")
 //   - Add(int, int) int: The sum of two ints.
 //   - Sub(int, int) int: The difference of two ints.
 //   - Mul(int, int) int: The product of two ints.
+//   - Join([]string, string) string: Identical to strings.Join.
+//   - ToUpper(string) string: Identical to strings.ToUpper.
+//   - ToLower(string) string: Identical to strings.ToLower.
 func UtilFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"Repeat": strings.Repeat,
-		"Len":    ansi.PrintableRuneWidth,
+		"Repeat":  strings.Repeat,
+		"Join":    strings.Join,
+		"ToUpper": strings.ToUpper,
+		"ToLower": strings.ToLower,
+		"Len":     ansi.PrintableRuneWidth,
 		"Min": func(a, b int) int {
 			if a <= b {
 				return a
