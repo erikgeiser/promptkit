@@ -18,11 +18,13 @@ const (
 	DefaultMultiTemplate = `
 {{- if .Prompt -}}
   {{ Bold .Prompt }}{{ if and (gt .MinSelections 0) (gt .MaxSelections 0) -}}
-    {{- if not (and (ge .NMarkedChoices .MinSelections) (le .NMarkedChoices .MaxSelections)) }} {{ Faint (print "Select " .MinSelections
-        "-" .MaxSelections " items") -}}
+    {{- if not (and (ge .NMarkedChoices .MinSelections)
+                    (le .NMarkedChoices .MaxSelections)) -}}
+      {{- print " " }}{{ Faint (print "Select " .MinSelections "-" .MaxSelections " items") -}}
     {{- end -}}
   {{- else if gt .MinSelections 0 -}}
-    {{- if lt .NMarkedChoices .MinSelections }} {{ Faint (print "Select at least " .MinSelections " items") -}}
+    {{- if lt .NMarkedChoices .MinSelections }} {{ Faint (print "Select at least " .MinSelections
+      " items") -}}
     {{- end -}}
   {{- else if gt .MaxSelections 0 -}}
     {{- if gt .NMarkedChoices .MaxSelections }} {{ Faint (print "Select up to " .MaxSelections " items") -}}

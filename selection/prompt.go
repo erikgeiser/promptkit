@@ -100,7 +100,7 @@ type Selection[T any] struct {
 
 	// PageSize is the number of choices that are displayed at once. If PageSize
 	// is smaller than the number of choices, pagination is enabled. If PageSize
-	// is 0, pagenation is disabled. Regardless of the value of PageSize,
+	// is 0, pagination is disabled. Regardless of the value of PageSize,
 	// pagination is always enabled when the prompt does not fit the terminal.
 	PageSize int
 
