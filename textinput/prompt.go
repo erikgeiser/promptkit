@@ -27,8 +27,9 @@ const (
 	{{- else }} {{ Foreground "2" (Bold "✔") }}
 	{{- end -}}` +
 		`{{- if .AutoCompleteIndecisive }}` +
-		`{{ range AutoCompleteSuffixes }}{{ "\n" }}{{ Repeat " " $.CursorOffset }}{{ Faint . }}{{ end }}` +
-		`{{ end -}}`
+		`{{ range AutoCompleteSuggestions }}` +
+		`{{ "\n" }}{{ Repeat " " $.CursorOffset }}{{ Faint (TrimPrefix . $.InputValue) }}` +
+		`{{ end }}{{ end -}}`
 
 	// DefaultResultTemplate defines the default appearance with which the
 	// finale result of the prompt is presented.
@@ -101,9 +102,19 @@ type TextInput struct {
 	//  * InitialValue string: The configured initial value of the input.
 	//  * Placeholder string: The configured placeholder of the input.
 	//  * Input string: The actual input field.
+	//  * InputValue string: The raw current input value.
 	//  * ValidationError error: The error value returned by Validate.
 	//    to the configured Validate function.
 	//  * TerminalWidth int: The width of the terminal.
+	//  * AutoCompleteTriggered bool: An indication that auto-complete was
+	//    just triggered by the user. It resets after further input.
+	//  * AutoCompleteIndecisive bool: An indication that auto-complete was
+	//    just triggered by the user with an indecisive result. It resets
+	//    after further input.
+	//  * CursorOffset int: The column offset of the cursor in the current line,
+	//    useful for aligning content below the input.
+	//  * AutoCompleteSuggestions() []string: A function that returns the
+	//    auto-complete suggestions for the current input.
 	//  * KeyMap *KeyMap: The configured key map.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
@@ -120,12 +131,15 @@ type TextInput struct {
 	//  * Prompt string: The configured prompt.
 	//  * InitialValue string: The configured initial value of the input.
 	//  * Placeholder string: The configured placeholder of the input.
+	//  * InputValue string: The raw current input value.
 	//  * TerminalWidth int: The width of the terminal.
 	//  * AutoCompleteTriggered bool: An indication that auto-complete was
 	//    just triggered by the user. It resets after further input.
 	//  * AutoCompleteIndecisive bool: An indication that auto-complete was
-	//    just triggered by the user with an indecisive results. It resets
+	//    just triggered by the user with an indecisive result. It resets
 	//    after further input.
+	//  * CursorOffset int: The column offset of the cursor in the current line,
+	//    useful for aligning content below the input.
 	//  * AutoCompleteSuggestions() []string: A function that returns the
 	//    auto-complete suggestions for the current input.
 	//  * Mask(string) string: A function that replaces all characters of

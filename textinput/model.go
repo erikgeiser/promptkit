@@ -71,17 +71,6 @@ func (m *Model) initTemplate() (*template.Template, error) {
 		"AutoCompleteSuggestions": func() []string {
 			return m.AutoComplete(m.input.Value())
 		},
-		"AutoCompleteSuffixes": func() []string {
-			suggestions := m.AutoComplete(m.input.Value())
-			prefix := m.input.Value()
-
-			suffixes := make([]string, 0, len(suggestions))
-			for _, s := range suggestions {
-				suffixes = append(suffixes, strings.TrimPrefix(s, prefix))
-			}
-
-			return suffixes
-		},
 	})
 
 	return tmpl.Parse(m.Template)
@@ -264,6 +253,7 @@ func (m *Model) view() string {
 		"AutoCompleteTriggered":  m.autoCompleteTriggered,
 		"AutoCompleteIndecisive": m.autoCompleteIndecisive,
 		"CursorOffset":           len([]rune(m.Prompt)) + 1 + m.input.Position(),
+		"InputValue":             m.input.Value(),
 		"KeyMap":                 m.KeyMap,
 	})
 	if err != nil {

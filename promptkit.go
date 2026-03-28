@@ -37,13 +37,17 @@ var ErrAborted = fmt.Errorf("prompt aborted")
 //   - Join([]string, string) string: Identical to strings.Join.
 //   - ToUpper(string) string: Identical to strings.ToUpper.
 //   - ToLower(string) string: Identical to strings.ToLower.
+//   - TrimPrefix(string, string) string: Identical to strings.TrimPrefix.
+//   - TrimSuffix(string, string) string: Identical to strings.TrimSuffix.
 func UtilFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"Repeat":  strings.Repeat,
-		"Join":    strings.Join,
-		"ToUpper": strings.ToUpper,
-		"ToLower": strings.ToLower,
-		"Len":     ansi.PrintableRuneWidth,
+		"Repeat":     strings.Repeat,
+		"Join":       strings.Join,
+		"ToUpper":    strings.ToUpper,
+		"ToLower":    strings.ToLower,
+		"TrimPrefix": strings.TrimPrefix,
+		"TrimSuffix": strings.TrimSuffix,
+		"Len":        ansi.PrintableRuneWidth,
 		"Min": func(a, b int) int {
 			if a <= b {
 				return a
