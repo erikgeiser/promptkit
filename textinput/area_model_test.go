@@ -2,7 +2,6 @@ package textinput_test
 
 import (
 	"errors"
-	"runtime"
 	"strings"
 	"testing"
 
@@ -14,13 +13,7 @@ import (
 )
 
 var (
-	keySubmit = func() tea.KeyPressMsg {
-		if runtime.GOOS == "windows" {
-			return tea.KeyPressMsg{Code: tea.KeyEnter, Mod: tea.ModCtrl}
-		}
-
-		return tea.KeyPressMsg{Code: tea.KeyEnter, Mod: tea.ModShift}
-	}()
+	keySubmit = tea.KeyPressMsg{Code: 's', Mod: tea.ModCtrl}
 )
 
 func TestAreaEnterText(t *testing.T) {
