@@ -1,7 +1,8 @@
 /*
-Package textinput implements prompt for a string input that can also be used for
-secret strings such as passwords. It also offers customizable appreance as well
-as optional support for input validation and a customizable key map.
+Package textinput implements prompts for string input. It provides a single-line
+text input that can also be used for secret strings such as passwords, and a
+multi-line text area for longer form input. Both offer customizable appearance
+as well as optional support for input validation and a customizable key map.
 */
 package textinput
 
@@ -101,6 +102,7 @@ type TextInput struct {
 	//  * ValidationError error: The error value returned by Validate.
 	//    to the configured Validate function.
 	//  * TerminalWidth int: The width of the terminal.
+	//  * KeyMap *KeyMap: The configured key map.
 	//  * promptkit.UtilFuncMap: Handy helper functions.
 	//  * termenv TemplateFuncs (see https://github.com/muesli/termenv).
 	//  * The functions specified in ExtendedTemplateFuncs.

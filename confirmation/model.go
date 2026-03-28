@@ -169,6 +169,7 @@ func (m *Model) view() string {
 		"DefaultNo":        m.DefaultValue == No,
 		"DefaultUndecided": m.DefaultValue == Undecided,
 		"TerminalWidth":    m.width,
+		"KeyMap":           m.KeyMap,
 	})
 	if err != nil {
 		m.Err = err

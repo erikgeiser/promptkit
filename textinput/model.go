@@ -252,6 +252,7 @@ func (m *Model) view() string {
 		"TerminalWidth":          m.width,
 		"AutoCompleteTriggered":  m.autoCompleteTriggered,
 		"AutoCompleteIndecisive": m.autoCompleteIndecisive,
+		"KeyMap":                 m.KeyMap,
 	})
 	if err != nil {
 		m.Err = err

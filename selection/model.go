@@ -344,6 +344,7 @@ func (m *Model[T]) view() string {
 		"AllChoices":    m.choices,
 		"NAllChoices":   len(m.choices),
 		"TerminalWidth": m.width,
+		"KeyMap":        m.KeyMap,
 	})
 	if err != nil {
 		m.Err = err
