@@ -35,7 +35,7 @@ func NewDefaultAreaKeyMap() *AreaKeyMap {
 	}
 
 	if runtime.GOOS == "windows" {
-		km.Submit = []string{"alt+enter", "ctrl+d"}
+		km.Submit = []string{"ctrl+enter", "ctrl+d"}
 	}
 
 	return km

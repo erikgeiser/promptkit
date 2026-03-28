@@ -16,7 +16,7 @@ import (
 var (
 	keySubmit = func() tea.KeyPressMsg {
 		if runtime.GOOS == "windows" {
-			return tea.KeyPressMsg{Code: tea.KeyEnter, Mod: tea.ModAlt}
+			return tea.KeyPressMsg{Code: tea.KeyEnter, Mod: tea.ModCtrl}
 		}
 
 		return tea.KeyPressMsg{Code: tea.KeyEnter, Mod: tea.ModShift}
@@ -161,7 +161,7 @@ func TestAreaSubmit(t *testing.T) {
 
 	cmd := test.Update(t, m, keySubmit)
 	if cmd == nil || cmd() != tea.Quit() {
-		t.Errorf("shift/alt+enter did not produce quit signal")
+		t.Errorf("shift/ctrl+enter did not produce quit signal")
 	}
 
 	test.AssertGoldenView(t, m, "area_submit.golden")
@@ -178,14 +178,14 @@ func TestAreaValidate(t *testing.T) {
 
 	cmd := test.Update(t, m, keySubmit)
 	if cmd != nil {
-		t.Errorf("shift/alt+enter on empty input that does not validate did not produce a no-op")
+		t.Errorf("shift/ctrl+enter on empty input that does not validate did not produce a no-op")
 	}
 
 	test.Update(t, m, test.KeyMsg('x'))
 
 	cmd = test.Update(t, m, keySubmit)
 	if cmd == nil || cmd() != tea.Quit() {
-		t.Errorf("shift/alt+enter on input that validates did not produce quit signal")
+		t.Errorf("shift/ctrl+enter on input that validates did not produce quit signal")
 	}
 }
 
