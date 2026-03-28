@@ -24,14 +24,13 @@ const (
 {{- end }} {{ Faint "Newline: " -}}
 {{- Faint (Foreground "6" (Join .KeyMap.InsertNewline "|")) -}}
 {{- Faint " • Submit: " -}}
-{{- Faint (Foreground "6" (Join .KeyMap.Submit "|")) -}}
-`
+{{- Faint (Foreground "6" (Join .KeyMap.Submit "|")) -}}`
 
 	// DefaultAreaResultTemplate defines the default appearance with which the
 	// final result of the prompt is presented.
 	DefaultAreaResultTemplate = `
-	{{- print .Prompt " " (Foreground "32" .FinalValue) "\n" -}}
-	`
+	{{- print .Prompt }}
+{{ print (Foreground "32" .FinalValue) "\n" -}}`
 
 	// DefaultAreaHeight is the default number of visible rows in the text area.
 	DefaultAreaHeight = 6

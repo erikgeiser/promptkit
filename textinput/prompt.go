@@ -25,8 +25,7 @@ const (
 	{{- Bold .Prompt }} {{ .Input -}}
 	{{- if .ValidationError }} {{ Foreground "1" (Bold "✘") }}
 	{{- else }} {{ Foreground "2" (Bold "✔") }}
-	{{- end -}}
-	`
+	{{- end -}}`
 
 	// DefaultResultTemplate defines the default appearance with which the
 	// finale result of the prompt is presented.
