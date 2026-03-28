@@ -206,6 +206,19 @@ func TestAreaTemplate(t *testing.T) {
 	test.AssertGoldenView(t, m, "area_template_confirmed.golden")
 }
 
+func TestAreaResultTemplate(t *testing.T) {
+	t.Parallel()
+
+	m := textinput.NewAreaModel(textinput.NewArea("notes:"))
+	m.ColorProfile = termenv.TrueColor
+
+	test.Run(t, m, test.MsgsFromText("hello world")...)
+	assertNoAreaError(t, m)
+
+	test.Update(t, m, keySubmit)
+	test.AssertGoldenView(t, m, "area_result_template.golden")
+}
+
 func TestAreaValidationIndicator(t *testing.T) {
 	t.Parallel()
 

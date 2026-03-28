@@ -28,12 +28,7 @@ const (
 
 	// DefaultAreaResultTemplate defines the default appearance with which the
 	// final result of the prompt is presented.
-	DefaultAreaResultTemplate = `
-	{{- print .Prompt }}
-{{ print (Foreground "32" .FinalValue) "\n" -}}`
-
-	// DefaultAreaHeight is the default number of visible rows in the text area.
-	DefaultAreaHeight = 6
+	DefaultAreaResultTemplate = `{{- print .Prompt "\n" (Foreground "32" .FinalValue) "\n" -}}`
 )
 
 // TextArea represents a configurable multi-line text area prompt.
