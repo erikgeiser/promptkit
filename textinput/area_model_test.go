@@ -2,6 +2,7 @@ package textinput_test
 
 import (
 	"errors"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -13,7 +14,13 @@ import (
 )
 
 var (
-	keyShiftEnter = tea.KeyPressMsg{Code: tea.KeyEnter, Mod: tea.ModShift}
+	keySubmit = func() tea.KeyPressMsg {
+		if runtime.GOOS == "windows" {
+			return tea.KeyPressMsg{Code: tea.KeyEnter, Mod: tea.ModAlt}
+		}
+
+		return tea.KeyPressMsg{Code: tea.KeyEnter, Mod: tea.ModShift}
+	}()
 )
 
 func TestAreaEnterText(t *testing.T) {
@@ -42,7 +49,7 @@ func TestAreaEnterText(t *testing.T) {
 			m.Placeholder, test.Indent(view))
 	}
 
-	test.Update(t, m, keyShiftEnter)
+	test.Update(t, m, keySubmit)
 	test.AssertGoldenView(t, m, "area_input_confirmed.golden")
 }
 
@@ -63,7 +70,7 @@ func TestAreaMultiline(t *testing.T) {
 		t.Errorf("value %q does not contain both lines", value)
 	}
 
-	test.Update(t, m, keyShiftEnter)
+	test.Update(t, m, keySubmit)
 	test.AssertGoldenView(t, m, "area_multiline_confirmed.golden")
 }
 
@@ -87,7 +94,7 @@ func TestAreaPlaceholder(t *testing.T) {
 		t.Errorf("placeholder %q was not rendered:\n%s", placeholder, test.Indent(view))
 	}
 
-	test.Update(t, m, keyShiftEnter)
+	test.Update(t, m, keySubmit)
 	test.AssertGoldenView(t, m, "area_placeholder_rejected.golden")
 }
 
@@ -117,7 +124,7 @@ func TestAreaInitialValue(t *testing.T) {
 		t.Errorf("value %q is not initial value %q", value, initialValue)
 	}
 
-	test.Update(t, m, keyShiftEnter)
+	test.Update(t, m, keySubmit)
 	test.AssertGoldenView(t, m, "area_initial_value_confirmed.golden")
 }
 
@@ -152,9 +159,9 @@ func TestAreaSubmit(t *testing.T) {
 	test.Run(t, m)
 	assertNoAreaError(t, m)
 
-	cmd := test.Update(t, m, keyShiftEnter)
+	cmd := test.Update(t, m, keySubmit)
 	if cmd == nil || cmd() != tea.Quit() {
-		t.Errorf("alt+enter did not produce quit signal")
+		t.Errorf("shift/alt+enter did not produce quit signal")
 	}
 
 	test.AssertGoldenView(t, m, "area_submit.golden")
@@ -169,16 +176,16 @@ func TestAreaValidate(t *testing.T) {
 	test.Run(t, m)
 	assertNoAreaError(t, m)
 
-	cmd := test.Update(t, m, keyShiftEnter)
+	cmd := test.Update(t, m, keySubmit)
 	if cmd != nil {
-		t.Errorf("alt+enter on empty input that does not validate did not produce a no-op")
+		t.Errorf("shift/alt+enter on empty input that does not validate did not produce a no-op")
 	}
 
 	test.Update(t, m, test.KeyMsg('x'))
 
-	cmd = test.Update(t, m, keyShiftEnter)
+	cmd = test.Update(t, m, keySubmit)
 	if cmd == nil || cmd() != tea.Quit() {
-		t.Errorf("alt+enter on input that validates did not produce quit signal")
+		t.Errorf("shift/alt+enter on input that validates did not produce quit signal")
 	}
 }
 
@@ -202,7 +209,7 @@ func TestAreaTemplate(t *testing.T) {
 		t.Errorf("separator was not rendered:\n%s", test.Indent(view))
 	}
 
-	test.Update(t, m, keyShiftEnter)
+	test.Update(t, m, keySubmit)
 	test.AssertGoldenView(t, m, "area_template_confirmed.golden")
 }
 

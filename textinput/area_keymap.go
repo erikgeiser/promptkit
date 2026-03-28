@@ -2,6 +2,7 @@ package textinput
 
 import (
 	"fmt"
+	"runtime"
 	"slices"
 
 	tea "charm.land/bubbletea/v2"
@@ -10,7 +11,7 @@ import (
 // NewDefaultAreaKeyMap returns an AreaKeyMap with sensible default key mappings
 // that can also be used as a starting point for customization.
 func NewDefaultAreaKeyMap() *AreaKeyMap {
-	return &AreaKeyMap{
+	km := &AreaKeyMap{
 		MoveBackward:           []string{"left", "ctrl+b"},
 		MoveForward:            []string{"right", "ctrl+f"},
 		MoveWordBackward:       []string{"alt+left", "alt+b"},
@@ -32,6 +33,12 @@ func NewDefaultAreaKeyMap() *AreaKeyMap {
 		Submit:                 []string{"shift+enter", "ctrl+d"},
 		Abort:                  []string{"ctrl+c"},
 	}
+
+	if runtime.GOOS == "windows" {
+		km.Submit = []string{"alt+enter", "ctrl+d"}
+	}
+
+	return km
 }
 
 // upstreamAreaKeyMap lists keys handled natively by the underlying
