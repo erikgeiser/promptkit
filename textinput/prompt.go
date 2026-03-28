@@ -25,7 +25,10 @@ const (
 	{{- Bold .Prompt }} {{ .Input -}}
 	{{- if .ValidationError }} {{ Foreground "1" (Bold "✘") }}
 	{{- else }} {{ Foreground "2" (Bold "✔") }}
-	{{- end -}}`
+	{{- end -}}` +
+		`{{- if .AutoCompleteIndecisive }}` +
+		`{{ range AutoCompleteSuffixes }}{{ "\n" }}{{ Repeat " " $.CursorOffset }}{{ Faint . }}{{ end }}` +
+		`{{ end -}}`
 
 	// DefaultResultTemplate defines the default appearance with which the
 	// finale result of the prompt is presented.

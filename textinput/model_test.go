@@ -203,6 +203,89 @@ func TestTemplate(t *testing.T) {
 	test.AssertGoldenView(t, m, "template_confirmed.golden")
 }
 
+func TestAutoCompleteView(t *testing.T) {
+	t.Parallel()
+
+	choices := []string{"foobar", "foobaz", "fooqux"}
+	keyTab := tea.KeyPressMsg{Code: tea.KeyTab}
+
+	t.Run("NoMatch", func(t *testing.T) {
+		t.Parallel()
+
+		m := textinput.NewModel(textinput.New("cmd:"))
+		m.AutoComplete = textinput.AutoCompleteFromSlice(choices)
+		m.Validate = nil
+		m.ColorProfile = termenv.TrueColor
+
+		test.Run(t, m, test.MsgsFromText("xyz")...)
+		test.Update(t, m, keyTab)
+		assertNoError(t, m)
+		test.AssertGoldenView(t, m, "autocomplete_no_match.golden")
+
+		view := test.StripANSI(m.View().Content)
+		for _, choice := range choices {
+			if strings.Contains(view, choice) {
+				t.Errorf("view contains suggestion %q but no match expected:\n%s",
+					choice, test.Indent(m.View().Content))
+			}
+		}
+	})
+
+	t.Run("FullMatch", func(t *testing.T) {
+		t.Parallel()
+
+		m := textinput.NewModel(textinput.New("cmd:"))
+		m.AutoComplete = textinput.AutoCompleteFromSlice(choices)
+		m.Validate = nil
+		m.ColorProfile = termenv.TrueColor
+
+		test.Run(t, m, test.MsgsFromText("foobar")...)
+		test.Update(t, m, keyTab)
+		assertNoError(t, m)
+		test.AssertGoldenView(t, m, "autocomplete_full_match.golden")
+
+		value := getValue(t, m)
+		if value != "foobar" {
+			t.Errorf("expected completed value %q, got %q", "foobar", value)
+		}
+
+		view := test.StripANSI(m.View().Content)
+		for _, other := range []string{"foobaz", "fooqux"} {
+			if strings.Contains(view, other) {
+				t.Errorf("view shows suggestion %q for a decisive match:\n%s",
+					other, test.Indent(m.View().Content))
+			}
+		}
+	})
+
+	t.Run("SubMatchWithSuggestions", func(t *testing.T) {
+		t.Parallel()
+
+		m := textinput.NewModel(textinput.New("cmd:"))
+		m.AutoComplete = textinput.AutoCompleteFromSlice(choices)
+		m.Validate = nil
+		m.ColorProfile = termenv.TrueColor
+
+		test.Run(t, m, test.MsgsFromText("foo")...)
+		test.Update(t, m, keyTab)
+		assertNoError(t, m)
+		test.AssertGoldenView(t, m, "autocomplete_submatch_suggestions.golden")
+
+		value := getValue(t, m)
+		if value != "foo" {
+			t.Errorf("expected common prefix %q, got %q", "foo", value)
+		}
+
+		view := test.StripANSI(m.View().Content)
+		for _, suffix := range []string{"bar", "baz", "qux"} {
+			if !strings.Contains(view, suffix) {
+				t.Errorf("suggestion suffix %q not shown in view:\n%s",
+					suffix, test.Indent(m.View().Content))
+			}
+		}
+	})
+}
+
 func TestAbort(t *testing.T) {
 	t.Parallel()
 
