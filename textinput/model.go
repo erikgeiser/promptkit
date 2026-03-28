@@ -252,6 +252,8 @@ func (m *Model) view() string {
 		"TerminalWidth":          m.width,
 		"AutoCompleteTriggered":  m.autoCompleteTriggered,
 		"AutoCompleteIndecisive": m.autoCompleteIndecisive,
+		"CursorOffset":           len([]rune(m.Prompt)) + 1 + m.input.Position(),
+		"InputValue":             m.input.Value(),
 		"KeyMap":                 m.KeyMap,
 	})
 	if err != nil {
