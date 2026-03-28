@@ -12,7 +12,7 @@ import (
 const minCharacters = 10
 
 func main() {
-	input := textinput.New("Choose a passphrase:")
+	input := textinput.New("Passphrase:")
 	input.Placeholder = "make it strong!"
 	input.Validate = func(s string) error {
 		if s == "hunter2" {

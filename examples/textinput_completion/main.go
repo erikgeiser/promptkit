@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	input := textinput.New("What's your go-to programming language?")
+	input := textinput.New("Choose a language?")
 	input.Placeholder = "Use tab for auto completion"
 	input.AutoComplete = textinput.AutoCompleteFromSlice([]string{
 		"Go",

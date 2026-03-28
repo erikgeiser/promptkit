@@ -25,7 +25,7 @@ func main() {
 
 	input := textinput.NewArea("Commit message:")
 	input.Placeholder = "feat: add amazing new feature"
-	input.Height = 4
+	input.Height = 3
 	input.Template = customTemplate
 	input.ResultTemplate = customResultTemplate
 	input.KeyMap = textinput.NewDefaultAreaKeyMap()

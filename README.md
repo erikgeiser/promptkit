@@ -19,13 +19,9 @@ and many opportunities for heavy customization.
 ---
 
 **Disclaimers:**
-* The API of library is not yet stable. Expect significant changes in minor
+
+- The API of library is not yet stable. Expect significant changes in minor
   versions before `v1.0.0`.
-* Windows is currently not explicitly supported because input events are dropped
-  when running multiple prompts sequentially due to a bug in
-  [bubbletea](https://github.com/charmbracelet/bubbletea). See
-  https://github.com/charmbracelet/bubbletea/pull/140 and
-  https://github.com/charmbracelet/bubbletea/issues/121 for more information.
 
 ---
 
@@ -33,14 +29,22 @@ and many opportunities for heavy customization.
 
 Selection with filter and pagination support: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/selection/main.go)
 
-<a href="https://asciinema.org/a/8co2qSgAIxRZBJzvX5iZXwUqF" target="_blank"><img src="https://asciinema.org/a/8co2qSgAIxRZBJzvX5iZXwUqF.svg" /></a>
+![Selection Prompt](.assets/selection.gif)
 
 ---
 
 The selection prompt is highly customizable and also works well with custom
 types which for example enables filtering only on custom fields: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/selection_custom/main.go)
 
-<a href="https://asciinema.org/a/Uw7QjXK7nZ0eHmigqIzdDXk3C" target="_blank"><img src="https://asciinema.org/a/Uw7QjXK7nZ0eHmigqIzdDXk3C.svg" /></a>
+![Custom Selection Prompt](.assets/selection_custom.gif)
+
+The selection module also contains a multi-selection prompt: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/multi_selection/main.go)
+
+![Multi-Selection Prompt](.assets/multi_selection.gif)
+
+The selection module also contains a multi-selection prompt: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/multi_selection_custom/main.go)
+
+![Custom Multi-Selection Prompt](.assets/multi_selection_custom.gif)
 
 ---
 
@@ -48,19 +52,23 @@ types which for example enables filtering only on custom fields: [Example Code](
 
 A text input that supports editable default values: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/textinput/main.go)
 
-<a href="https://asciinema.org/a/xUudX97RAXNnHMkArASH4Ccgv" target="_blank"><img src="https://asciinema.org/a/xUudX97RAXNnHMkArASH4Ccgv.svg" /></a>
+![Text Input Prompt](.assets/textinput.gif)
 
 ---
 
 Custom validation is also supported: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/textinput_custom/main.go)
 
-<a href="https://asciinema.org/a/FF14DYA8WtEtRjdPkcllAJk9p" target="_blank"><img src="https://asciinema.org/a/FF14DYA8WtEtRjdPkcllAJk9p.svg" /></a>
+![Custom Text Input Prompt](.assets/textinput_custom.gif)
 
 ---
 
 The text input can also be used in hidden mode for password prompts: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/textinput_hidden/main.go)
 
-<a href="https://asciinema.org/a/k2KTLG49OWWQ3AofrGSzWVmkL" target="_blank"><img src="https://asciinema.org/a/k2KTLG49OWWQ3AofrGSzWVmkL.svg" /></a>
+![Hidden Text Input Prompt](.assets/textinput_hidden.gif)
+
+The text input prompt also supports auto-completion: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/textinput_completion/main.go)
+
+![Text Input Prompt With Auto-Completion](.assets/textinput_completion.gif)
 
 ---
 
@@ -68,7 +76,11 @@ The text input can also be used in hidden mode for password prompts: [Example Co
 
 A confirmation prompt for binary questions: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/confirmation/main.go)
 
-<a href="https://asciinema.org/a/dpQHPP22ceylJGbSthAekZwBB" target="_blank"><img src="https://asciinema.org/a/dpQHPP22ceylJGbSthAekZwBB.svg" /></a>
+![Confirmation Prompt](.assets/confirmation.gif)
+
+The confirmation prompt can be customized as well: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/confirmation_custom/main.go):
+
+![Custom Confirmation Prompt](.assets/confirmation_custom.gif)
 
 ## Widget
 
