@@ -13,10 +13,10 @@ import (
 func main() {
 	const customTemplate = `
 	{{- Bold .Prompt }}
-{{- if .ValidationError }}
-{{ Foreground "1" (Bold "  ✘ ") }}{{ Foreground "1" .ValidationError.Error }}{{ end }}
 {{ .Input -}}
-{{ Foreground "8" "  ctrl+d to submit • ctrl+c to abort" }}
+{{- if .ValidationError }}
+{{ Foreground "1" (Bold "✘ ") }}{{ Foreground "1" .ValidationError.Error }}{{ end }}
+{{ Foreground "8" "Use ctrl+d to submit • Use ctrl+c to abort" }}
 `
 
 	const customResultTemplate = `

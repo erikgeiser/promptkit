@@ -1,7 +1,8 @@
 /*
-Package textinput implements prompt for a string input that can also be used for
-secret strings such as passwords. It also offers customizable appreance as well
-as optional support for input validation and a customizable key map.
+Package textinput implements prompts for string input. It provides a single-line
+text input that can also be used for secret strings such as passwords, and a
+multi-line text area for longer form input. Both offer customizable appearance
+as well as optional support for input validation and a customizable key map.
 */
 package textinput
 

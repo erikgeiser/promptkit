@@ -19,10 +19,9 @@ const (
 	{{- if .Prompt }}{{ Bold .Prompt }}
 {{ end -}}
 {{- .Input -}}
-{{- if .ValidationError }} {{ Foreground "1" (Bold "✘") }}
-{{- else }} {{ Foreground "2" (Bold "✔") }}
-{{- end }}
-{{ Faint "Newline: " -}}
+{{- if .ValidationError }}{{ Foreground "1" (Bold "✘") }}
+{{- else }}{{ Foreground "2" (Bold "✔") }}
+{{- end }} {{ Faint "Newline: " -}}
 {{- Faint (Foreground "6" (Join .KeyMap.InsertNewline "|")) -}}
 {{- Faint " • Submit: " -}}
 {{- Faint (Foreground "6" (Join .KeyMap.Submit "|")) -}}

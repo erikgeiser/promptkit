@@ -34,10 +34,10 @@ func NewDefaultAreaKeyMap() *AreaKeyMap {
 	}
 }
 
-// upsteamAreaKeyMap lists keys handled natively by the underlying
+// upstreamAreaKeyMap lists keys handled natively by the underlying
 // bubbles/textarea component. These are blocked from being passed through if
 // they do not match any action in the AreaKeyMap, to avoid conflicts.
-var upsteamAreaKeyMap = &AreaKeyMap{
+var upstreamAreaKeyMap = &AreaKeyMap{
 	MoveBackward:           []string{"left", "ctrl+b"},
 	MoveForward:            []string{"right", "ctrl+f"},
 	MoveWordBackward:       []string{"alt+left", "alt+b"},
@@ -87,7 +87,7 @@ func areaKeyMatches(key tea.KeyPressMsg, mapping []string) bool {
 }
 
 func areaKeyMatchesUpstream(key tea.KeyPressMsg) bool {
-	return areaKeyMatches(key, allAreaKeys(upsteamAreaKeyMap))
+	return areaKeyMatches(key, allAreaKeys(upstreamAreaKeyMap))
 }
 
 // validateAreaKeyMap returns an error if the key map is missing required bindings.

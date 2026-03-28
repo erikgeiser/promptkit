@@ -7,6 +7,7 @@ import (
 
 	"charm.land/bubbles/v2/textarea"
 	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"github.com/erikgeiser/promptkit"
 	"github.com/muesli/termenv"
 )
@@ -100,6 +101,25 @@ func (m *AreaModel) initAreaInput() textarea.Model {
 		input.SetValue(m.InitialValue)
 	}
 
+	if m.Height > 0 {
+		defaultPrompt := input.Prompt
+		promptWidth := lipgloss.Width(defaultPrompt)
+
+		input.SetPromptFunc(promptWidth, func(info textarea.PromptInfo) string {
+			offset := m.input.ScrollYOffset()
+
+			if info.LineNumber == offset && offset > 0 {
+				return "↑ "
+			}
+
+			if info.LineNumber == offset+m.Height-1 && m.input.LineCount() > offset+m.Height {
+				return "↓ "
+			}
+
+			return defaultPrompt
+		})
+	}
+
 	return input
 }
 
@@ -189,9 +209,10 @@ func (m *AreaModel) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m *AreaModel) prepareAutoResize() {
 	if m.Height <= 0 {
-		// Set a large height before Update() so the viewport never scrolls,
-		// preventing lines from disappearing above the visible area.
-		m.input.SetHeight(9999)
+		// Set the height to one more than the current line count before
+		// Update() so the viewport never scrolls, preventing lines from
+		// disappearing above the visible area.
+		m.input.SetHeight(m.input.LineCount() + 1)
 	}
 }
 
