@@ -241,7 +241,7 @@ func TestAreaValidationIndicator(t *testing.T) {
 			t.Errorf("failure indicator ✘ unexpectedly rendered:\n%s", test.Indent(m.View().Content))
 		}
 
-		for _, line := range strings.Split(view, "\n") {
+		for line := range strings.SplitSeq(view, "\n") {
 			if strings.Contains(line, "✔") && !strings.Contains(line, "Newline:") {
 				t.Errorf("success indicator ✔ is not on the same line as the hints:\n%s", test.Indent(m.View().Content))
 			}
@@ -267,7 +267,7 @@ func TestAreaValidationIndicator(t *testing.T) {
 			t.Errorf("success indicator ✔ unexpectedly rendered:\n%s", test.Indent(m.View().Content))
 		}
 
-		for _, line := range strings.Split(view, "\n") {
+		for line := range strings.SplitSeq(view, "\n") {
 			if strings.Contains(line, "✘") && !strings.Contains(line, "Newline:") {
 				t.Errorf("failure indicator ✘ is not on the same line as the hints:\n%s", test.Indent(m.View().Content))
 			}
