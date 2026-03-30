@@ -2,7 +2,7 @@ Output multi_selection.gif
 
 Set Shell bash
 Set FontSize 32
-Set Width 1200
+Set Width 1550
 Set Height 600
 
 Type@30ms "./examples/multi_selection"

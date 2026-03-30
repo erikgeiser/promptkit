@@ -2,7 +2,7 @@ Output textinput.gif
 
 Set Shell bash
 Set FontSize 32
-Set Width 1600
+Set Width 1550
 Set Height 300
 
 Env USER Steve

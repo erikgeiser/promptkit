@@ -38,11 +38,11 @@ types which for example enables filtering only on custom fields: [Example Code](
 
 ![Custom Selection Prompt](.assets/selection_custom.gif)
 
-The selection module also contains a multi-selection prompt: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/multi_selection/main.go)
+The selection module also contains a multi-selection prompt (this is still a preview, use `go get go get github.com/erikgeiser/promptkit@main`): [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/multi_selection/main.go)
 
 ![Multi-Selection Prompt](.assets/multi_selection.gif)
 
-The selection module also contains a multi-selection prompt: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/multi_selection_custom/main.go)
+The selection module also contains a multi-selection prompt (this is still a preview, use `go get go get github.com/erikgeiser/promptkit@main`): [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/multi_selection_custom/main.go)
 
 ![Custom Multi-Selection Prompt](.assets/multi_selection_custom.gif)
 
@@ -69,6 +69,14 @@ The text input can also be used in hidden mode for password prompts: [Example Co
 The text input prompt also supports auto-completion: [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/textinput_completion/main.go)
 
 ![Text Input Prompt With Auto-Completion](.assets/textinput_completion.gif)
+
+For longer inputs, there is also a textara (this is still a preview, use `go get go get github.com/erikgeiser/promptkit@main`): [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/textarea/main.go)
+
+![Text Area Prompt](.assets/textarea.gif)
+
+It can also be customized (this is still a preview, use `go get go get github.com/erikgeiser/promptkit@main`): [Example Code](https://github.com/erikgeiser/promptkit/blob/main/examples/textarea_custom/main.go)
+
+![Custom Text Area Prompt](.assets/textarea_custom.gif)
 
 ---
 

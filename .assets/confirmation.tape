@@ -2,7 +2,7 @@ Output confirmation.gif
 
 Set Shell bash
 Set FontSize 32
-Set Width 1200
+Set Width 1550
 Set Height 300
 
 Type@30ms "./examples/confirmation"

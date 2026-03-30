@@ -2,7 +2,7 @@ Output textarea_custom.gif
 
 Set Shell bash
 Set FontSize 32
-Set Width 1200
+Set Width 1550
 Set Height 450
 
 Type@30ms "./examples/textarea_custom"
