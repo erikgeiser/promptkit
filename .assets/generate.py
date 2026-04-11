@@ -65,7 +65,12 @@ def process_tape(tape: Path) -> str:
 
 
 def main() -> None:
-    tapes = sorted(ASSETS_DIR.glob("*.tape"))
+    selector = (
+        "*.tape" if sys.argv == 0 else sys.argv[1].removesuffix(".tape") + ".tape"
+    )
+    print(selector)
+
+    tapes = sorted(ASSETS_DIR.glob(selector))
     if not tapes:
         print("No .tape files found in", ASSETS_DIR)
         sys.exit(1)

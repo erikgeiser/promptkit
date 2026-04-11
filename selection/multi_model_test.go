@@ -392,6 +392,33 @@ func TestMultiZeroMinSelections(t *testing.T) {
 	}
 }
 
+func TestMultiPreSelect(t *testing.T) {
+	t.Parallel()
+
+	m := selection.NewMultiModel(selection.NewMulti("foo:", []string{"a", "b", "c"}))
+	m.ColorProfile = termenv.TrueColor
+	m.PageSize = 2
+	m.PreSelected = selection.PreSelect("b", "c")
+
+	test.Run(t, m)
+	test.AssertGoldenView(t, m, "multi_preselect_pre.golden")
+
+	values := getValues(t, m)
+	if len(values) != 2 || values[0] != "b" || values[1] != "c" {
+		t.Fatalf("selected values are not b and c: %#v", values)
+	}
+
+	test.Update(t, m, keySpace)
+
+	values = getValues(t, m)
+	if len(values) != 3 || values[0] != "a" || values[1] != "b" || values[2] != "c" {
+		t.Fatalf("selected values are not a, b and c: %#v", values)
+	}
+
+	test.Update(t, m, keyEnter)
+	test.AssertGoldenView(t, m, "multi_preselect_post.golden")
+}
+
 var keyEsc = tea.KeyPressMsg{Code: tea.KeyEsc}
 
 func getValues[T any](tb testing.TB, m *selection.MultiModel[T]) []T {

@@ -81,7 +81,16 @@ func (m *MultiModel[T]) Init() tea.Cmd {
 	}
 
 	m.filterInput = m.initFilterInput()
+
 	m.selectedChoices = make(map[int]bool)
+	if m.PreSelected != nil {
+		for _, c := range m.choices {
+			if m.PreSelected(c) {
+				m.selectedChoices[c.idx] = true
+			}
+		}
+	}
+
 	m.currentChoices, m.availableChoices = m.filteredAndPagedChoices()
 	m.requestedPageSize = m.PageSize
 
