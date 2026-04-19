@@ -101,6 +101,11 @@ type MultiSelection[T any] struct {
 	// disabled and FilterPlaceholder does nothing.
 	FilterPlaceholder string
 
+	// PreSelected is an optional function that decided whether an option should
+	// be pre-selected. It can easily be populated from a single choice value or
+	// a slice of choice values using the selection.PreSelected helper.
+	PreSelected func(c *Choice[T]) bool
+
 	// PageSize is the number of choices that are displayed at once. If
 	// PageSize is smaller than the number of choices, pagination is enabled.
 	// If PageSize is 0, pagination is disabled. Regardless of the value of
@@ -285,4 +290,20 @@ func (s *MultiSelection[T]) RunPrompt() ([]T, error) {
 	}
 
 	return m.Values()
+}
+
+func PreSelect[T comparable](preSelectedValues ...T) func(c *Choice[T]) bool {
+	if len(preSelectedValues) == 0 {
+		return nil
+	}
+
+	preSelectedMap := map[T]bool{}
+
+	for _, v := range preSelectedValues {
+		preSelectedMap[v] = true
+	}
+
+	return func(c *Choice[T]) bool {
+		return preSelectedMap[c.Value]
+	}
 }

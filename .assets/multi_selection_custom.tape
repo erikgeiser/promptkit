@@ -8,7 +8,7 @@ Set Height 600
 Type@30ms "./examples/multi_selection_custom"
 Sleep 100ms  Enter
 Sleep 1s
-Space
+Down Sleep 250ms
 Down Sleep 250ms
 Space
 Sleep 1

@@ -30,9 +30,9 @@ func main() {
 	}
 
 	choices := []lang{
+		{name: "Python", icon: "🐍"},
 		{name: "Go", icon: "🐹"},
 		{name: "Rust", icon: "🦀"},
-		{name: "Python", icon: "🐍"},
 		{name: "TypeScript", icon: "📘"},
 		{name: "Haskell", icon: "λ"},
 	}
@@ -44,6 +44,7 @@ func main() {
 	sp.MinSelections = 2
 	sp.MaxSelections = 4
 	sp.LoopCursor = true
+	sp.PreSelected = selection.PreSelect(choices[1])
 
 	// Custom styling with emoji icons.
 	sp.UnmarkedChoiceStyle = func(c *selection.Choice[lang]) string {
