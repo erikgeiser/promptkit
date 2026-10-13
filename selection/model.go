@@ -422,7 +422,7 @@ func (m *Model[T]) canScrollDown() bool {
 		return false
 	}
 
-	if m.scrollOffset+m.PageSize >= len(m.choices) {
+	if m.scrollOffset+m.PageSize >= m.availableChoices {
 		return false
 	}
 

@@ -238,6 +238,71 @@ func TestNoFilter(t *testing.T) {
 	test.AssertGoldenView(t, m, "no_filter_confirmed.golden")
 }
 
+func TestFilterPaginateLast(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name       string
+		loopCursor bool
+		want       string
+	}{
+		{name: "stop", want: "CCC3"},
+		{name: "loop", loopCursor: true, want: "CCC1"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			m := selection.NewModel(selection.New("foo:", []string{
+				"CCC1", "AAA", "CCC2", "BBB", "CCC3", "DDD",
+			}))
+			m.PageSize = 2
+			m.LoopCursor = tc.loopCursor
+			m.ColorProfile = termenv.TrueColor
+
+			inputs := append(test.MsgsFromText("CC"), keyDown, keyDown)
+			test.Run(t, m, inputs...)
+			assertNoError(t, m)
+
+			if choice := getChoice(t, m); choice != "CCC3" {
+				t.Fatalf("unexpected choice on last filtered page: %q", choice)
+			}
+
+			lastView := m.View().Content
+			if strings.Contains(test.StripANSI(lastView), "⇣") {
+				t.Errorf("last filtered page shows a scroll down hint:\n%s", lastView)
+			}
+
+			test.Update(t, m, keyPgDown)
+
+			if m.View().Content != lastView {
+				t.Errorf("page down changed the last filtered page")
+			}
+
+			test.Update(t, m, keyDown)
+
+			if choice := getChoice(t, m); choice != tc.want {
+				t.Errorf("choice after down: %q, expected %q", choice, tc.want)
+			}
+
+			test.Update(t, m, test.KeyMsg('X'))
+			test.Update(t, m, keyDown)
+			test.Update(t, m, keyUp)
+
+			_, err := m.Value()
+			if err == nil {
+				t.Errorf("expected no choice when the filter has no matches")
+			}
+
+			cmd := test.Update(t, m, keyEnter)
+			if cmd != nil && cmd() == tea.Quit() {
+				t.Errorf("enter with no matching choices should not quit")
+			}
+
+			assertNoError(t, m)
+		})
+	}
+}
+
 func TestAbort(t *testing.T) {
 	t.Parallel()
 

@@ -169,6 +169,68 @@ func TestMultiFilter(t *testing.T) {
 	}
 }
 
+func TestMultiFilterPaginateLast(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name       string
+		loopCursor bool
+		want       string
+	}{
+		{name: "stop", want: "CCC3"},
+		{name: "loop", loopCursor: true, want: "CCC1"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			m := selection.NewMultiModel(selection.NewMulti("foo:", []string{
+				"CCC1", "AAA", "CCC2", "BBB", "CCC3", "DDD",
+			}))
+			m.PageSize = 2
+			m.LoopCursor = tc.loopCursor
+			m.ColorProfile = termenv.TrueColor
+
+			inputs := append(test.MsgsFromText("CC"), keyDown, keyDown)
+			test.Run(t, m, inputs...)
+			assertMultiNoError(t, m)
+
+			lastView := m.View().Content
+			if !strings.Contains(test.StripANSI(lastView), "▸ ☐ CCC3") {
+				t.Fatalf("cursor is not on the last filtered choice:\n%s", lastView)
+			}
+
+			if strings.Contains(test.StripANSI(lastView), "⇣") {
+				t.Errorf("last filtered page shows a scroll down hint:\n%s", lastView)
+			}
+
+			test.Update(t, m, keyPgDown)
+
+			if m.View().Content != lastView {
+				t.Errorf("page down changed the last filtered page")
+			}
+
+			test.Update(t, m, keyDown)
+			test.Update(t, m, keySpace)
+
+			values := getValues(t, m)
+			if len(values) != 1 || values[0] != tc.want {
+				t.Errorf("marked choice after down: %v, expected [%s]", values, tc.want)
+			}
+
+			test.Update(t, m, test.KeyMsg('X'))
+			test.Update(t, m, keyDown)
+			test.Update(t, m, keyUp)
+			test.Update(t, m, keySpace)
+			assertMultiNoError(t, m)
+
+			values = getValues(t, m)
+			if len(values) != 1 || values[0] != tc.want {
+				t.Errorf("marking with no matching choices changed selections: %v", values)
+			}
+		})
+	}
+}
+
 func TestMultiSelectionsPersistThroughFilter(t *testing.T) {
 	t.Parallel()
 
@@ -273,6 +335,26 @@ func TestMultiPaginate(t *testing.T) {
 	values := getValues(t, m)
 	if len(values) != 2 || values[0] != "First1" || values[1] != "Second1" {
 		t.Errorf("unexpected values across pages: %v", values)
+	}
+}
+
+func TestMultiLoopCursorPaged(t *testing.T) {
+	t.Parallel()
+
+	m := selection.NewMultiModel(selection.NewMulti("foo:", []string{
+		"a", "b", "c", "d", "e",
+	}))
+	m.Filter = nil
+	m.PageSize = 2
+	m.LoopCursor = true
+	m.ColorProfile = termenv.TrueColor
+
+	test.Run(t, m, keyDown, keyDown, keyDown, keyDown, keyDown, keySpace)
+	assertMultiNoError(t, m)
+
+	values := getValues(t, m)
+	if len(values) != 1 || values[0] != "a" {
+		t.Errorf("marked choice after looping: %v, expected [a]", values)
 	}
 }
 
